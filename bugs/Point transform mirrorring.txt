@@ -1,0 +1,22 @@
+m0 = DPoint( 100,100 )
+mir = DCplxTrans( 1,0,True,0,0 )
+mir.trans( m0 )
+print( m0 )
+
+### EXCPECTED OUTPUT ###
+100,-100
+
+### REAL OUTPUT ###
+100,100
+
+###############################
+
+### HOW TO FIX IT ###
+m0 = DSimplePolygon( [DPoint(100,100)] )
+mir = DCplxTrans( 1,0,True,0,0 )
+m0.transform( mir )
+printf( m0.point( 0 ) )
+
+### OUTPUT ###
+100,-100
+
