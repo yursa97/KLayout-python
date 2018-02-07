@@ -1,6 +1,5 @@
 # $description: Active script
 # $version: 1
-# $show-in-menu
 # $menu-path: My scripts
 # $shortcut: Ctrl+E
 
@@ -9,39 +8,6 @@ import pya
 
 
 from ClassLib import * 
-
-
-class Path_RS(Complex_Base):
-    def __init__(self, Z0, start, end, trans_in=None):
-        self.Z0 = Z0
-        self.end = end
-        self.dr = end - start
-        super(Path_RS, self).__init__(start, trans_in)
-        self.start = self.connections[0]
-        self.end = self.connections[1]
-        self.alpha_start = self.angle_connections[0]
-        self.alpha_end = self.angle_connections[1]
-
-    def init_primitives(self):
-        L = abs(abs(self.dr.y) - abs(self.dr.x))
-        r = min(abs(self.dr.y), abs(self.dr.x))
-        if(abs(self.dr.y) > abs(self.dr.x)):
-            self.arc1 = CPW_arc(self.Z0, DPoint(0, 0), copysign(
-                r, self.dr.y), copysign(pi/2, self.dr.x*self.dr.y))
-            self.cop1 = CPW(self.Z0.width, self.Z0.gap, self.arc1.end,
-                            self.arc1.end + DPoint(0, copysign(L, self.dr.y)))
-            self.connections = [self.arc1.start, self.cop1.end]
-            self.angle_connections = [self.arc1.alpha_start, self.cop1.alpha_end]
-        else:
-            self.cop1 = CPW(self.Z0.width, self.Z0.gap, DPoint(
-                0, 0), DPoint(0, 0) + DPoint(copysign(L, self.dr.x), 0))
-            self.arc1 = CPW_arc(self.Z0, self.cop1.end, copysign(
-                r, self.dr.y), copysign(pi/2, self.dr.y*self.dr.x))
-            self.connections = [ self.cop1.start, self.arc1.end]
-            self.angle_connections = [ self.cop1.alpha_end,self.arc1.alpha_start]
-            
-        self.primitives = {"arc1": self.arc1, "cop1": self.cop1}
-
 
 
 app = pya.Application.instance()
