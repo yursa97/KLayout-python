@@ -177,7 +177,7 @@ class Path_RS(Complex_Base):
             self.arc1 = CPW_arc(self.Z0, self.cop1.end, copysign(
                 r, self.dr.y), copysign(pi/2, self.dr.y*self.dr.x))
             self.connections = [ self.cop1.start, self.arc1.end]
-            self.angle_connections = [ self.cop1.alpha_end,self.arc1.alpha_start]
+            self.angle_connections = [ self.cop1.alpha_start,self.arc1.alpha_end]
             
         self.primitives = {"arc1": self.arc1, "cop1": self.cop1}
 

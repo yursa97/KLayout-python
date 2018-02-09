@@ -9,7 +9,6 @@ import pya
 
 from ClassLib import * 
 
-
 app = pya.Application.instance()
 mw = app.main_window()
 lv = mw.current_view()
