@@ -138,7 +138,7 @@ class Element_Base():
 
 class Complex_Base( Element_Base ):
     def __init__( self, origin, trans_in=None ):
-        super( Complex_Base,self ).__init__( origin,trans_in )
+        super().__init__( origin,trans_in )
         self.primitives = OrderedDict()
         self._init_primitives_trans()
     
@@ -311,7 +311,6 @@ class Element_Base():
         r_cell = None
         if( layer_i != -1 ):            
             r_cell = Region( dest.begin_shapes_rec( layer_i ) )        
-
         # how to interpret destination
         if( layer_i == -1 ):
             dest += self.metal_region

@@ -1,9 +1,14 @@
 import pya
-from math import sqrt, cos, sin, atan2, pi, copysign
+from math import sqrt, cos, sin, atan2, pi, copysign, tan
 from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from ClassLib.BaseClasses import *
+
+class CPWParameters:
+  def __init__(self, width, gap):
+    self.width = width
+    self.gap = gap
 
 class CPW( Element_Base ):
     """@brief: class represents single coplanar waveguide
@@ -21,7 +26,7 @@ class CPW( Element_Base ):
         self.end = end
         self.start = start
         self.dr = end - start
-        super( CPW, self ).__init__( start, trans_in )
+        super().__init__( start, trans_in )
         self.start = self.connections[0]
         self.end = self.connections[1]
         self.dr = self.end - self.start
@@ -155,7 +160,7 @@ class Path_RS(Complex_Base):
         self.Z0 = Z0
         self.end = end
         self.dr = end - start
-        super(Path_RS, self).__init__(start, trans_in)
+        super().__init__(start, trans_in)
         self.start = self.connections[0]
         self.end = self.connections[1]
         self.alpha_start = self.angle_connections[0]
@@ -208,70 +213,119 @@ class Coil_type_1( Complex_Base ):
             
 from collections import Counter
 
-class CPW_RL_Path( Complex_Base ):
-    def __init__( self, start, RL_str, Z_list, R_list, L_list, delta_alpha_list, trans_in = None ):
-        self.RL_str = RL_str
-        self.N_elements = len(RL_str)
-        self.RL_counter = Counter( RL_str )
+class CPW_RL_Path(Complex_Base):
+
+    def __init__(self, origin, shape, cpw_parameters, turn_radiuses, 
+        segment_lengths, turn_angles, trans_in = None):
+        '''
+        A piecewise-linear coplanar waveguide with rounded turns.
         
-        # periodically filling  Z,R,L lists to make their length equal to the RL_str
-        self.Z_list = [Z_list[i%len(Z_list)] for i in range( self.N_elements )]
-        self.R_list = [R_list[i%len(R_list)] for i in range( self.RL_counter['R'] )]
-        self.L_list = [L_list[i%len(L_list)] for i in range( self.RL_counter['L'] )]
-        self.delta_alpha_list = delta_alpha_list
+        Segment lengths are treated as the lengths of the segments of
+        a line with turn_raduises = 0. Changing turning raduises
+        will not alter the position of the end of the line.
         
-        super( CPW_RL_Path, self ).__init__( start, trans_in )
+        TODO: 180 deg turns
+        
+        Parameters:
+            origin: DPoint
+                The point where the line should start 
+            shape: string
+                String in format "RLLRL" where an R means a turn 
+                and an L means a straight part
+            cpw_parameters: CPWParameters or array-like
+                Parameters of the CPW or an array-like with parameters 
+                for each peace (R or L)
+            turn_radiuses: float or array-like
+                Radius of the turns or an array-like with radiuses for 
+                each turn 
+            segment_lengths: array-like
+                Lengths of the straight parts of the equivalent 
+                piecewise-linear line with no corner rounding
+            turn_angles: array-like
+                Angles for each turn of the line
+                !!! 180 turns are not yet supported !!!
+            trans_in: DTrans
+                Transformation of the line as a whole            
+        '''
+    
+        self._shape_string = shape
+        self._N_elements = len(shape)
+        self._shape_string_counter = Counter(shape)
+        
+        N_turns = self._shape_string_counter['R']
+        
+        if hasattr(cpw_parameters, "__len__"):
+            if len(cpw_parameters) != self._N_elements:
+                raise ValueError("CPW parameters dimension mismatch")
+            self._cpw_parameters = cpw_parameters
+        else:
+            self._cpw_parameters = [cpw_parameters]*self._N_elements
+        
+        if hasattr(turn_radiuses, "__len__"):
+            if len(turn_radiuses) != N_turns:
+                raise ValueError("Turn raduises dimension mismatch")
+            self._turn_radiuses = turn_radiuses
+        else:
+            self._turn_radiuses = [turn_radiuses]*N_turns
+    
+        self._segment_lengths = segment_lengths
+        self._turn_angles = turn_angles
+        
+        super().__init__(origin, trans_in)
         self.start = self.connections[0]
         self.end = self.connections[1]
         self.alpha_start = self.angle_connections[0]
         self.alpha_end = self.angle_connections[1]
+    
         
-    def init_primitives( self ):
+    def init_primitives(self):
+    
         R_index = 0
         L_index = 0
         origin = DPoint(0,0)
-        # placing the first element
-        symbol_0 = self.RL_str[0]
-        if( symbol_0 == 'R' ):
-            if( self.delta_alpha_list[0] > 0 ):
-                sgn = 1
-            else:
-                sgn = -1
-                    
-            R = self.R_list[R_index]*sgn
-            delta_alpha = self.delta_alpha_list[R_index]       
-            self.primitives["arc_0"] = CPW_arc( self.Z_list[0],origin, R,delta_alpha )
-            R_index += 1
-        elif( symbol_0 == 'L' ):
-            self.primitives["cpw_0"] = CPW( self.Z_list[0].width, self.Z_list[0].gap, self.start, self.start + DPoint( self.L_list[0],0 ) )
-            L_index += 1
         
-        for i,symbol in enumerate(self.RL_str):
-            if( i == 0 ):
-                continue
-
-            prev_primitive = list(self.primitives.values())[i-1]     
-                       
-            if( symbol == 'R' ):
-                if( self.delta_alpha_list[R_index] > 0 ):
-                    sgn = 1
-                else:
-                    sgn = -1
-                    
-                R = self.R_list[R_index]*sgn
-                delta_alpha = self.delta_alpha_list[R_index]
-            
-                cpw_arc = CPW_arc( self.Z_list[i],prev_primitive.end, R, delta_alpha, 
-                                                    trans_in=DCplxTrans(1,prev_primitive.alpha_end*180/pi, False,0,0) )
-                self.primitives["arc_"+str(R_index)] = cpw_arc
-                R_index += 1
+        prev_primitive_end = origin
+        prev_primitive_end_angle = 0
+        
+        for i, symbol in enumerate(self._shape_string):
+                      
+            if symbol == 'R':
+                turn_raduis = self._turn_radiuses[R_index] \
+                        if self._turn_angles[R_index]>0 \
+                            else -self._turn_radiuses[R_index]
+                                        
+                cpw_arc = CPW_arc(self._cpw_parameters[i], prev_primitive_end, 
+                          turn_raduis, self._turn_angles[R_index], 
+                            trans_in = DCplxTrans(1, prev_primitive_end_angle*180/pi, False, 0, 0))
                 
-            elif( symbol == 'L' ):
-                cpw = CPW( self.Z_list[i].width, self.Z_list[i].gap,
-                                        prev_primitive.end, prev_primitive.end + DPoint(self.L_list[L_index],0),
-                                        trans_in=DCplxTrans(1,prev_primitive.alpha_end*180/pi,False,0,0) )
+                self.primitives["arc_"+str(R_index)] = cpw_arc
+                R_index += 1    
+                
+            elif symbol == 'L':
+
+                # Turns are reducing segments' lengths so as if there were no roundings at all
+                if i+1 < self._N_elements and self._shape_string[i+1] == 'R':
+                    coeff = abs(tan(self._turn_angles[R_index]/2))
+                    self._segment_lengths[L_index] -= self._turn_radiuses[R_index]*coeff
+
+                if i-1 > 0 and self._shape_string[i-1] == 'R':
+                    coeff = abs(tan(self._turn_angles[R_index-1]/2))
+                    self._segment_lengths[L_index] -= self._turn_radiuses[R_index-1]*coeff
+                        
+                cpw = CPW(self._cpw_parameters[i].width, self._cpw_parameters[i].gap,
+                        prev_primitive_end, prev_primitive_end + DPoint(self._segment_lengths[L_index], 0),
+                            trans_in=DCplxTrans(1, prev_primitive_end_angle*180/pi, False, 0, 0))
+                            
                 self.primitives["cpw_"+str(L_index)] = cpw
                 L_index += 1 
+            
+            primitive = list(self.primitives.values())[i]
+            prev_primitive_end = primitive.end
+            prev_primitive_end_angle = primitive.alpha_end
                 
-            self.connections = [origin, list(self.primitives.values())[-1].end]
-            self.angle_connections = [0, list(self.primitives.values())[-1].alpha_end]
+        self.connections = [origin, list(self.primitives.values())[-1].end]
+        self.angle_connections = [0, list(self.primitives.values())[-1].alpha_end]
+        
+
+
+            
