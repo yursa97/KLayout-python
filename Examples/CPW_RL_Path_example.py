@@ -97,7 +97,13 @@ feedline = CPW_RL_Path(cp1.end, "LRLRLRL", cpw_params, 200e3, segment_lengths, [
 feedline.place(cell, layer_photo)
 
 
+#Snake feedline
 
+
+segment_lengths = [1e6]*5
+
+feedline = CPW_RL_Path(cp2.end, "LRRLRRLRRLRRL", cpw_params, 200e3, segment_lengths, [pi/2, pi/2, -pi/2, -pi/2]*2)
+feedline.place(cell, layer_photo)
 
 
 ### DRAW SECTION END ###
