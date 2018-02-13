@@ -41,7 +41,7 @@ class CWave( Complex_Base ):
     def init_primitives(self):
         origin = DPoint(0,0)
         #erased line params
-        Z = CPW( 0, self.s/2 )
+        Z = CPWParameters( 0, self.s/2 )
         
         # placing circle r_out with dr clearance from ground polygon
         self.empt_circle = Circle( origin,self.r_out + self.dr, n_pts=self.n_pts, solid=False )
@@ -61,7 +61,7 @@ class CWave( Complex_Base ):
         
         # starting RLR
         self.RL_start = origin + DPoint( -self.in_circle.r + self.delta,0 )
-        rl_path_start = CPW_RL_Path( self.RL_start, "RLR", [Z], [self.r_curve], [self.L0], [self.alpha,-self.alpha] )
+        rl_path_start = CPW_RL_Path( self.RL_start, "RLR", Z, self.r_curve, [self.L0], [self.alpha,-self.alpha])
         self.primitives["rl_start"] = rl_path_start
         
         # ending RLR
@@ -70,7 +70,7 @@ class CWave( Complex_Base ):
         else:
             m_x = True
         self.RL_end = origin + DPoint( self.in_circle.r - self.delta,0 )
-        rl_path_end = CPW_RL_Path( self.RL_end, "RLR", [Z], [self.r_curve], [self.L0], [self.alpha,-self.alpha], trans_in = DCplxTrans( 1,180, m_x, 0,0 ) )
+        rl_path_end = CPW_RL_Path( self.RL_end, "RLR", Z, self.r_curve, [self.L0], [self.alpha,-self.alpha], trans_in = DCplxTrans( 1,180, m_x, 0,0 ) )
 
         
         # intermidiate RLRs
