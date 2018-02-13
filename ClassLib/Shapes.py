@@ -12,7 +12,7 @@ class Circle( Element_Base ):
         self.r = r
         self.n_pts = n_pts
         self.solid = solid
-        super( Circle,self ). __init__( center,trans_in )
+        super(). __init__( center,trans_in )
         
     def init_regions(self):
         dpts_arr = [DPoint(self.r*cos(2*pi*i/self.n_pts),self.r*sin(2*pi*i/self.n_pts)) for i in range(0,self.n_pts)]
