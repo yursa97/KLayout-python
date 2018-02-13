@@ -7,6 +7,7 @@ from ClassLib.BaseClasses import *
 
 class QBit_Flux_1( Element_Base ):
     def __init__( self, origin, params, trans_in=None ):
+      
         self.params = params
         self.a = params[0]
         self.b = params[1]
@@ -73,7 +74,7 @@ class QBit_Flux_1( Element_Base ):
         self.poly_5.transform( DCplxTrans( 1.0, 270, False, self.p6 ) )           
         self.poly_6 = self._make_polygon( (1-self._alpha_2)*self._length2, self.w, self.d2, self.f2, self.jos2_b )
         self.poly_6.transform( DCplxTrans( 1.0, 90, False, self.p8 ) )               
-        super( QBit_Flux_1,self ).__init__( origin, trans_in )
+        super().__init__( origin, trans_in )
         
     def _make_polygon( self, length, w, d, f, overlapping ):
         polygon = DSimplePolygon
@@ -174,7 +175,7 @@ class QBit_Flux_2( Element_Base ):
         self.poly_5.transform( DCplxTrans( 1.0, 270, False, self.p6 ) )           
         self.poly_6 = self._make_polygon( (1-self._alpha_2)*self._length2, self.w, self.d2, self.f2, self.jos2_b )
         self.poly_6.transform( DCplxTrans( 1.0, 90, False, self.p8 ) )               
-        super( QBit_Flux_2,self ).__init__( origin, trans_in )
+        super().__init__( origin, trans_in )
         
     def _make_polygon( self, length, w, d, f, overlapping ):
         polygon = DSimplePolygon
@@ -271,7 +272,7 @@ class QBit_Flux_3( Element_Base ):
         self.poly_5.transform( DCplxTrans( 1.0, 270, False, self.p4 ) )           
         self.poly_6 = self._make_polygon( (1-self._alpha_2)*self._length2, self.w, self.d2, self.f2, self.jos2_b )
         self.poly_6.transform( DCplxTrans( 1.0, 90, False, self.p6 ) )               
-        super( QBit_Flux_3,self ).__init__( origin, trans_in )
+        super().__init__( origin, trans_in )
         
     def _make_polygon( self, length, w, d, f, overlapping ):
         polygon = DSimplePolygon
@@ -366,7 +367,7 @@ class QBit_Flux_Сshunted( Element_Base ):
         self.poly_5.transform( DCplxTrans( 1.0, 270, False, self.p5 ) )           
         self.poly_6 = self._make_polygon( (1-self._alpha_2)*self._length2, self.w, self.d2, self.f2, self.jos2_b )
         self.poly_6.transform( DCplxTrans( 1.0, 90, False, self.p7 ) )               
-        super( QBit_Flux_Сshunted,self ).__init__( origin, trans_in )
+        super().__init__( origin, trans_in )
         
     def _make_polygon( self, length, w, d, f, overlapping ):
         polygon = DSimplePolygon
@@ -407,10 +408,10 @@ class QBit_Flux_Сshunted( Element_Base ):
     # overwritig parent method "place" to be able to draw on 2 different layers simultaneously
     def place( self, cell, layer_photo, layer_el ):
         # placing photolitography
-        super( QBit_Flux_Сshunted,self ).place( cell, layer_photo, "photo" )
+        super().place( cell, layer_photo, "photo" )
         
         # placing electron-beam litography
-        super( QBit_Flux_Сshunted,self ).place( cell, layer_el, "el" )
+        super().place( cell, layer_el, "el" )
         
 
 class QBit_Flux_Сshunted_3JJ( Element_Base ):
@@ -485,7 +486,7 @@ class QBit_Flux_Сshunted_3JJ( Element_Base ):
         
         self.poly_5 = self._make_polygon( self._length_right + self.jos2_b, self.w, self.d2, self.f2, self.jos2_b )
         self.poly_5.transform( DCplxTrans( 1.0, 90, True, self.p6 ) )                       
-        super( QBit_Flux_Сshunted_3JJ,self ).__init__( origin, trans_in )
+        super().__init__( origin, trans_in )
         
     def _make_polygon( self, length, w, d, f, overlapping ):
         polygon = DSimplePolygon
@@ -525,7 +526,7 @@ class QBit_Flux_Сshunted_3JJ( Element_Base ):
     # overwritig parent method "place" to be able to draw on 2 different layers simultaneously
     def place( self, cell, layer_photo, layer_el ):
         # placing photolitography
-        super( QBit_Flux_Сshunted_3JJ,self ).place( cell, layer_photo, "photo" )
+        super().place( cell, layer_photo, "photo" )
         
         # placing electron-beam litography
-        super( QBit_Flux_Сshunted_3JJ,self ).place( cell, layer_el, "el" )
+        super().place( cell, layer_el, "el" )
