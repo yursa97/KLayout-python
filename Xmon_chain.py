@@ -9,7 +9,10 @@ from ClassLib import *
 reload(ClassLib)
 from ClassLib import *
 
+reload(ClassLib.Coplanars)
+reload(ClassLib.Resonators)
 from ClassLib.Coplanars import *
+from ClassLib.Resonators import *
 
 
 class CHIP:
@@ -76,27 +79,34 @@ cp7.place(cell, layer_photo)
 cp8 = Contact_Pad(DPoint(-2.5e6, -5e6), {"w":20e3, "g":10e3}, trans_in = DTrans.R90)
 cp8.place(cell, layer_photo)
 
-#First feedline
-
 cpw_params = CPWParameters(20e3, 10e3)
+
+
+#First feedline
 
 segment_lenghts = [2.5e6, cp7.end.x-cp8.end.x, 2.5e6]
 
 feedline = CPW_RL_Path(cp8.end, "LRLRL", cpw_params, 100e3, 
-      segment_lenghts, [-pi/2,-pi/2] ,trans_in = DTrans.R90)
+     segment_lenghts, [-pi/2,-pi/2] ,trans_in = DTrans.R90)
 feedline.place(cell, layer_photo)
 
 #Second feedline
 
 segment_lengths = [0.5e6, 1e6]
-turn2 = cp1.end+DPoint(0.5e6, 1e6)
+turn2 = cp1.end + DPoint(0.5e6, 1e6)
 segment_lengths += [(cp5.end.y-turn2.y)*2/sqrt(2)]
 segment_lengths += [cp5.end.x-turn2.x-segment_lengths[-1]*sqrt(2)/2]
 
-feedline = CPW_RL_Path(cp1.end, "LRLRLRL", cpw_params, 200e3, segment_lengths, [pi/2,-pi/4, -pi/4])
+feedline = CPW_RL_Path(cp1.end, "LRLRLRL", cpw_params, 200e3, segment_lengths, [pi/2, -pi/4, -pi/4])
 feedline.place(cell, layer_photo)
 
+res_cpw_params = CPWParameters(7e3, 4e3)
 
+res = CPWResonator(turn2, res_cpw_params, 40e3, 6, 11.45)
+res.place(cell, layer_photo)
+
+end = CPW(0, res_cpw_params.b/2, res.end, res.end+DPoint(0,10e3))
+end.place(cell, layer_photo)
 
 
 

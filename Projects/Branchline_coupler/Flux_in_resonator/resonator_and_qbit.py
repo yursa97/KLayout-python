@@ -1,11 +1,22 @@
 # $description: test_script 
 # $version: 1.0.0 
 # $show-in-menu
-import pya
+import pya 
+from importlib import reload
+
 from math import cos, sin, atan2, pi
 from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
+
+
+import ClassLib
 from ClassLib import *
+reload(ClassLib)
+from ClassLib import *
+
+from ClassLib.Coplanars import *
+from ClassLib.Resonators import *
+
             
 class CHIP:
     dx = 10.1e6
@@ -140,7 +151,7 @@ if ( __name__ ==  "__main__" ):
     
     #empty polygon for qBit
     qbit_bbox = pya.DBox().from_ibox( qbit.metal_region.bbox() )
-    #empty = CPW( 0, qbit_bbox.height()/2 + 2*qbit.a, qbit_bbox.p1 + DPoint(0,qbit_bbox.height()/2), qbit_bbox.p2 - DPoint(qbit.B4.width() + qbit.B3.width()/2,qbit_bbox.height()/2 )  )
-    #empty.place( cell, layer_photo )
+    empty = CPW( 0, qbit_bbox.height()/2 + 2*qbit.a, qbit_bbox.p1 + DPoint(0,qbit_bbox.height()/2), qbit_bbox.p2 - DPoint(qbit.B4.width() + qbit.B3.width()/2,qbit_bbox.height()/2 )  )
+    empty.place( cell, layer_photo )
     ## DRAWING SECTION END ##
     lv.zoom_fit()
