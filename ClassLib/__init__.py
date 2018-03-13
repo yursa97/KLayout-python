@@ -20,7 +20,6 @@ reload(ClassLib.Qbits)
 reload(ClassLib.Resonators)
 reload(ClassLib.Shapes)
 reload(ClassLib.ContactPad)
-reload(ClassLib.BaseClasses)
 reload(ClassLib._PROG_SETTINGS)
 
 from ClassLib.BaseClasses import *
@@ -33,3 +32,4 @@ from ClassLib.Resonators import *
 from ClassLib.Shapes import *
 from ClassLib.ContactPad import *
 from ClassLib._PROG_SETTINGS import *
+
