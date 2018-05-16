@@ -16,7 +16,7 @@ from ClassLib import *
 
 from ClassLib.Coplanars import *
 from ClassLib.Resonators import *
-
+from ClassLib.Qbits import *
             
 class CHIP:
     dx = 10.1e6
@@ -81,7 +81,7 @@ if ( __name__ ==  "__main__" ):
     p1 = DPoint( 0 + contact_L, CHIP.dy/2 )
     p2 = DPoint( CHIP.dx - contact_L, CHIP.dy/2 )
     Z0 = CPW( width, gap, p1, p2 )
-    Z0.place( cell, layer_photo )
+    #Z0.place( cell, layer_photo )
     
     # left contact pad
     width1 = CHIP.width*2
@@ -89,10 +89,10 @@ if ( __name__ ==  "__main__" ):
     p3 = DPoint( 0, CHIP.dy/2 )
     p4 = DPoint( contact_L/2, CHIP.dy/2 )
     Z1 = CPW( width1, gap1, p3, p4 )
-    Z1.place( cell, layer_photo )
+    #Z1.place( cell, layer_photo )
     
     adapter1 = CPW2CPW( Z1, Z0, p4, p1 )
-    adapter1.place( cell, layer_photo )
+    #adapter1.place( cell, layer_photo )
     
     # right contact pad
     width1 = CHIP.width*2
@@ -100,10 +100,10 @@ if ( __name__ ==  "__main__" ):
     p5 = DPoint( CHIP.dx - contact_L/2, CHIP.dy/2 )
     p6 = DPoint( CHIP.dx, CHIP.dy/2 )
     Z2 = CPW( width1, gap1, p5, p6 )
-    Z2.place( cell, layer_photo )
+    #Z2.place( cell, layer_photo )
     
     adapter1 = CPW2CPW( Z2, Z0, p5, p2 )
-    adapter1.place( cell, layer_photo )
+    #adapter1.place( cell, layer_photo )
     
     # resonator
     L_coupling = 300e3
@@ -118,7 +118,7 @@ if ( __name__ ==  "__main__" ):
     Z_res = CPW( width_res, gap_res, origin, origin )
     to_line = Z_res.gap + Z0.gap
     worm = EMResonator_TL2Qbit_worm( Z_res, DPoint(CHIP.dx/2, CHIP.dy/2 - Z0.b) , L_coupling, L1_list[0], r, L2, N )
-    worm.place( cell, layer_photo )
+#    worm.place( cell, layer_photo )
 
     # qBit 
     origin = DPoint(1e6,0)
@@ -147,11 +147,19 @@ if ( __name__ ==  "__main__" ):
     toLine = 25e3
     dy = (worm.cop_tail.dr.abs() - square_a)/2
     qbit = QBit_Flux_Сshunted( worm.end + DPoint( toLine, dy ) , qbit_params, DCplxTrans( 1,90,False,0,0 ) )
-    qbit.place( cell, layer_photo, layer_el )
     
     #empty polygon for qBit
-    qbit_bbox = pya.DBox().from_ibox( qbit.metal_region.bbox() )
-    empty = CPW( 0, qbit_bbox.height()/2 + 2*qbit.a, qbit_bbox.p1 + DPoint(0,qbit_bbox.height()/2), qbit_bbox.p2 - DPoint(qbit.B4.width() + qbit.B3.width()/2,qbit_bbox.height()/2 )  )
+    qbit_bbox = pya.DBox().from_ibox( qbit.metal_regions["photo"].bbox() )
+    #print(qbit.metal_regions)
+    #qbit_bbox = qbit.metal_region.bbox() 
+    print(0, qbit_bbox.p2,qbit_bbox.height(), qbit_bbox.width())
+    empty = CPW( 0, qbit_bbox.height()/2 + 2*qbit.a, 
+        qbit_bbox.p1 + DPoint(0,qbit_bbox.height()/2), 
+        qbit_bbox.p2 - DPoint(qbit.B4.width() + qbit.B3.width()/2,qbit_bbox.height()/2 )  )
+  
     empty.place( cell, layer_photo )
+    qbit.place( cell, layer_photo, layer_el )
+
+    print(empty.start, empty.end)
     ## DRAWING SECTION END ##
     lv.zoom_fit()

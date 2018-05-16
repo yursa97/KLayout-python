@@ -6,7 +6,7 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 from ClassLib.Coplanars import *
 from ClassLib.Shapes import *
 
-class CWave2CPW( Element_Base ):
+class CWave2CPW( ElementBase ):
     '''
     Draws a semi-circle coupler from coplanar waveguide to jelly capacitance plates.
 

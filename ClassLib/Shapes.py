@@ -4,9 +4,9 @@ from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  R
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from ClassLib._PROG_SETTINGS import *
-from ClassLib.BaseClasses import Element_Base
+from ClassLib.BaseClasses import ElementBase
 
-class Circle( Element_Base ):
+class Circle( ElementBase ):
     def __init__(self,center,r,trans_in=None,n_pts=50,solid=True):
         self.center = center
         self.r = r
@@ -21,7 +21,7 @@ class Circle( Element_Base ):
         else:
             self.empty_region.insert( SimplePolygon().from_dpoly( DSimplePolygon(dpts_arr) ) )
 
-class Circle_arc( Element_Base ):
+class Circle_arc( ElementBase ):
     def __init__( self, center, r, alpha_start=0, alpha_end = pi, trans_in=None, n_pts=50, solid=True ):
         self.center = center
         self.r = r

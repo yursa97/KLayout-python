@@ -5,7 +5,11 @@ import pya
 from math import cos, sin, atan2, pi
 from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
+
+import ClassLib
 from ClassLib import *
+
+from ClassLib.Coplanars import *
             
 class CHIP:
     dx = 10.1e6
