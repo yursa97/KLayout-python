@@ -79,17 +79,17 @@ class CWave( Complex_Base ):
             The angle of single arc of slice.
         r_curve: float
             The radius of single arc.
+        L0: float
+            The length of the initial and final "RLR" sections of the slice.
         n_pts: int
             The number of points on the perimeter of the circle.
         solid: ???
-        L0: float
-            The length of the initial and final "RLR" sections of the slice.
         trans_in: Bool
             Initial transformation
 
     '''
 
-    def __init__(self, center, r_out, dr, n_segments, s, alpha, r_curve, n_pts=50, solid=True, trans_in=None ):
+    def __init__(self, center, r_out, dr, n_segments, s, alpha, r_curve, L0=0, n_pts=50, solid=True, trans_in=None ):
         self.r_out = r_out
         self.dr = dr
         self.n_segments = n_segments

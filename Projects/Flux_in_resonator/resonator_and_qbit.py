@@ -1,5 +1,5 @@
-# $description: test_script 
-# $version: 1.0.0 
+# $description: test_script  
+# $version: 1.0.0  
 # $show-in-menu
 import pya 
 from importlib import reload
