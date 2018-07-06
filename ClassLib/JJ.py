@@ -26,7 +26,6 @@ class SQUIDManhattan(Complex_Base):
 
     def init_primitives(self):
 
-
         top_left_h_JJ = sqrt(1-self._asymmetry)*self._h_JJ
         top_right_h_JJ = sqrt(1+self._asymmetry)*self._h_JJ
         bottom_left_w_JJ = sqrt(1-self._asymmetry)*self._w_JJ
