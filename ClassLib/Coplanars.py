@@ -319,10 +319,11 @@ class CPW_RL_Path(Complex_Base):
         
         for i, symbol in enumerate(self._shape_string):
                               
-            if symbol == 'R':
-                turn_radius = self._turn_radiuses[R_index] \
-                        if self._turn_angles[R_index]>0 \
-                            else -self._turn_radiuses[R_index]
+            if( symbol == 'R' ):
+                if( self._turn_angles[R_index] > 0 ):
+                    turn_radius = self._turn_radiuses[R_index]
+                else:
+                    turn_radius =-self._turn_radiuses[R_index]
                                         
                 cpw_arc = CPW_arc(self._cpw_parameters[i], prev_primitive_end, 
                           turn_radius, self._turn_angles[R_index], 
@@ -332,22 +333,23 @@ class CPW_RL_Path(Complex_Base):
                 R_index += 1    
                 
             elif symbol == 'L':
-
+            
                 # Turns are reducing segments' lengths so as if there were no roundings at all
-                if i+1 < self._N_elements \
-                    and self._shape_string[i+1] == 'R' \
-                        and abs(self._turn_angles[R_index]) < pi:
-                        
-                    coeff = abs(tan(self._turn_angles[R_index]/2))
-                    self._segment_lengths[L_index] -= self._turn_radiuses[R_index]*coeff
+                if( i+1 < self._N_elements 
+                    and self._shape_string[i+1] == 'R'
+                    and abs(self._turn_angles[R_index]) < pi ):
+                        coeff = abs(tan(self._turn_angles[R_index]/2))
+                        self._segment_lengths[L_index] -= self._turn_radiuses[R_index]*coeff
 
-                if i-1 > 0 \
-                    and self._shape_string[i-1] == 'R'\
-                        and abs(self._turn_angles[R_index-1]) < pi:
+                if( i-1 > 0
+                    and self._shape_string[i-1] == 'R' 
+                    and abs(self._turn_angles[R_index-1]) < pi ):    
+                        coeff = abs(tan(self._turn_angles[R_index-1]/2))
+                        self._segment_lengths[L_index] -= self._turn_radiuses[R_index-1]*coeff
                         
-                    coeff = abs(tan(self._turn_angles[R_index-1]/2))
-                    self._segment_lengths[L_index] -= self._turn_radiuses[R_index-1]*coeff
-                        
+                if( self._segment_lengths[L_index] < 0 ):
+                    print( "CPW_RL_Path warning: segment length is less than zero" )
+                    
                 cpw = CPW(self._cpw_parameters[i].width, self._cpw_parameters[i].gap,
                         prev_primitive_end, prev_primitive_end + DPoint(self._segment_lengths[L_index], 0),
                             trans_in=DCplxTrans(1, prev_primitive_end_angle*180/pi, False, 0, 0))

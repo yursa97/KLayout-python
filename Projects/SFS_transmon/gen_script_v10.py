@@ -7,7 +7,6 @@ from importlib import reload
 from ClassLib import *
 
 ### START classes to be delegated to different file ###
-                
 class SFS_Csh_emb( Complex_Base ):
     def __init__( self, origin, params, trans_in=None ):
         self.params = params
@@ -19,15 +18,16 @@ class SFS_Csh_emb( Complex_Base ):
         self.r_curve = params[5]
         self.n_pts_cwave = params[6]
         self.L0 = params[7]
-        self.Z1 = params[8]
-        self.d_alpha1 = params[9]
-        self.width1 = params[10]
-        self.gap1 = params[11]
-        self.Z2 = params[12]
-        self.d_alpha2 = params[13]
-        self.width2 = params[14]
-        self.gap2 = params[15]
-        self.n_pts_arcs = params[16]
+        self.delta = params[8]
+        self.Z1 = params[9]
+        self.d_alpha1 = params[10]
+        self.width1 = params[11]
+        self.gap1 = params[12]
+        self.Z2 = params[13]
+        self.d_alpha2 = params[14]
+        self.width2 = params[15]
+        self.gap2 = params[16]
+        self.n_pts_arcs = params[17]
         super( SFS_Csh_emb, self ).__init__( origin, trans_in )
         '''
         self.excitation_port = self.connections[0]
@@ -39,7 +39,7 @@ class SFS_Csh_emb( Complex_Base ):
     def init_primitives( self ):
         origin = DPoint(0,0)
         
-        self.c_wave = CWave( origin, self.r_out, self.dr, self.n_semiwaves, self.s, self.alpha, self.r_curve, n_pts=self.n_pts_cwave, L0=self.L0 )
+        self.c_wave = CWave( origin, self.r_out, self.dr, self.n_semiwaves, self.s, self.alpha, self.r_curve, n_pts=self.n_pts_cwave, L0=self.L0, delta=self.delta )
         self.primitives["c_wave"] = self.c_wave
         
         Z1_start = origin + DPoint( 0,self.r_out + self.gap1 + self.width1/2 )
@@ -52,15 +52,11 @@ class SFS_Csh_emb( Complex_Base ):
         self.cpw2 = CPW( self.Z2.width, self.Z2.gap, Z2_start, Z2_end )        
         self.primitives["cpw2"] = self.cpw2
         
-        self.c_wave_2_cpw_adapter = CWave2CPW( self.c_wave, self.params[8:16], n_pts=self.n_pts_arcs )
+        self.c_wave_2_cpw_adapter = CWave2CPW( self.c_wave, self.params[9:17], n_pts=self.n_pts_arcs )
         self.primitives["c_wave_2_cpw_adapter"] = self.c_wave_2_cpw_adapter
        
-
-        
         self.connections = [Z1_end, Z2_end]
-        self.angle_connections = [pi/2, 3/2*pi]
-        
-        
+        self.angle_connections = [pi/2, 3/2*pi]    
         
         
     
@@ -116,10 +112,11 @@ if __name__ == "__main__":
     r_gap = 25e3
     n_semiwaves = 4
     s = 5e3  
-    alpha = pi/2
-    r_curve = 2e4
+    alpha = pi/3
+    r_curve = 10e3
     n_pts_cwave = 50
     L0 = 20e3
+    delta = 30e3
     
     Z = CPW( 14.5e3, 6.7e3 )
     Z1 = Z
@@ -131,10 +128,13 @@ if __name__ == "__main__":
     width2 = width1
     gap2 = width2
     n_pts_arcs = 50
-    params = [r_out, r_gap,n_semiwaves, s, alpha, r_curve, n_pts_cwave, L0,
+    sfs_params = [r_out, r_gap,n_semiwaves, s, alpha, r_curve, n_pts_cwave, L0, delta,
                         Z1,d_alpha1,width1,gap1,Z2,d_alpha2,width2,gap2, n_pts_arcs]
+    
+    cont_pad1 = Contact_Pad( origin + DPoint(0,CHIP.dy/2),{"w":Z.width,"g":Z.gap} )
+    cont_pad1.place( cell,layer_ph )
     p = DPoint( CHIP.dx/2, CHIP.dy/2 )
-    sfs = SFS_Csh_emb( p, params )
+    sfs = SFS_Csh_emb( p, sfs_params )
     sfs.place( cell, layer_ph )
     # Single photon source photo layer drawing START #
     

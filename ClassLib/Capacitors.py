@@ -79,6 +79,8 @@ class CWave( Complex_Base ):
             The angle of single arc of slice.
         r_curve: float
             The radius of single arc.
+        delta: float
+            length of the horizontal lines on the ends of the cut
         L0: float
             The length of the initial and final "RLR" sections of the slice.
         n_pts: int
@@ -89,7 +91,7 @@ class CWave( Complex_Base ):
 
     '''
 
-    def __init__(self, center, r_out, dr, n_segments, s, alpha, r_curve, L0=0, n_pts=50, solid=True, trans_in=None ):
+    def __init__(self, center, r_out, dr, n_segments, s, alpha, r_curve, delta=40e3, L0=0, n_pts=50, solid=True, trans_in=None ):
         self.r_out = r_out
         self.dr = dr
         self.n_segments = n_segments
@@ -97,7 +99,7 @@ class CWave( Complex_Base ):
         self.alpha = alpha
         self.r_curve = r_curve
         self.n_pts = n_pts
-        self.delta = 40e3
+        self.delta = delta
         self.L_full = 2*self.r_out - 2*self.delta
         # calculating parameters of the CPW_RL_Path #
         r = self.r_curve
