@@ -19,10 +19,16 @@ class CPW( Element_Base ):
                         DPoint start - center aligned point, determines the start point of the coplanar segment
                         DPoint end - center aligned point, determines the end point of the coplanar segment
     """
-    def __init__(self, width, gap, start=DPoint(0,0), end=DPoint(0,0), gndWidth=-1, trans_in=None ):
-        self.width = width
-        self.gap = gap
-        self.b = 2*gap + width
+    def __init__(self, width=None, gap=None, start=DPoint(0,0), end=DPoint(0,0), gndWidth=-1, trans_in=None, cpw_params=None ):
+        if( cpw_params  is None ):
+            self.width = width
+            self.gap = gap
+            self.b = 2*gap + width
+        else:
+            self.width = cpw_params.width
+            self.gap = cpw_params.gap
+            self.b = 2*self.gap + self.width
+            
         self.gndWidth = gndWidth
         self.end = end
         self.start = start
@@ -218,7 +224,6 @@ class Path_RS(Complex_Base):
         
 class Coil_type_1( Complex_Base ):
     def __init__( self, Z0, start, L1, r, L2, trans_in=None ):
-        print("COIL")
         self.Z0 = Z0
         self.L1 = L1
         self.r = r

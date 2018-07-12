@@ -29,12 +29,12 @@ class SFS_Csh_emb( Complex_Base ):
         self.gap2 = params[16]
         self.n_pts_arcs = params[17]
         super( SFS_Csh_emb, self ).__init__( origin, trans_in )
-        '''
-        self.excitation_port = self.connections[0]
-        self.output_port = self.connections[1]
+        
+        self.excitation = self.connections[0]
+        self.output = self.connections[1]
         self.excitation_angle = self.angle_connections[0]
         self.output_angle = self.angle_connections[1]
-        '''
+        
         
     def init_primitives( self ):
         origin = DPoint(0,0)
@@ -101,9 +101,10 @@ if __name__ == "__main__":
     ### DRAW SECTION START ###
     origin = DPoint(0,0)
     
-    # Chip drwaing START #    
-    chip = pya.DBox( origin, DPoint( CHIP.dx, CHIP.dy ) )
-    cell.shapes( layer_ph ).insert( pya.Box().from_dbox(chip) )
+    # Chip drwaing START #
+    Z_params = CPWParameters( 14.5e3, 6.7e3 ) 
+    chip = Chip5x10_with_contactPads( origin, Z_params )
+    chip.place( cell, layer_ph )
     # Chip drawing END #
     
     
@@ -118,7 +119,7 @@ if __name__ == "__main__":
     L0 = 20e3
     delta = 30e3
     
-    Z = CPW( 14.5e3, 6.7e3 )
+    Z = CPW( cpw_params=Z_params )
     Z1 = Z
     d_alpha1 = pi/3
     width1 = r_gap/3 
@@ -131,11 +132,17 @@ if __name__ == "__main__":
     sfs_params = [r_out, r_gap,n_semiwaves, s, alpha, r_curve, n_pts_cwave, L0, delta,
                         Z1,d_alpha1,width1,gap1,Z2,d_alpha2,width2,gap2, n_pts_arcs]
     
-    cont_pad1 = Contact_Pad( origin + DPoint(0,CHIP.dy/2),{"w":Z.width,"g":Z.gap} )
-    cont_pad1.place( cell,layer_ph )
-    p = DPoint( CHIP.dx/2, CHIP.dy/2 )
-    sfs = SFS_Csh_emb( p, sfs_params )
+    Z3 = CPW( start = chip.connections[0], end = chip.connections[0] + DPoint( 0.5e6,0 ), cpw_params =  Z_params )
+    Z3.place( cell, layer_ph )
+    
+    sfs = SFS_Csh_emb( Z3.end, sfs_params, trans_in=Trans.R90 )
     sfs.place( cell, layer_ph )
+    
+    r_curve = 0.2e6
+    cpw_source_out = CPW_RL_Path( sfs.output, "RLR", Z_params, r_curve, 
+                                                        [chip.connections[2].x - sfs.output.x, chip.connections[2].y-sfs.output.y],
+                                                        [pi/2] )
+    cpw_source_out.place( cell, layer_ph )
     # Single photon source photo layer drawing START #
     
     ### DRAW SECTION END ###

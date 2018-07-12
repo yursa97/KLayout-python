@@ -59,6 +59,7 @@ class Contact_Pad(Element_Base):
 
         
         self.connections = [DPoint(0,0), DPoint(x+self._pad_length+self._transition_length, 0)]
+        self.angle_connections = [pi,0]
     
     
     
