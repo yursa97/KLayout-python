@@ -10,7 +10,9 @@ class Rectangle( Element_Base ):
     def __init__( self, origin, a,b, trans_in=None ):
         self.a = a
         self.b = b
-        super( Rectangle, self ).__init__( origin, trans_in )
+        print(type(self))
+        print(isinstance(self,Element_Base) )
+        super( Rectangle,self ).__init__( origin, trans_in )
         
     def init_regions( self ):
         origin = DPoint(0,0)

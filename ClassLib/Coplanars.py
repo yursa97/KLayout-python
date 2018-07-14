@@ -287,7 +287,7 @@ class CPW_RL_Path(Complex_Base):
         self._N_elements = len(shape)
         self._shape_string_counter = Counter(shape)
         
-        N_turns = self._shape_string_counter['R']
+        self._N_turns = self._shape_string_counter['R']
         
         if hasattr(cpw_parameters, "__len__"):
             if len(cpw_parameters) != self._N_elements:
@@ -297,11 +297,11 @@ class CPW_RL_Path(Complex_Base):
             self._cpw_parameters = [cpw_parameters]*self._N_elements
         
         if hasattr(turn_radiuses, "__len__"):
-            if len(turn_radiuses) != N_turns:
+            if len(turn_radiuses) !=  self._N_turns:
                 raise ValueError("Turn raduises dimension mismatch")
             self._turn_radiuses = turn_radiuses
         else:
-            self._turn_radiuses = [turn_radiuses]*N_turns
+            self._turn_radiuses = [turn_radiuses]* self._N_turns
     
         self._segment_lengths = segment_lengths
         self._turn_angles = turn_angles
@@ -340,12 +340,16 @@ class CPW_RL_Path(Complex_Base):
             elif symbol == 'L':
             
                 # Turns are reducing segments' lengths so as if there were no roundings at all
+                
+                # next 'R' segment if exists
+                print(self._shape_string[i+1])
+                print(i)
                 if( i+1 < self._N_elements 
                     and self._shape_string[i+1] == 'R'
                     and abs(self._turn_angles[R_index]) < pi ):
                         coeff = abs(tan(self._turn_angles[R_index]/2))
                         self._segment_lengths[L_index] -= self._turn_radiuses[R_index]*coeff
-
+                # previous 'R' segment if exists
                 if( i-1 > 0
                     and self._shape_string[i-1] == 'R' 
                     and abs(self._turn_angles[R_index-1]) < pi ):    

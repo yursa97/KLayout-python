@@ -11,6 +11,7 @@ from ClassLib.Resonators import *
 from ClassLib.Shapes import *
 from ClassLib.ContactPad import *
 from ClassLib._PROG_SETTINGS import *
+from ClassLib.ChipTemplates import *
 
 reload(ClassLib.BaseClasses)
 reload(ClassLib.Capacitors)
@@ -21,6 +22,7 @@ reload(ClassLib.Resonators)
 reload(ClassLib.Shapes)
 reload(ClassLib.ContactPad)
 reload(ClassLib._PROG_SETTINGS)
+reload(ClassLib.ChipTemplates)
 
 from ClassLib.BaseClasses import *
 from ClassLib.Capacitors import *
@@ -32,4 +34,6 @@ from ClassLib.Resonators import *
 from ClassLib.Shapes import *
 from ClassLib.ContactPad import *
 from ClassLib._PROG_SETTINGS import *
+from ClassLib.ChipTemplates import *
+
 
