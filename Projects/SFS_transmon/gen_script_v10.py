@@ -141,7 +141,7 @@ if __name__ == "__main__":
     sfs.place( cell, layer_ph )
     
     r_curve = 0.2e6
-    cpw_source_out = CPW_RL_Path( sfs.output, "RLR", Z_params, r_curve, 
+    cpw_source_out = CPW_RL_Path( sfs.output, "LRL", Z_params, r_curve, 
                                                         [chip.connections[2].x - sfs.output.x, chip.connections[2].y-sfs.output.y],
                                                         [pi/2] )
     cpw_source_out.place( cell, layer_ph )

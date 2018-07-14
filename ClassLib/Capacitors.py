@@ -63,8 +63,11 @@ class CWave2CPW( Element_Base ):
 class CWave( Complex_Base ):
     '''
     Draws a condensator from a circle cutting it into 2 pieces.
+    '''
 
-    Parameters:
+    def __init__(self, center, r_out, dr, n_segments, s, alpha, r_curve, delta=40e3, L0=0, n_pts=50, solid=True, trans_in=None ):
+        '''
+        Parameters:
         center: DPoint
             A center of circle.
         r_out: float
@@ -88,10 +91,7 @@ class CWave( Complex_Base ):
         solid: ???
         trans_in: Bool
             Initial transformation
-
-    '''
-
-    def __init__(self, center, r_out, dr, n_segments, s, alpha, r_curve, delta=40e3, L0=0, n_pts=50, solid=True, trans_in=None ):
+        '''
         self.r_out = r_out
         self.dr = dr
         self.n_segments = n_segments
@@ -159,7 +159,6 @@ class CWave( Complex_Base ):
         shapes += 'RLRL'
         angles.extend([2*m_x*self.alpha,-m_x*self.alpha])
         lengths.extend([self.L0, self.delta])
-        print(shapes)
         cut = CPW_RL_Path(self.RL_start,shapes,Z,self.r_curve,lengths,angles)
         # prev_path = list(self.primitives.values())[-1]
         # rl_path_end = CPW_RL_Path( prev_path.end, "RLRL", Z, self.r_curve, [self.L0, self.delta], [m_x*self.alpha,-m_x*self.alpha])

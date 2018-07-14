@@ -47,9 +47,15 @@ class CPW( Element_Base ):
         alpha = atan2( self.dr.y, self.dr.x )
         self.angle_connections = [alpha,alpha]
         alpha_trans = ICplxTrans().from_dtrans( DCplxTrans( 1,alpha*180/pi,False, self.start ) )
-        self.metal_region.insert( pya.Box( Point().from_dpoint(DPoint(0,-self.width/2)), Point().from_dpoint(DPoint( self.dr.abs(), self.width/2 )) ) )
-        self.empty_region.insert( pya.Box( Point().from_dpoint(DPoint(0,self.width/2)), Point().from_dpoint(DPoint( self.dr.abs(), self.width/2 + self.gap )) ) )
-        self.empty_region.insert( pya.Box( Point().from_dpoint(DPoint(0,-self.width/2-self.gap)), Point().from_dpoint(DPoint( self.dr.abs(), -self.width/2 )) ) )
+        
+        metal_poly = DSimplePolygon( [DPoint(0,-self.width/2),
+                                                       DPoint(self.dr.abs(),-self.width/2), 
+                                                       DPoint(self.dr.abs(),self.width/2),
+                                                       DPoint(0,self.width/2)] )
+        self.metal_region.insert( pya.SimplePolygon().from_dpoly( metal_poly ) )
+        if( self.gap != 0 ):
+            self.empty_region.insert( pya.Box( Point().from_dpoint(DPoint(0,self.width/2)), Point().from_dpoint(DPoint( self.dr.abs(), self.width/2 + self.gap )) ) )
+            self.empty_region.insert( pya.Box( Point().from_dpoint(DPoint(0,-self.width/2-self.gap)), Point().from_dpoint(DPoint( self.dr.abs(), -self.width/2 )) ) )
         self.metal_region.transform( alpha_trans )
         self.empty_region.transform( alpha_trans )
 
@@ -342,16 +348,9 @@ class CPW_RL_Path(Complex_Base):
                 # Turns are reducing segments' lengths so as if there were no roundings at all
                 
                 # next 'R' segment if exists
-                print("New L symbol")
-                print(i+1, " ",self._N_elements," ",len(self._shape_string))
-                print(R_index," ",len(self._turn_angles))
-                print("Hello1")
-                print(self._shape_string)
-                if( i+1 < self._N_elements ):
-                    if( self._shape_string[i+1] == 'R' ):
-                        if( abs(self._turn_angles[R_index]) < pi ):
-                            print(self._shape_string[i+1])
-                            print(i)
+                if( i+1 < self._N_elements
+                    and self._shape_string[i+1] == 'R' 
+                    and abs(self._turn_angles[R_index]) < pi ):
                             coeff = abs(tan(self._turn_angles[R_index]/2))
                             self._segment_lengths[L_index] -= self._turn_radiuses[R_index]*coeff
                 # previous 'R' segment if exists

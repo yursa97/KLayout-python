@@ -47,16 +47,32 @@ if __name__ == "__main__":
 
     ### DRAW SECTION START ###
     origin = DPoint(0,0)
-    Z_params = CPWParameters( 14.5e3, 6.7e3 ) 
-    chip = Chip5x10_with_contactPads( origin, Z_params )
-    chip.place( cell, layer_ph )
     
-    gap = 0e3
+    # Single photon source photo layer drawing START #
+    r_out = 200e3
+    r_gap = 0
+    n_semiwaves = 4
+    s = 5e3  
+    alpha = pi/3
+    r_curve = 10e3
+    n_pts_cwave = 50
+    L0 = 20e3
+    delta = 30e3
+    
+    cwave_params = [r_out,r_gap,n_semiwaves,s,alpha,r_curve,delta,L0,n_pts_cwave]
+    
+    cap = CWave( origin, *cwave_params, trans_in=Trans.R90 )
+    cap.place( cell, layer_ph )
+    
+    gap = 0
     width = 30e3
     length = 150e3
-    delta = 200e3
-    Z_left = CPW( width, gap, origin + DPoint( 0, chip.chip_y/2 ), origin + DPoint( chip.chip_x/2, chip.chip_y/2 ) )
-    Z_left.place( cell,layer_ph )
+    delta = 10e3
+    Z_left = CPW( width, gap, origin + DPoint( -r_out + delta,0 ), origin + DPoint( -r_out - length + delta,0 ) )
+    Z_left.place( cell, layer_ph, merge=True )
+    
+    Z_right = CPW( width, gap, origin - DPoint( -r_out + delta,0 ), origin - DPoint( -r_out - length + delta,0 ) )
+    Z_right.place( cell, layer_ph, merge=True )
     ### DRAW SECTION END ###
     
     lv.zoom_fit()
