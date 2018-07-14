@@ -5,6 +5,8 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from importlib import reload
 from ClassLib import *
+reload(ClassLib)
+from ClassLib import *
 
 ### START classes to be delegated to different file ###
 class SFS_Csh_emb( Complex_Base ):

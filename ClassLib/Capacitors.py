@@ -159,7 +159,7 @@ class CWave( Complex_Base ):
         shapes += 'RLRL'
         angles.extend([2*m_x*self.alpha,-m_x*self.alpha])
         lengths.extend([self.L0, self.delta])
-
+        print(shapes)
         cut = CPW_RL_Path(self.RL_start,shapes,Z,self.r_curve,lengths,angles)
         # prev_path = list(self.primitives.values())[-1]
         # rl_path_end = CPW_RL_Path( prev_path.end, "RLRL", Z, self.r_curve, [self.L0, self.delta], [m_x*self.alpha,-m_x*self.alpha])

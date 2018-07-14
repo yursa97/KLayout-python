@@ -2,8 +2,8 @@ from importlib import reload
 
 import ClassLib
 from ClassLib.BaseClasses import *
-from ClassLib.Capacitors import *
 from ClassLib.Coplanars import *
+from ClassLib.Capacitors import *
 from ClassLib.Couplers import *
 from ClassLib.JJ import *
 from ClassLib.Qbits import *
@@ -14,8 +14,8 @@ from ClassLib._PROG_SETTINGS import *
 from ClassLib.ChipTemplates import *
 
 reload(ClassLib.BaseClasses)
-reload(ClassLib.Capacitors)
 reload(ClassLib.Coplanars)
+reload(ClassLib.Capacitors)
 reload(ClassLib.JJ)
 reload(ClassLib.Qbits)
 reload(ClassLib.Resonators)
@@ -25,8 +25,8 @@ reload(ClassLib._PROG_SETTINGS)
 reload(ClassLib.ChipTemplates)
 
 from ClassLib.BaseClasses import *
-from ClassLib.Capacitors import *
 from ClassLib.Coplanars import *
+from ClassLib.Capacitors import *
 from ClassLib.Couplers import *
 from ClassLib.JJ import *
 from ClassLib.Qbits import *

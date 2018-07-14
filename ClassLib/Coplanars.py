@@ -342,13 +342,18 @@ class CPW_RL_Path(Complex_Base):
                 # Turns are reducing segments' lengths so as if there were no roundings at all
                 
                 # next 'R' segment if exists
-                print(self._shape_string[i+1])
-                print(i)
-                if( i+1 < self._N_elements 
-                    and self._shape_string[i+1] == 'R'
-                    and abs(self._turn_angles[R_index]) < pi ):
-                        coeff = abs(tan(self._turn_angles[R_index]/2))
-                        self._segment_lengths[L_index] -= self._turn_radiuses[R_index]*coeff
+                print("New L symbol")
+                print(i+1, " ",self._N_elements," ",len(self._shape_string))
+                print(R_index," ",len(self._turn_angles))
+                print("Hello1")
+                print(self._shape_string)
+                if( i+1 < self._N_elements ):
+                    if( self._shape_string[i+1] == 'R' ):
+                        if( abs(self._turn_angles[R_index]) < pi ):
+                            print(self._shape_string[i+1])
+                            print(i)
+                            coeff = abs(tan(self._turn_angles[R_index]/2))
+                            self._segment_lengths[L_index] -= self._turn_radiuses[R_index]*coeff
                 # previous 'R' segment if exists
                 if( i-1 > 0
                     and self._shape_string[i-1] == 'R' 
