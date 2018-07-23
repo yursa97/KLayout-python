@@ -47,17 +47,18 @@ if( lv == None ):
     lv = mw.current_view()
 else:
     cv = lv.active_cellview()
+    
+cell_name = "Tmon_chain_10x5_aoe_drives"
+print(cell_name)
 
-print(cv)
 
 layout = cv.layout()
 layout.dbu = 0.001
-if( layout.has_cell( "testScript") ):
-    pass
-else:
-    cell = layout.create_cell( "testScript" )
+if not layout.has_cell(cell_name):
+  layout.create_cell(cell_name)
 
-
+cv.cell_name = cell_name
+cell = cv.cell
 
 info = pya.LayerInfo(1,0)
 info2 = pya.LayerInfo(2,0)
@@ -151,8 +152,8 @@ for i in range(-(chain_length)//2, (chain_length)//2, 1):
   res_cursor = DPoint(i*resonators_interval+resonators_interval/2, resonators_y_positions)
   print(i)
   trans_in = None if i>=0 else DTrans.M90
-  claw = Claw(DPoint(0,0), res_cpw_params, 200e3, w_claw = 20e3, w_claw_pad=0, l_claw_pad = 0)
-  res = CPWResonator(res_cursor, res_cpw_params, 40e3, 6+(i+4)/10, 11.45, coupling_length=450e3,
+  claw = Claw(DPoint(0,0), res_cpw_params, 100e3, w_claw = 20e3, w_claw_pad=0, l_claw_pad = 0)
+  res = CPWResonator(res_cursor, res_cpw_params, 40e3, 7+(i+4)/10, 11.45, coupling_length=450e3,
                                     meander_periods = 3, trans_in = trans_in)
   claw.make_trans(DTrans(res.end))
   claw.place(canvas)
@@ -240,7 +241,10 @@ aoe_drive2.place(canvas)
 
 ### DRAW SECTION END ###
 ebeam = ebeam.merge()
-cell.shapes( layer_photo ).insert(canvas)
+invert_region = Region(pya.Box(Point(-CHIP.dx/2-50e3, -CHIP.dy/2-50e3), 
+                        Point(CHIP.dx/2+50e3, CHIP.dy/2+50e3)))
+
+cell.shapes( layer_photo ).insert(invert_region - canvas)
 cell.shapes( layer_el ).insert(ebeam)
 
 

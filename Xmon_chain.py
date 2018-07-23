@@ -1,7 +1,6 @@
 # $description: xmon_chain
 # $version: 0
 # $show-in-menu
-# $shortcut: Ctrl+M
 
 
 # Enter your Python code here

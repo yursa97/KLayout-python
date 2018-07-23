@@ -47,17 +47,19 @@ if( lv == None ):
     lv = mw.current_view()
 else:
     cv = lv.active_cellview()
+    
+cell_name = "Tmon_chain_10x5_FBs"
+print(cell_name)
 
-print(cv)
+
 
 layout = cv.layout()
 layout.dbu = 0.001
-if( layout.has_cell( "testScript") ):
-    pass
-else:
-    cell = layout.create_cell( "testScript" )
+if not layout.has_cell(cell_name):
+  layout.create_cell(cell_name)
 
-
+cv.cell_name = cell_name
+cell = cv.cell
 
 info = pya.LayerInfo(1,0)
 info2 = pya.LayerInfo(2,0)
@@ -151,8 +153,8 @@ for i in range(-(chain_length)//2, (chain_length)//2, 1):
   res_cursor = DPoint(i*resonators_interval+resonators_interval/2, resonators_y_positions)
   print(i)
   trans_in = None if i>=0 else DTrans.M90
-  claw = Claw(DPoint(0,0), res_cpw_params, 200e3, w_claw = 20e3, w_claw_pad=0, l_claw_pad = 0)
-  res = CPWResonator(res_cursor, res_cpw_params, 40e3, 6+(i+4)/10, 11.45, coupling_length=450e3,
+  claw = Claw(DPoint(0,0), res_cpw_params, 100e3, w_claw = 20e3, w_claw_pad=0, l_claw_pad = 0)
+  res = CPWResonator(res_cursor, res_cpw_params, 40e3, 7+(i+4)/10, 11.45, coupling_length=450e3,
                                     meander_periods = 3, trans_in = trans_in)
   claw.make_trans(DTrans(res.end))
   claw.place(canvas)
@@ -203,44 +205,44 @@ tmon1_fc.place(canvas)
 tmon1_fc_end = FluxCoil(tmon1_fc.end, fc_cpw_params, width = 20e3, trans_in = DTrans.R180)
 tmon1_fc_end.place(canvas)
 
-tmon_m1_fc_segment_lengths =\
+# tmon -1
+fc_segment_lengths =\
      [-qubit_ports[-1].x + cp5.end.x, cp5.end.y - qubit_ports[-1].y-20e3]
-tmon_m1_fc = CPW_RL_Path(cp5.end, "LRL", fc_cpw_params, 240e3,
-     tmon_m1_fc_segment_lengths, [-pi/2] ,trans_in = DTrans.M90)
-tmon_m1_fc.place(canvas)
+fc = CPW_RL_Path(cp5.end, "LRL", fc_cpw_params, 240e3,
+     fc_segment_lengths, [-pi/2] ,trans_in = DTrans.M90)
+fc.place(canvas)
 
-tmon1_fc_end = FluxCoil(tmon_m1_fc.end, fc_cpw_params, width = 20e3, trans_in = DTrans.R180)
-tmon1_fc_end.place(canvas)
+fc_end = FluxCoil(fc.end, fc_cpw_params, width = 20e3, trans_in = DTrans.R180)
+fc_end.place(canvas)
 
-# ========= AOE drives =========
+# tmon 3
+fc_segment_lengths =\
+     [0.5e6, abs(qubit_ports[3].x - cp3.end.x), -0.5e6+cp3.end.y - qubit_ports[3].y-20e3]
+fc = CPW_RL_Path(cp3.end, "LRLRL", fc_cpw_params, 240e3,
+     fc_segment_lengths, [pi/2, -pi/2] , trans_in = DTrans.R270)
+fc.place(canvas)
 
-aoe_drive_claw_cpw_params = CPWParameters(md_cpw_params.width, 10e3)
+fc_end = FluxCoil(fc.end, fc_cpw_params, width = 20e3, trans_in = DTrans.R180)
+fc_end.place(canvas)
 
-aoe_drive1_seg_lengths = [500e3, qubit_ports[2].x - cp3.end.x + tmon_arm_len,
-                            abs(qubit_ports[2].y - cp3.end.y)-800e3]
-aoe_drive1 = CPW_RL_Path(cp3.end, "LRLRL", fc_cpw_params, 240e3,
-     aoe_drive1_seg_lengths, [pi/2, -pi/2] ,trans_in = DTrans.R270)
+# tmon -4
+fc_segment_lengths =\
+     [0.5e6, -qubit_ports[-4].x + cp4.end.x, -0.5e6+cp4.end.y - qubit_ports[-4].y-20e3]
+fc = CPW_RL_Path(cp4.end, "LRLRL", fc_cpw_params, 240e3,
+     fc_segment_lengths, [-pi/2, pi/2] ,trans_in = DTrans.R270)
+fc.place(canvas)
 
-aoe_claw = Claw(aoe_drive1.end, aoe_drive_claw_cpw_params, 5*tmon_arm_len,
-                      w_claw = 20e3, w_claw_pad=0, l_claw_pad = 0, trans_in=DTrans.R180)
+fc_end = FluxCoil(fc.end, fc_cpw_params, width = 20e3, trans_in = DTrans.R180)
+fc_end.place(canvas)
 
-aoe_claw.place(canvas)
-aoe_drive1.place(canvas)
 
-aoe_drive2_seg_lengths = [500e3, abs(qubit_ports[-3].x - cp4.end.x)+tmon_arm_len,
-                            abs(qubit_ports[-3].y - cp4.end.y)-800e3]
-aoe_drive2 = CPW_RL_Path(cp4.end, "LRLRL", fc_cpw_params, 240e3,
-     aoe_drive2_seg_lengths, [-pi/2, pi/2] ,trans_in = DTrans.R270)
-
-aoe_claw = Claw(aoe_drive2.end, aoe_drive_claw_cpw_params, 5*tmon_arm_len,
-                      w_claw = 20e3, w_claw_pad=0, l_claw_pad = 0, trans_in=DTrans.R180)
-
-aoe_claw.place(canvas)
-aoe_drive2.place(canvas)
 
 ### DRAW SECTION END ###
 ebeam = ebeam.merge()
-cell.shapes( layer_photo ).insert(canvas)
+invert_region = Region(pya.Box(Point(-CHIP.dx/2-50e3, -CHIP.dy/2-50e3), 
+                        Point(CHIP.dx/2+50e3, CHIP.dy/2+50e3)))
+
+cell.shapes( layer_photo ).insert(invert_region - canvas)
 cell.shapes( layer_el ).insert(ebeam)
 
 
