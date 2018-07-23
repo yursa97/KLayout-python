@@ -8,7 +8,7 @@ from ClassLib import *
 reload(ClassLib)
 from ClassLib import *
 
-### START classes to be delegated to different file ###
+### START classes to /be delegated to different file ###
 class SFS_Csh_emb( Complex_Base ):
     def __init__( self, origin, params, trans_in=None ):
         self.params = params
