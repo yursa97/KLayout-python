@@ -20,6 +20,37 @@ class Rectangle( Element_Base ):
         pts_arr = [origin,p1,p2,p3]
         self.metal_region.insert( SimplePolygon().from_dpoly( DSimplePolygon(pts_arr) ) )
 
+class Cross( Element_Base ):
+    def __init__( self, origin, inner_square_a, outer_square_a, trans_in=None ):
+        self.in_a = inner_square_a
+        self.out_a = outer_square_a
+        super( Cross, self ).__init__( origin, trans_in )
+        
+    def init_regions( self ):
+        origin = DPoint(0,0)
+        w = self.out_a/2 - self.in_a/2
+        
+        rec1 = Rectangle( origin, w,w )
+        p2 = origin + DPoint(self.in_a + w,0)
+        rec2 = Rectangle( p2, w,w )
+        p3 = origin + DPoint( self.in_a+w,self.in_a+w )
+        rec3 = Rectangle( p3, w, w )
+        p4 = origin + DPoint( 0, self.in_a + w )
+        rec4 = Rectangle( p4, w, w )
+        
+        tmp_reg = Region()
+        
+        rec1.place( tmp_reg )
+        rec2.place( tmp_reg )
+        rec3.place( tmp_reg )
+        rec4.place( tmp_reg )
+        
+        rec = Rectangle( origin, self.out_a, self.out_a )
+        rec.place( self.metal_region )
+        
+        self.empty_region = tmp_reg
+
+
 class Circle( Element_Base ):
     def __init__(self,center,r,trans_in=None,n_pts=50,solid=True):
         self.center = center

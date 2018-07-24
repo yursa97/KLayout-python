@@ -11,4 +11,5 @@ class Shamil_mark( Complex_Base ):
         super( Shamil_mark, self ).__init__( origin, trans_in )
         
     def init_primitives( self ):
+        pass
         
