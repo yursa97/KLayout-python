@@ -12,6 +12,7 @@ from ClassLib.Shapes import *
 from ClassLib.ContactPad import *
 from ClassLib._PROG_SETTINGS import *
 from ClassLib.ChipTemplates import *
+from ClassLib.Marks import *
 
 reload(ClassLib.BaseClasses)
 reload(ClassLib.Coplanars)
@@ -23,6 +24,7 @@ reload(ClassLib.Shapes)
 reload(ClassLib.ContactPad)
 reload(ClassLib._PROG_SETTINGS)
 reload(ClassLib.ChipTemplates)
+reload(ClassLib.Marks)
 
 from ClassLib.BaseClasses import *
 from ClassLib.Coplanars import *
@@ -35,5 +37,5 @@ from ClassLib.Shapes import *
 from ClassLib.ContactPad import *
 from ClassLib._PROG_SETTINGS import *
 from ClassLib.ChipTemplates import *
-
+from ClassLib.Marks import *
 

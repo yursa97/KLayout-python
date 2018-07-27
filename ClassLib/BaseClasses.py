@@ -21,8 +21,6 @@ class Element_Base():
         self.empty_region = Region()
         self.metal_regions = {}
         self.empty_regions = {}        
-        self.metal_regions["default"] = self.metal_region
-        self.empty_regions["default"] = self.empty_region
         
         self.metal_region.merged_semantics = True
         self.empty_region.merged_semantics = True
@@ -75,9 +73,8 @@ class Element_Base():
     def make_trans( self, dCplxTrans ):
         if( dCplxTrans is not None ):
             iCplxTrans = ICplxTrans().from_dtrans( dCplxTrans )
-            for metal_region, empty_region in zip(self.metal_regions.values(), self.empty_regions.values()):            
-                metal_region.transform( iCplxTrans )
-                empty_region.transform( iCplxTrans )
+            self.metal_region.transform( iCplxTrans )
+            self.empty_region.transform( iCplxTrans )
             self._update_connections( dCplxTrans )
             self._update_alpha( dCplxTrans )
     
@@ -130,14 +127,14 @@ class Element_Base():
             
             if( merge is True ):
                 r_cell.merge()
+                
             dest.shapes( temp_i ).insert( r_cell )
             dest.layout().clear_layer( layer_i )
             dest.layout().move_layer( temp_i, layer_i )
             dest.layout().delete_layer( temp_i )
         if( layer_i == -1 ): # dest is interpreted as instance of Region() class
-            for metal_region,empty_region in zip(self.metal_regions.values(),self.empty_regions.values()):
-                dest += metal_region
-                dest -= empty_region
+            dest += self.metal_region
+            dest -= self.empty_region
             if( merge is True ):
                 dest.merge()
                 

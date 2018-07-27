@@ -49,7 +49,7 @@ if __name__ == "__main__":
 
     ### DRAW SECTION START ###
     origin = DPoint(0,0)
-    cros = Cross( origin, 40e3, 120e3 )
+    cros = Shamil_mark( origin )
     cros.place( cell, layer_ph )
     ### DRAW SECTION END ###
     
