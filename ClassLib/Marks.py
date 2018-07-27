@@ -21,4 +21,3 @@ class Shamil_mark( Complex_Base ):
         
         Z = CPWParamters( 10e3,0 )
         self.primitives["left_arc"] = CPW_arc( Z, 
-        
