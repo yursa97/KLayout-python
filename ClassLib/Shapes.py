@@ -7,10 +7,10 @@ from ClassLib._PROG_SETTINGS import *
 from ClassLib.BaseClasses import Element_Base
 
 class Rectangle( Element_Base ):
-    def __init__( self, origin, a,b, trans_in=None ):
+    def __init__( self, origin, a,b, trans_in=None, inverse=False ):
         self.a = a
         self.b = b
-        super( Rectangle,self ).__init__( origin, trans_in )
+        super( Rectangle,self ).__init__( origin, trans_in, inverse )
         
     def init_regions( self ):
         origin = DPoint(0,0)
@@ -24,7 +24,9 @@ class Cross( Element_Base ):
     def __init__( self, origin, inner_square_a, outer_square_a, trans_in=None ):
         self.in_a = inner_square_a
         self.out_a = outer_square_a
+        self.center = origin + DPoint( self.out_a/2, self.out_a/2 )
         super( Cross, self ).__init__( origin, trans_in )
+        self.center = self.connections[0]
         
     def init_regions( self ):
         origin = DPoint(0,0)
@@ -49,6 +51,7 @@ class Cross( Element_Base ):
         rec.place( self.metal_region )
         
         self.empty_region = tmp_reg
+        self.connections = [self.center]
 
 
 class Circle( Element_Base ):

@@ -8,7 +8,7 @@ from ClassLib._PROG_SETTINGS import *
 from collections import OrderedDict
 
 class Element_Base():
-    def __init__(self, origin, trans_in=None):
+    def __init__(self, origin, trans_in=None, inverse=False ):
         ## MUST BE IMPLEMENTED ##
         self.connections = []       # DPoint list with possible connection points
         self.angle_connections = [] #list with angle of connecting elements
@@ -17,6 +17,7 @@ class Element_Base():
         self.connection_ptrs = [] # pointers to connected structures represented by their class instances
         
         self.origin = origin
+        self.inverse = inverse
         self.metal_region = Region()
         self.empty_region = Region()
         self.metal_regions = {}
@@ -53,6 +54,12 @@ class Element_Base():
     # after all, origin should be updated
     def _init_regions_trans( self ):
         self.init_regions()         # must be implemented in every subclass
+        
+        # in case "inverse" is True
+        # interchanging empty and metal polygons
+        if( self.inverse is True ):
+            self.metal_region, self.empty_region = self.empty_region, self.metal_region
+        
         dr_origin = DSimplePolygon( [DPoint(0,0)] )
         if( self.DCplxTrans_init is not None ):
             # constructor trans displacement
@@ -152,6 +159,8 @@ class Complex_Base( Element_Base ):
     def make_trans( self, dCplxTrans_temp ):
         for primitive in self.primitives.values():
             primitive.make_trans( dCplxTrans_temp )
+        self._update_connections( dCplxTrans_temp )
+        self._update_alpha( dCplxTrans_temp )
                 
     def _init_primitives_trans( self ):
         self.init_primitives()              # must be implemented in every subclass
@@ -159,26 +168,17 @@ class Complex_Base( Element_Base ):
         if( self.DCplxTrans_init is not None ):
             # constructor trans displacement
             dCplxTrans_temp = DCplxTrans( 1,0,False, self.DCplxTrans_init.disp )
-            for element in self.primitives.values():
-                element.make_trans( dCplxTrans_temp )
+            self.make_trans( dCplxTrans_temp )
             dr_origin.transform( dCplxTrans_temp )
-            self._update_connections( dCplxTrans_temp )
-            self._update_alpha( dCplxTrans_temp )
             
             # rest of the constructor trans functions
             dCplxTrans_temp = self.DCplxTrans_init.dup()
             dCplxTrans_temp.disp = DPoint(0,0)
-            for element in self.primitives.values():
-                element.make_trans( dCplxTrans_temp )
-            dr_origin.transform( dCplxTrans_temp )
-            self._update_connections( dCplxTrans_temp )
-            self._update_alpha( dCplxTrans_temp )            
+            self.make_trans( dCplxTrans_temp )
+            dr_origin.transform( dCplxTrans_temp )   
         
         dCplxTrans_temp = DCplxTrans( 1,0,False, self.origin )
-        for element in self.primitives.values():    
-            element.make_trans( dCplxTrans_temp ) # move to the origin
-        self._update_connections( dCplxTrans_temp )
-        self._update_alpha( dCplxTrans_temp )  
+        self.make_trans( dCplxTrans_temp ) #move to the origin
         self.origin += dr_origin.point( 0 )
         
         # FOLLOWING CYCLE GIVES WRONG INFO ABOUT FILLED AND ERASED AREAS

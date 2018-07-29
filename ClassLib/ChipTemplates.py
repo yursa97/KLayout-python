@@ -24,8 +24,11 @@ class Chip5x10_with_contactPads( Complex_Base ):
         '''
         self.chip_x = 10e6
         self.chip_y = 5e6
+        self.center = DPoint( self.chip_x/2, self.chip_y/2 )
+        print(self.center)
         self.Z_params = Z_params
         super( Chip5x10_with_contactPads, self ).__init__( origin, trans_in )
+        self.center = self.connections[-1]
         
     def init_primitives( self ):
         origin = DPoint(0,0)
@@ -60,3 +63,6 @@ class Chip5x10_with_contactPads( Complex_Base ):
             self.primitives["cp_bot_" + str(i)] = self.contact_pads_bottom[i]
             self.connections.append( self.contact_pads_bottom[i].end )
             self.angle_connections.append( self.contact_pads_bottom[i].angle_connections[1] ) 
+            
+        self.connections.append( DPoint(self.chip_x/2,self.chip_y/2) )
+        self.angle_connections.append( 0 )

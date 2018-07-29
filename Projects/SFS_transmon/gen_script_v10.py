@@ -147,6 +147,10 @@ if __name__ == "__main__":
     cpw_source_out.place( cell, layer_ph )
     # Single photon source photo layer drawing START #
     
+    # marks
+    print( chip.center )
+    mark1 = Mark1( chip.center )
+    mark1.place( cell, layer_ph )
     ### DRAW SECTION END ###
     
     lv.zoom_fit()

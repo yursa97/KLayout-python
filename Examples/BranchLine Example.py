@@ -4,11 +4,11 @@ from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  R
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from ClassLib import *
-         
+
 ### START classes to be delegated to different file ###
 
 ### END classes to be delegated to different file ###
-    
+
 ### MAIN FUNCTION ###
 if( __name__ == "__main__" ):
 # getting main references of the application
@@ -16,7 +16,7 @@ if( __name__ == "__main__" ):
     mw = app.main_window()
     lv = mw.current_view()
     cv = None
-    
+
     #this insures that lv and cv are valid objects
     if( lv == None ):
         cv = mw.create_layout(1)
@@ -31,17 +31,17 @@ if( __name__ == "__main__" ):
         pass
     else:
         cell = layout.create_cell( "testScript" )
-    
+
     info = pya.LayerInfo(10,0)
     layer_i = layout.layer( info )
 
     # clear this cell and layer
     cell.clear()
 
-    # setting layout view  
+    # setting layout view
     lv.select_cell(cell.cell_index(), 0)
     lv.add_missing_layers()
-    
+
     ### DRAW SECTION START ###
     #parameters
     width1 = 48e3
@@ -59,37 +59,37 @@ if( __name__ == "__main__" ):
     R3 = 0.3e6
     R4 = 0.3e6
     gamma1 = pi/4
-    gamma2 = 2.35619    
-    
+    gamma2 = 2.35619
+
     origin = DPoint(1e6,0)
     #cell.shapes( layer_i ).insert( pya.Box( Point(0,0), Point( CHIP.dx, CHIP.dy ) ) )
-    Z0 = CPW( width1, gap1, origin, origin )    
+    Z0 = CPW( width1, gap1, origin, origin )
     Z1 = CPW( width2, gap2, origin, origin )
     '''Z1 = CPW( width1, gap1, origin, origin + DPoint( 1e6,0 ), trans_in=DCplxTrans( 1,90,False,1e6,0 ) )
     Z1.place( cell, layer_i )
     for val in Z1.connections:
         print( val )
     print( Z0.origin )'''
-    
+
     '''Z1 = CPW_arc( Z0, origin + DPoint(1e6,0), R1, gamma1, trans_in=DCplxTrans( 1,90,False,1e6,0 ) )
     Z1.place( cell, layer_i )
     for val in Z1.connections:
         print( val )
     print( Z0.origin )'''
-    
+
     '''Z1 = CPW( width2,gap2, DPoint(0,0), DPoint(0,0) )
     tj = TJunction_112( Z0,Z1, origin + DPoint(1e6,1e6), DCplxTrans( 1,30,False,1e6,1e6 ) )
     tj.place( cell, layer_i )'''
-            
+
     '''bl = BranchLine_finger( Z0, origin, L1,L2,L3,R1,R2,gamma1, trans_in=DTrans( DTrans.R90 ) )
     bl.place( cell, layer_i )
     for val in bl.connections:
         print( val )
     print( Z0.origin )'''
-    
+
     bl1_params = [L1,L2,L3,R1,R2,gamma1]
     bl2_params = [L1,L2,L3,L4,L5,R1,R2,R3,R4,gamma1,gamma2]
-    
+
     bl_hor = BranchLine_finger2( Z1, origin, bl2_params )
     bl_vert = BranchLine_finger2( Z0, origin, bl2_params )
     tj = TJunction_112( Z0,Z1, origin )
@@ -100,7 +100,7 @@ if( __name__ == "__main__" ):
     print()
     for alpha in coupler.angle_connections:
         print( alpha )
-    
 
+    Class
     lv.zoom_fit()
    ### MAIN FUNCTION END ###

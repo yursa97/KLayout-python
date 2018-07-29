@@ -3,7 +3,7 @@ from math import sqrt, cos, sin, atan2, pi, copysign
 from pya import Point, DPoint, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from ClassLib import * 
+from ClassLib import *
 reload( ClassLib )
 from ClassLib import *
 
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     mw = app.main_window()
     lv = mw.current_view()
     cv = None
-    
+
     #this insures that lv and cv are valid objects
     if( lv == None ):
         cv = mw.create_layout(1)
@@ -34,7 +34,7 @@ if __name__ == "__main__":
         pass
     else:
         cell = layout.create_cell( "testScript" )
-    
+
     info = pya.LayerInfo(1,0)
     info2 = pya.LayerInfo(2,0)
     layer_ph = layout.layer( info )
@@ -43,14 +43,13 @@ if __name__ == "__main__":
     # clear this cell and layer
     cell.clear()
 
-    # setting layout view  
+    # setting layout view
     lv.select_cell(cell.cell_index(), 0)
     lv.add_missing_layers()
 
     ### DRAW SECTION START ###
     origin = DPoint(0,0)
-    cros = Shamil_mark( origin )
+    cros = Mark1( chip.center )
     cros.place( cell, layer_ph )
     ### DRAW SECTION END ###
-    
     lv.zoom_fit()
