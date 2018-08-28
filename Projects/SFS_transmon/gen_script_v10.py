@@ -145,10 +145,9 @@ if __name__ == "__main__":
                                                         [chip.connections[2].x - sfs.output.x, chip.connections[2].y-sfs.output.y],
                                                         [pi/2] )
     cpw_source_out.place( cell, layer_ph )
-    # Single photon source photo layer drawing START #
+    # Single photon source  drawing END #
     
     # marks
-    print( chip.center )
     mark1 = Mark1( chip.center )
     mark1.place( cell, layer_ph )
     ### DRAW SECTION END ###

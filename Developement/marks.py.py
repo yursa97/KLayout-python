@@ -39,7 +39,7 @@ if __name__ == "__main__":
     info2 = pya.LayerInfo(2,0)
     layer_ph = layout.layer( info )
     layer_el = layout.layer( info2 )
-
+    
     # clear this cell and layer
     cell.clear()
 
@@ -51,5 +51,6 @@ if __name__ == "__main__":
     origin = DPoint(0,0)
     cros = Mark1( chip.center )
     cros.place( cell, layer_ph )
+
     ### DRAW SECTION END ###
     lv.zoom_fit()

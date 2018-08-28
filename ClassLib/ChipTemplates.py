@@ -25,7 +25,6 @@ class Chip5x10_with_contactPads( Complex_Base ):
         self.chip_x = 10e6
         self.chip_y = 5e6
         self.center = DPoint( self.chip_x/2, self.chip_y/2 )
-        print(self.center)
         self.Z_params = Z_params
         super( Chip5x10_with_contactPads, self ).__init__( origin, trans_in )
         self.center = self.connections[-1]
