@@ -13,7 +13,7 @@ import os
 import shutil
 
 SIMULATION_ID = "Cwave_first"
-SONNET_DIR = "C:/Users/SUNSHINE_MACHINE/Documents/CWave_capacitance_designs"
+SONNET_DIR = r"C:\Users\user\Documents\CWave_capacitance_simulations"
     
 # Enter your Python code here
 ### MAIN FUNCTION ###

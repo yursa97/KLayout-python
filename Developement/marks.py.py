@@ -49,7 +49,7 @@ if __name__ == "__main__":
 
     ### DRAW SECTION START ###
     origin = DPoint(0,0)
-    cros = Mark1( chip.center )
+    cros = Mark1( origin )
     cros.place( cell, layer_ph )
 
     ### DRAW SECTION END ###

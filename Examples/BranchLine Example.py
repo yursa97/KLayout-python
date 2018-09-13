@@ -101,6 +101,6 @@ if( __name__ == "__main__" ):
     for alpha in coupler.angle_connections:
         print( alpha )
 
-    Class
+
     lv.zoom_fit()
    ### MAIN FUNCTION END ###
