@@ -82,7 +82,7 @@ class Matlab_commander():
     
     def send( self, byte_arr ):
         confirm_byte = None
-        #print( "sending: ", byte_arr )
+        print( "sending: ", byte_arr )
         self.sock.sendall( byte_arr )
         
         # waiting for 1 byte received, timeout is 1 second
@@ -144,7 +144,6 @@ if( __name__ == "__main__"):
     writer.send( CMD.SAY_HELLO )
     writer.send( CMD.CLEAR_POLYGONS )
     writer.send_boxProps( 100,100, 100,100 )
-    # revesed - counter-clockwise direction of hull
     writer.send_polygon( [0,0,100,100],[45,55,55,45], True, [1,3] )
     writer.send_set_ABS_sweep( 1, 10 )
     writer.send( CMD.SIMULATE )
