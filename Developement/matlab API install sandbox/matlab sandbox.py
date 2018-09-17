@@ -5,6 +5,8 @@ import time
 import numpy as np
 import struct
 
+import csv
+
 class Timer:    
     def __init__(self,sec, time_fcn=time.time):
         self.sec = sec
@@ -82,7 +84,7 @@ class Matlab_commander():
     
     def send( self, byte_arr ):
         confirm_byte = None
-        print( "sending: ", byte_arr )
+        #print( "sending: ", byte_arr )
         self.sock.sendall( byte_arr )
         
         # waiting for 1 byte received, timeout is 1 second
@@ -139,13 +141,34 @@ class Matlab_commander():
         self.send_float64( start_f )
         self.send_float64( stop_f )
         
+    def read_line( self ):
+        while( True ):
+            data = self.sock.recv(1024,socket.MSG_PEEK)
+            idx = data.find(b'\n')
+            if( idx != - 1 ):
+                data = self.sock.recv(idx+1)[:-1]
+                break
+            else:
+                continue
+                
+        return data
+            
+                
+        
 if( __name__ == "__main__"):
     writer = Matlab_commander()
+    print("starting connection...")
     writer.send( CMD.SAY_HELLO )
     writer.send( CMD.CLEAR_POLYGONS )
     writer.send_boxProps( 100,100, 100,100 )
     writer.send_polygon( [0,0,100,100],[45,55,55,45], True, [1,3] )
     writer.send_set_ABS_sweep( 1, 10 )
     writer.send( CMD.SIMULATE )
+    file_name = writer.read_line().decode("ASCII")
+    print(file_name)
+    with open(file_name,"r") as csv_file:
+        rows = list(csv.reader(csv_file))
+        print(rows[:10])
+        
     writer.send( CMD.CLOSE_CONNECTION )
     writer.close()
