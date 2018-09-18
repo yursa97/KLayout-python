@@ -109,47 +109,32 @@ if __name__ == "__main__":
     chip.place( cell, layer_ph )
     # Chip drawing END #
     
+    width = 300e3
+    gap = 200e3
+    Z = CPW( width,gap, DPoint(0,chip.chip_y/2), DPoint(chip.chip_x,chip.chip_y/2) )
+    Z.place( cell, layer_ph )
     
-    # Single photon source photo layer drawing START #
-    r_out = 200e3
-    r_gap = 25e3
-    n_semiwaves = 4
-    s = 5e3  
-    alpha = pi/3
-    r_curve = 10e3
-    n_pts_cwave = 50
-    L0 = 20e3
-    delta = 30e3
-    
-    Z = CPW( cpw_params=Z_params )
-    Z1 = Z
-    d_alpha1 = pi/3
-    width1 = r_gap/3 
-    gap1 = width1
-    Z2 = Z
-    d_alpha2 = 2/3*pi
-    width2 = width1
-    gap2 = width2
-    n_pts_arcs = 50
-    sfs_params = [r_out, r_gap,n_semiwaves, s, alpha, r_curve, n_pts_cwave, L0, delta,
-                        Z1,d_alpha1,width1,gap1,Z2,d_alpha2,width2,gap2, n_pts_arcs]
-    
-    Z3 = CPW( start = chip.connections[0], end = chip.connections[0] + DPoint( 0.5e6,0 ), cpw_params =  Z_params )
-    Z3.place( cell, layer_ph )
-    
-    sfs = SFS_Csh_emb( Z3.end, sfs_params, trans_in=Trans.R90 )
-    sfs.place( cell, layer_ph )
-    
-    r_curve = 0.2e6
-    cpw_source_out = CPW_RL_Path( sfs.output, "LRL", Z_params, r_curve, 
-                                                        [chip.connections[2].x - sfs.output.x, chip.connections[2].y-sfs.output.y],
-                                                        [pi/2] )
-    cpw_source_out.place( cell, layer_ph )
-    # Single photon source  drawing END #
-    
-    # marks
-    mark1 = Mark1( chip.center )
-    mark1.place( cell, layer_ph )
-    ### DRAW SECTION END ###
+    from SonnetLab import *
     
     lv.zoom_fit()
+    
+    writer = Matlab_commander()
+    print("starting connection...")
+    writer.send( CMD.SAY_HELLO )
+    writer.send( CMD.CLEAR_POLYGONS )
+    writer.send_boxProps( chip.chip_x,chip.chip_y, 200,400 )
+    poly_for_matlab = []
+    reg = Region(cell.begin_shapes_rec( layer_ph ))
+    for polygon in reg:
+        print( polygon.to_simple_polygon().points )
+        
+    writer.send_polygon( [0,0,100,100],[45,55,55,45], [1,3] )
+    writer.send_set_ABS_sweep( 1, 10 )
+    writer.send( CMD.SIMULATE )
+    file_name = writer.read_line().decode("ASCII")
+    print("visualizing...")
+    writer.send( CMD.VISUALIZE )
+    print("closing connection" )
+    writer.send( CMD.CLOSE_CONNECTION )
+    print("connection closed\n")
+    writer.close()

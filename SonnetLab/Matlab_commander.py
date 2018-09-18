@@ -7,45 +7,14 @@ import struct
 
 import csv
 
-class Timer:    
-    def __init__(self,sec, time_fcn=time.time):
-        self.sec = sec
-        self.p_time = 0
-        self.time_fcn = time_fcn
-        
-        self.t_start = self.time_fcn()
-        self.on = False
-        self.last_interval = None
-    
-    def _update_time( self ):
-        self.p_time = self.time_fcn() - self.t_start
-    
-    def start( self ):
-        if( self.on is False ):
-            self.t_start= self.time_fcn()
-            self.on = True
-        
-    def stop( self ):
-        if( self.on is True ):
-            self._update_time()
-            self.last_interval = self.p_time
-            self.p_time = 0
-            self.on = False
-    
-    def time( self ):
-        if( self.on is True ):
-            self._update_time()
-            return self.p_time
-        else:
-            return self.last_interval
-            
-    def is_passed( self ):
-        if( self.on is True ):
-            return self.time() > self.sec
-        elif( self.last_interval is not None ):
-            return self.last_interval > self.sec
-        else:
-            return None
+import pya
+from math import sqrt, cos, sin, tan, atan2, pi, copysign
+from pya import Point, DPoint, Vector, DVector, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
+from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
+
+from ClassLib.BaseClasses import Complex_Base
+from ClassLib.Shapes import Rectangle
+from ClassLib.ContactPad import Contact_Pad
 
 class FLAG:
     FALSE = (0).to_bytes(2,byteorder="big")
@@ -61,6 +30,7 @@ class CMD:
     CLEAR_POLYGONS = (6).to_bytes(2,byteorder="big")
     SET_ABS = (7).to_bytes(2,byteorder="big")
     SIMULATE = (8).to_bytes(2,byteorder="big")
+    VISUALIZE = (9).to_bytes(2,byteorder="big")
     
 class RESPONSE:
     OK = 0
@@ -117,10 +87,10 @@ class Matlab_commander():
         self.send_uint32( len(array) )
         self.send( raw_data )
     
-    def send_polygon( self, array_x, array_y, ports=False, port_edges_numbers_list=None ):
+    def send_polygon( self, array_x, array_y, port_edges_numbers_list=None ):
         self.send( CMD.POLYGON )
         
-        if( ports is True ):
+        if( port_edges_numbers_list is not None ):
             self.send( FLAG.TRUE )
             self.send_array_uint32( port_edges_numbers_list )
         else:
@@ -153,7 +123,95 @@ class Matlab_commander():
                 
         return data
             
-                
+
+if __name__ == "__main__":
+# getting main references of the application
+    app = pya.Application.instance()
+    mw = app.main_window()
+    lv = mw.current_view()
+    cv = None
+    
+    #this insures that lv and cv are valid objects
+    if( lv == None ):
+        cv = mw.create_layout(1)
+        lv = mw.current_view()
+    else:
+        cv = lv.active_cellview()
+
+# find or create the desired by programmer cell and layer
+    layout = cv.layout()
+    layout.dbu = 0.001
+    if( layout.has_cell( "testScript") ):
+        pass
+    else:
+        cell = layout.create_cell( "testScript" )
+    
+    info = pya.LayerInfo(1,0)
+    info2 = pya.LayerInfo(2,0)
+    layer_ph = layout.layer( info )
+    layer_el = layout.layer( info2 )
+
+    # clear this cell and layer
+    cell.clear()
+
+    # setting layout view  
+    lv.select_cell(cell.cell_index(), 0)
+    lv.add_missing_layers()
+
+    ### DRAW SECTION START ###
+    origin = DPoint(0,0)
+    
+    # Chip drwaing START #
+    Z_params = CPWParameters( 14.5e3, 6.7e3 ) 
+    chip = Chip5x10_with_contactPads( origin, Z_params )
+    chip.place( cell, layer_ph )
+    # Chip drawing END #
+    
+    
+    # Single photon source photo layer drawing START #
+    r_out = 200e3
+    r_gap = 25e3
+    n_semiwaves = 4
+    s = 5e3  
+    alpha = pi/3
+    r_curve = 10e3
+    n_pts_cwave = 50
+    L0 = 20e3
+    delta = 30e3
+    
+    Z = CPW( cpw_params=Z_params )
+    Z1 = Z
+    d_alpha1 = pi/3
+    width1 = r_gap/3 
+    gap1 = width1
+    Z2 = Z
+    d_alpha2 = 2/3*pi
+    width2 = width1
+    gap2 = width2
+    n_pts_arcs = 50
+    sfs_params = [r_out, r_gap,n_semiwaves, s, alpha, r_curve, n_pts_cwave, L0, delta,
+                        Z1,d_alpha1,width1,gap1,Z2,d_alpha2,width2,gap2, n_pts_arcs]
+    
+    Z3 = CPW( start = chip.connections[0], end = chip.connections[0] + DPoint( 0.5e6,0 ), cpw_params =  Z_params )
+    Z3.place( cell, layer_ph )
+    
+    sfs = SFS_Csh_emb( Z3.end, sfs_params, trans_in=Trans.R90 )
+    sfs.place( cell, layer_ph )
+    
+    r_curve = 0.2e6
+    cpw_source_out = CPW_RL_Path( sfs.output, "LRL", Z_params, r_curve, 
+                                                        [chip.connections[2].x - sfs.output.x, chip.connections[2].y-sfs.output.y],
+                                                        [pi/2] )
+    cpw_source_out.place( cell, layer_ph )
+    # Single photon source  drawing END #
+    
+    # marks
+    mark1 = Mark1( chip.center )
+    mark1.place( cell, layer_ph )
+    ### DRAW SECTION END ###
+    
+    lv.zoom_fit()
+         
         
 if( __name__ == "__main__"):
     writer = Matlab_commander()
@@ -161,14 +219,16 @@ if( __name__ == "__main__"):
     writer.send( CMD.SAY_HELLO )
     writer.send( CMD.CLEAR_POLYGONS )
     writer.send_boxProps( 100,100, 100,100 )
-    writer.send_polygon( [0,0,100,100],[45,55,55,45], True, [1,3] )
+    writer.send_polygon( [0,0,100,100],[45,55,55,45], [1,3] )
     writer.send_set_ABS_sweep( 1, 10 )
     writer.send( CMD.SIMULATE )
     file_name = writer.read_line().decode("ASCII")
-    print(file_name)
-    with open(file_name,"r") as csv_file:
-        rows = list(csv.reader(csv_file))
-        print(rows[:10])
-        
+    print("visualizing...")
+    writer.send( CMD.VISUALIZE )
+    print("closing connection" )
     writer.send( CMD.CLOSE_CONNECTION )
+    print("connection closed\n")
     writer.close()
+    
+    with open(file_name,"r") as csv_file:
+        rows = np.array( list(csv.reader(csv_file))[8:], dtype=np.float64 )
