@@ -92,7 +92,8 @@ class Tmon(ElementBase):
 
         squid = SQUIDManhattan(DPoint(0, g_tmon+w_tmon+JJ_arm_len+JJ_site_span/2),
                             self._w_JJ, self._h_JJ, \
-                                self._asymmetry, 100, JJ_site_span*1.5)
+                                self._asymmetry, 100, JJ_site_span*1.5,\
+                                    squid_width_top = 5e3, squid_width_bottom = 3.8e3)
 
         self.metal_regions["ebeam"].insert(squid.metal_region)
 

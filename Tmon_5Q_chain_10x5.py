@@ -222,7 +222,9 @@ ebeam = ebeam.merge()
 invert_region = Region(pya.Box(Point(-CHIP.dx/2-50e3, -CHIP.dy/2-50e3), 
                         Point(CHIP.dx/2+50e3, CHIP.dy/2+50e3)))
 
-cell.shapes( layer_photo ).insert(invert_region - canvas)
+#cell.shapes( layer_photo ).insert(invert_region - canvas)
+cell.shapes( layer_photo ).insert(canvas)
+
 cell.shapes( layer_el ).insert(ebeam)
 
 

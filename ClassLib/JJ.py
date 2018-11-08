@@ -9,16 +9,17 @@ from ClassLib.Coplanars import *
 class SQUIDManhattan(Complex_Base):
 
     def __init__(self, origin, w_JJ, h_JJ, asymmetry, bridge_width, structure_length,
-        squid_width = 3e3, pad_width = 5e3, small_lead_width = .33e3,
-        top_tiny_lead_length = 1e3, bottom_tiny_lead_length = 2e3,
-        tiny_lead_outshoot = 1000, trans_in = None):
+        squid_width_top = 3e3, squid_width_bottom = 2e3, pad_width = 8e3, small_lead_width = .33e3,
+        top_tiny_lead_length = 1e3, bottom_tiny_lead_length = 1e3,
+        tiny_lead_outshoot = 500, trans_in = None):
 
-        self._w_JJ = w_JJ - 30
-        self._h_JJ = h_JJ - 30
+        self._w_JJ = w_JJ
+        self._h_JJ = h_JJ
         self._asymmetry = asymmetry
         self._bridge_width = bridge_width + 15
         self._structure_length = structure_length
-        self._squid_width = squid_width
+        self._squid_width_top = squid_width_top
+        self._squid_width_bottom = squid_width_bottom
         self._pad_width = pad_width
         self._small_lead_width = small_lead_width
         self._top_tiny_lead_length = top_tiny_lead_length
@@ -29,12 +30,13 @@ class SQUIDManhattan(Complex_Base):
 
     def init_primitives(self):
 
-        top_left_h_JJ = sqrt(1-self._asymmetry)*self._h_JJ
-        top_right_h_JJ = sqrt(1+self._asymmetry)*self._h_JJ
-        bottom_left_w_JJ = sqrt(1-self._asymmetry)*self._w_JJ
-        bottom_right_w_JJ = sqrt(1+self._asymmetry)*self._w_JJ
+        bottom_left_w_JJ = sqrt(1-self._asymmetry)*self._h_JJ - 30
+        bottom_right_w_JJ = sqrt(1+self._asymmetry)*self._h_JJ - 30
+        top_left_h_JJ = sqrt(1-self._asymmetry)*self._w_JJ - 30
+        top_right_h_JJ = sqrt(1+self._asymmetry)*self._w_JJ - 30
 
         # Top
+
 
         cursor = DPoint(0, self._structure_length/2)
         self.primitives["top_pad"] =\
@@ -42,7 +44,7 @@ class SQUIDManhattan(Complex_Base):
                 cursor+DPoint(0, -self._structure_length/4))
         cursor = self.primitives["top_pad"].end
 
-        cursor_l = cursor + DPoint(-self._squid_width/2-self._small_lead_width/2, 0)
+        cursor_l = cursor + DPoint(-self._squid_width_top/2-self._small_lead_width/2, 0)
         self.primitives["top_left_small_lead"] =\
             CPW(self._small_lead_width, 0, cursor_l,
                     cursor_l+DPoint(0, -self._structure_length/4+top_left_h_JJ/2))
@@ -51,9 +53,9 @@ class SQUIDManhattan(Complex_Base):
         cursor_l += DPoint(-self._small_lead_width/2, -top_left_h_JJ/2)
         self.primitives["top_left_tiny_lead"] =\
             CPW(top_left_h_JJ, 0, cursor_l,
-                    cursor_l+DPoint(self._top_tiny_lead_length, 0))
+                    cursor_l+DPoint(self._top_tiny_lead_length+self._tiny_lead_outshoot, 0))
 
-        cursor_r = cursor + DPoint(self._squid_width/2+self._small_lead_width/2, 0)
+        cursor_r = cursor + DPoint(self._squid_width_top/2+self._small_lead_width/2, 0)
         self.primitives["top_right_small_lead"] =\
             CPW(self._small_lead_width, 0, cursor_r,
                 cursor_r+DPoint(0, -self._structure_length/4+top_right_h_JJ/2))
@@ -62,7 +64,7 @@ class SQUIDManhattan(Complex_Base):
         cursor_r += DPoint(self._small_lead_width/2, -top_right_h_JJ/2)
         self.primitives["top_right_tiny_lead"] =\
             CPW(top_right_h_JJ, 0, cursor_r,
-                    cursor_r+DPoint(-self._top_tiny_lead_length, 0))
+                    cursor_r+DPoint(-self._top_tiny_lead_length-self._tiny_lead_outshoot, 0))
 
 
         # Bottom
@@ -74,36 +76,36 @@ class SQUIDManhattan(Complex_Base):
         cursor = self.primitives["bottom_pad"].end
 
         cursor_l = cursor +\
-            DPoint(-self._squid_width/2 \
-                    - self._small_lead_width*1.5 \
-                    + self._top_tiny_lead_length + self._bridge_width\
-                    + bottom_left_w_JJ, 0)
+            DPoint(-self._squid_width_bottom/2 \
+                    - self._small_lead_width/2 \
+                    , 0)
         self.primitives["bottom_left_small_lead"] =\
             CPW(self._small_lead_width, 0, cursor_l,
-                cursor_l+DPoint(0, self._structure_length/4-self._bottom_tiny_lead_length+self._tiny_lead_outshoot))
+                cursor_l+DPoint(0, self._structure_length/4\
+                    -self._bottom_tiny_lead_length))
         cursor_l = self.primitives["bottom_left_small_lead"].end
 
         cursor_l += DPoint(self._small_lead_width/2-bottom_left_w_JJ/2, 0)
+
         self.primitives["bottom_left_tiny_lead"] =\
             CPW(bottom_left_w_JJ, 0, cursor_l,
-                cursor_l+DPoint(0, self._bottom_tiny_lead_length))
+                cursor_l+DPoint(0, self._bottom_tiny_lead_length\
+                    - top_left_h_JJ/2 - self._bridge_width))
 
         cursor_r = cursor +\
-            DPoint(self._squid_width/2 \
-                    + self._small_lead_width*1.5 \
-                    - self._top_tiny_lead_length - self._bridge_width\
-                    - bottom_right_w_JJ, 0)
+            DPoint(self._squid_width_bottom/2 \
+                    + self._small_lead_width/2, 0)
         self.primitives["bottom_right_small_lead"] =\
             CPW(self._small_lead_width, 0, cursor_r,
                 cursor_r+DPoint(0, self._structure_length/4\
-                                   -self._bottom_tiny_lead_length\
-                                   +self._tiny_lead_outshoot))
+                                   -self._bottom_tiny_lead_length))
         cursor_r = self.primitives["bottom_right_small_lead"].end
 
         cursor_r += DPoint(-self._small_lead_width/2+bottom_right_w_JJ/2, 0)
         self.primitives["bottom_right_tiny_lead"] =\
             CPW(bottom_right_w_JJ, 0, cursor_r,
-                cursor_r+DPoint(0, self._bottom_tiny_lead_length))
+                cursor_r+DPoint(0, self._bottom_tiny_lead_length\
+                    - top_right_h_JJ/2 - self._bridge_width))
 
 
 class Line_N_JJCross( ElementBase ):
