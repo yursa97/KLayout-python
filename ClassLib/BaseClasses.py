@@ -8,9 +8,18 @@ from ClassLib._PROG_SETTINGS import *
 from collections import OrderedDict
 
 class Element_Base():
+    '''
+    @brief: base class for simple elements and objects that are consisting of
+               single metal polygon and maybe several polygons that will be
+               erased from the background
+    '''
     def __init__(self, origin, trans_in=None, inverse=False ):
         ## MUST BE IMPLEMENTED ##
         self.connections = []       # DPoint list with possible connection points
+        self.connection_edges = [] # list of polygons and edges that are able to connect
+        # indexes in "self.connection_edges" where Sonnet ports
+        # should be placed
+        self.sonnet_port_connection_indexes = [] 
         self.angle_connections = [] #list with angle of connecting elements
         ## MUST BE IMLPEMENTED END ##
         
@@ -145,6 +154,13 @@ class Element_Base():
             if( merge is True ):
                 dest.merge()
                 
+    def add_sonnet_port( self, connection_idx ):
+        '''
+        @brief: sets internal marker that during export to Sonnet
+                   the port should be placed at the connection edge with
+                   with an index 'connection_idx' 
+        '''
+        self.sonnet_port_connection_indexes.append(self.connection_edges[connection_idx])
 
 
 class Complex_Base( Element_Base ):

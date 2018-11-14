@@ -1,8 +1,13 @@
-from importlib import reload
+import sonnetLab
 
-from . import Matlab_commander
+from sonnetLab.matlabClient import *
+from sonnetLab.cMD import *
+from sonnetLab.flags import *
 
-reload(.Matlab_commander)
+reload(sonnetLab.matlabClient)
+reload(sonnetLab.cMD)
+reload(sonnetLab.flags)
 
-from . import Matlab_commander
-
+from sonnetLab.matlabClient import *
+from sonnetLab.cMD import *
+from sonnetLab.flags import *

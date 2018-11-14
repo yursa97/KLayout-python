@@ -13,7 +13,7 @@ class CPWParameters:
 
 class CPW( Element_Base ):
     """@brief: class represents single coplanar waveguide
-      @params:   float width - represents width of the central conductor
+        @params:  float width - represents width of the central conductor
                         float gap - spacing between central conductor and ground planes
                         float gndWidth - width of ground plane to be drawed 
                         DPoint start - center aligned point, determines the start point of the coplanar segment
@@ -52,6 +52,7 @@ class CPW( Element_Base ):
                                                        DPoint(self.dr.abs(),-self.width/2), 
                                                        DPoint(self.dr.abs(),self.width/2),
                                                        DPoint(0,self.width/2)] )
+        self.connection_edges = [3,1]
         self.metal_region.insert( pya.SimplePolygon().from_dpoly( metal_poly ) )
         if( self.gap != 0 ):
             self.empty_region.insert( pya.Box( Point().from_dpoint(DPoint(0,self.width/2)), Point().from_dpoint(DPoint( self.dr.abs(), self.width/2 + self.gap )) ) )
@@ -98,7 +99,7 @@ class CPW_arc( Element_Base ):
             alpha_end = alpha_end - 1e-3
         
         d_alpha_inner = (alpha_end - alpha_start)/(n_inner - 1)
-        d_alpha_outer = -(alpha_end - alpha_start)/(n_outer - 1)
+        d_alpha_outer = -d_alpha_inner
         
         
 #        print("Center:", center)
@@ -121,9 +122,10 @@ class CPW_arc( Element_Base ):
         
         n_inner = 200
         n_outer = 200
-       
+        
         metal_arc = self._get_solid_arc(self.center, self.R, self.width, 
                     self.alpha_start - pi/2, self.alpha_end - pi/2, n_inner, n_outer)  
+        self.connection_edges = [n_inner+n_outer,n_inner]
         
         empty_arc1 = self._get_solid_arc(self.center, self.R - (self.width + self.gap)/2, 
                     self.gap, self.alpha_start - pi/2, self.alpha_end - pi/2, n_inner, n_outer)  
