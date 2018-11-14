@@ -13,6 +13,10 @@ from sonnetLab.matlabClient import  MatlabClient
 
 import numpy as np
 
+import socket
+import struct
+import numpy as np
+
 class SonnetLab( MatlabClient ):
     def __init__(self, host="localhost", port=MatlabClient.MATLAB_PORT ):
         super(SonnetLab,self).__init__()
@@ -20,8 +24,8 @@ class SonnetLab( MatlabClient ):
     def clear( self ):    
         self._clear()
         
-    def set_boxProps( self, dim_X_um, dim_Y_um, cells_X_num, cells_Y_num ):
-        self._set_boxProps( dim_X_um, dim_Y_um, cells_X_num, cells_Y_num )
+    def set_boxProps( self, dim_X_nm, dim_Y_nm, cells_X_num, cells_Y_num ):
+        self._set_boxProps( dim_X_nm/1e3, dim_Y_nm/1e3, cells_X_num, cells_Y_num )
         
     def set_ABS_sweep(self, start_f, stop_f ):
         self._set_ABS_sweep( start_f, stop_f )
@@ -34,15 +38,52 @@ class SonnetLab( MatlabClient ):
             return None
         
         poly = el.metal_region[0].dup() # the only polygon in the region
-
-        pts_x = np.zeros(poly.num_points(), dtype=np.int32 )
-        pts_y = np.zeros(poly.num_points(), dtype=np.int32 )
-        for i,p in enumerate(poly.each_point_hull()):
-            pts_x[i] = p.x/1e3
-            pts_y[i] = p.y/1e3
+        sonnet_port_connection_indexes = []
+        self.send_polygon( poly, el.sonnet_port_edge_indexes )
         
-        self._send_polygon( pts_x,pts_y, el.sonnet_port_connection_indexes )
+    def send_polygon( self, polygon, connections=None, port_edges_indexes=None ):
+        pts_x = np.zeros(polygon.num_points(), dtype=np.int32 )
+        pts_y = np.zeros(polygon.num_points(), dtype=np.int32 )
+        print( "Sending polygon", " ", connections )
+        if( port_edges_indexes is not None ):
+            print( "port edges indexes passing is not implemented yet." )
+            raise NotImplementedError
         
+        port_edges_indexes = []    
+        
+        for i,edge in enumerate(polygon.each_edge()):
+            pts_x[i] = pt.x/1e3
+            pts_y[i] = pt.y/1e3
+            
+            if( prev_pt is None ):,  
+                prev_pt = pt
+                continue
+                
+            for conn_pt in connections:
+                dr = conn_pt - prev_pt
+                a = pt - prev_pt
+                h = abs(dr.x*a.y - dr.y*a.x)/np.sqrt(a.x**2 + a.y**2)
+                if( h < 10 ): # distance from connection point to the edge in nm
+                    port_edges_indexes.append(i-1)
+                    print(conn_pt, prev_pt, pt)
+                    break
+                    
+            prev_pt = pt
+            
+        print( port_edges_indexes )
+        self._send_polygon( pts_x,pts_y, port_edges_indexes )
+        
+    def send_cell_layer( self, cell, layer_i, port_connections ):
+        r_cell = Region( cell.begin_shapes_rec( layer_i ) )
+        for poly in r_cell:
+            self.send_polygon( poly, port_connections )
+    
+    def start_simulation( self ):
+        self._send_simulate()
+    
+    def visualize_sever( self ):
+        self._visualize_sever()
+    
     def release( self ):
         print( "closing connection" )
         self._send( CMD.CLOSE_CONNECTION )
@@ -86,15 +127,17 @@ if __name__ == "__main__":
     ### DRAW SECTION START ###
     origin = DPoint(0,0)
     
+    X_SIZE = 100e3
+    Y_SIZE = 100e3
+    
     # Chip drwaing START #
-    Z_params = CPWParameters( 14.5e3, 6.7e3 ) 
-    box = pya.Box( 0,0, 100e3,100e3 ) # 100x100 um box
+    cpw_pars = CPWParameters( 14.5e3, 6.7e3 ) 
+    box = pya.Box( 0,0, X_SIZE,Y_SIZE )
     cell.shapes( layer_ph ).insert( box )
     
-    cop = CPW( 14.5e3, 6.7e3, DPoint(0,50e3), DPoint(100e3,50e3) )
+    cop = CPW_RL_Path( DPoint(0,Y_SIZE/2), "LRL", cpw_pars, 10e3, [X_SIZE/2,Y_SIZE/2], np.pi/2 )
     cop.place( cell, layer_ph )
-    cop.add_sonnet_port(0)
-    cop.add_sonnet_port(1)
+    ports = [cop.start, cop.end]
     ### DRAW SECTION END ###
     
     lv.zoom_fit()
@@ -104,15 +147,17 @@ if __name__ == "__main__":
     print("starting connection...")
     ml_terminal._send( CMD.SAY_HELLO )
     ml_terminal.clear()
-    ml_terminal.set_boxProps( 100,100, 100,100 )
-    ml_terminal.send_element( cop )
+    ml_terminal.set_boxProps( X_SIZE,Y_SIZE, 200,100 )
+    print( "sending cell and layer" )
+    ml_terminal.send_cell_layer( cell, layer_ph, ports )
     ml_terminal.set_ABS_sweep( 1, 10 )
-    ml_terminal._send( CMD.SIMULATE )
-    file_name = ml_terminal.read_line().decode("ASCII")
+    print( "simulating..." )
+    ml_terminal.start_simulation()
     print("visualizing...")
-    ml_terminal._send( CMD.VISUALIZE )
+    ml_terminal.visualize_sever()
+    file_name = ml_terminal.read_line()#.decode("ASCII")
     ml_terminal.release()
-    
+
     with open(file_name,"r") as csv_file:
         rows = np.array( list(csv.reader(csv_file))[8:], dtype=np.float64 )
         

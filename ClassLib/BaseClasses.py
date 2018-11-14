@@ -16,10 +16,10 @@ class Element_Base():
     def __init__(self, origin, trans_in=None, inverse=False ):
         ## MUST BE IMPLEMENTED ##
         self.connections = []       # DPoint list with possible connection points
-        self.connection_edges = [] # list of polygons and edges that are able to connect
+        self.connection_edges = [] # indexes of edges that are intended to connect to other polygons
         # indexes in "self.connection_edges" where Sonnet ports
         # should be placed
-        self.sonnet_port_connection_indexes = [] 
+        self.sonnet_port_connections = [] 
         self.angle_connections = [] #list with angle of connecting elements
         ## MUST BE IMLPEMENTED END ##
         
@@ -157,10 +157,11 @@ class Element_Base():
     def add_sonnet_port( self, connection_idx ):
         '''
         @brief: sets internal marker that during export to Sonnet
-                   the port should be placed at the connection edge with
+                   the port should be placed at the connection edge
                    with an index 'connection_idx' 
         '''
-        self.sonnet_port_connection_indexes.append(self.connection_edges[connection_idx])
+        print(self.connections)
+        self.sonnet_port_connections.append(self.connections[connection_idx])
 
 
 class Complex_Base( Element_Base ):

@@ -312,7 +312,13 @@ class CPW_RL_Path(Complex_Base):
             self._turn_radiuses = [turn_radiuses]* self._N_turns
     
         self._segment_lengths = segment_lengths
-        self._turn_angles = turn_angles
+        
+        if hasattr(turn_angles, "__len__"):
+            if len(turn_angles) !=  self._N_turns:
+                raise ValueError("Turn angles dimension mismatch")
+            self._turn_angles = turn_angles
+        else:
+            self._turn_angles = [turn_angles]* self._N_turns
         
         super().__init__(origin, trans_in)
         self.start = self.connections[0]
