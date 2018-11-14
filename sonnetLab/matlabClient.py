@@ -12,7 +12,7 @@ class MatlabClient():
         self.host = host
         self.port = port
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.timeout = 20
+        self.timeout = 10
         self.sock.settimeout( self.timeout )
         self.address = (host,port)
                 
@@ -79,6 +79,7 @@ class MatlabClient():
         if( port_edges_numbers_list is None or len(port_edges_numbers_list)==0 ):
             self._send( FLAG.FALSE )
         else:
+            print( "edges true")
             self._send( FLAG.TRUE )
             self._send_array_uint32( port_edges_numbers_list )
         

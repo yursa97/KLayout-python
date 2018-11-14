@@ -42,33 +42,26 @@ class SonnetLab( MatlabClient ):
         self.send_polygon( poly, el.sonnet_port_edge_indexes )
         
     def send_polygon( self, polygon, connections=None, port_edges_indexes=None ):
-        pts_x = np.zeros(polygon.num_points(), dtype=np.int32 )
-        pts_y = np.zeros(polygon.num_points(), dtype=np.int32 )
-        print( "Sending polygon", " ", connections )
+        pts_x = np.zeros(polygon.num_points(), dtype=np.float64 )
+        pts_y = np.zeros(polygon.num_points(), dtype=np.float64 )
+        print( "Sending polygon, edges: ", polygon.num_points_hull() )
         if( port_edges_indexes is not None ):
             print( "port edges indexes passing is not implemented yet." )
             raise NotImplementedError
         
         port_edges_indexes = []    
-        
+        prev_pt = None
         for i,edge in enumerate(polygon.each_edge()):
-            pts_x[i] = pt.x/1e3
-            pts_y[i] = pt.y/1e3
-            
-            if( prev_pt is None ):,  
-                prev_pt = pt
-                continue
+            pts_x[i] = edge.p1.x/1.0e3
+            pts_y[i] = edge.p1.y/1.0e3
                 
             for conn_pt in connections:
-                dr = conn_pt - prev_pt
-                a = pt - prev_pt
-                h = abs(dr.x*a.y - dr.y*a.x)/np.sqrt(a.x**2 + a.y**2)
-                if( h < 10 ): # distance from connection point to the edge in nm
-                    port_edges_indexes.append(i-1)
-                    print(conn_pt, prev_pt, pt)
+                r_middle = (edge.p1 + edge.p2)*0.5
+                R = conn_pt.distance( r_middle )
+                if( R < 10 ): # distance from connection point to the middle of the edge <10 nm
+                    port_edges_indexes.append(i+1) # matlab polygon edge indexing starts from 1
+                    print(edge.p1, edge.p2, conn_pt)
                     break
-                    
-            prev_pt = pt
             
         print( port_edges_indexes )
         self._send_polygon( pts_x,pts_y, port_edges_indexes )
@@ -147,7 +140,7 @@ if __name__ == "__main__":
     print("starting connection...")
     ml_terminal._send( CMD.SAY_HELLO )
     ml_terminal.clear()
-    ml_terminal.set_boxProps( X_SIZE,Y_SIZE, 200,100 )
+    ml_terminal.set_boxProps( X_SIZE,Y_SIZE, 300,300 )
     print( "sending cell and layer" )
     ml_terminal.send_cell_layer( cell, layer_ph, ports )
     ml_terminal.set_ABS_sweep( 1, 10 )
