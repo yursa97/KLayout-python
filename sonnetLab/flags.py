@@ -5,4 +5,7 @@ class FLAG:
 class RESPONSE:
     OK = 0
     ERROR = 1
+    START_SIMULATION = 2
+    BUSY_SIMULATION = 3
+    SIMULATION_FINISHED = 4
 

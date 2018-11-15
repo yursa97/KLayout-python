@@ -17,9 +17,10 @@ import socket
 import struct
 import numpy as np
 
-class SonnetLab( MatlabClient ):
+class SonnetLab( MatlabClient ):        
     def __init__(self, host="localhost", port=MatlabClient.MATLAB_PORT ):
         super(SonnetLab,self).__init__()
+        self.state = self.STATE.READY
     
     def clear( self ):    
         self._clear()
@@ -71,8 +72,32 @@ class SonnetLab( MatlabClient ):
         for poly in r_cell:
             self.send_polygon( poly, port_connections )
     
-    def start_simulation( self ):
+    def start_simulation( self, wait=True ):
+        '''
+        @brief: function that start simulation on the remote matlab-sonnet server
+        @params:
+            bool wait - if True, the function blocks until simulation is over
+                            if False, the function returns without waiting simulation results. 
+                            Simulation status can be checked later using "get_simulation_status"
+                            that performs non-blocking check of the simulation status
+                            default value: True
+        @return:
+            bool - True if function has been terminated successfully
+                      False otherwise          
+        '''
+        if( self.state != self.STATE.READY ):
+            return
+        # send simulation command
         self._send_simulate()
+                
+        if( wait == True ):
+            while( self.state == self.STATE.BUSY_SIMULATING ):
+                self.get_simulation_status() # updates self.state
+            
+    def get_simulation_status( self ):
+        self._get_simulation_status()
+        return self.state
+            
     
     def visualize_sever( self ):
         self._visualize_sever()
@@ -145,7 +170,7 @@ if __name__ == "__main__":
     ml_terminal.send_cell_layer( cell, layer_ph, ports )
     ml_terminal.set_ABS_sweep( 1, 10 )
     print( "simulating..." )
-    ml_terminal.start_simulation()
+    ml_terminal.start_simulation( wait=True )
     print("visualizing...")
     ml_terminal.visualize_sever()
     file_name = ml_terminal.read_line()#.decode("ASCII")
