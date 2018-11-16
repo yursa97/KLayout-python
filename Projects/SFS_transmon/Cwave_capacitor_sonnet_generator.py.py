@@ -14,8 +14,7 @@ import shutil
 
 SIMULATION_ID = "Cwave_first"
 SONNET_DIR = r"C:\Users\user\Documents\CWave_capacitance_simulations"
-    
-# Enter your Python code here
+
 ### MAIN FUNCTION ###
 if __name__ == "__main__":
 # getting main references of the application
@@ -72,6 +71,7 @@ if __name__ == "__main__":
     delta = 30e3
 
     p0 = DPoint( r_out + length - delta, r_out*( 1 + 1/4 ) )
+    
     # writing description file    
     with open( os.path.join(SONNET_DIR,SIMULATION_ID + ".csv"), "w" ) as csv_file:
         writer = csv.writer( csv_file )

@@ -98,7 +98,6 @@ class SonnetLab( MatlabClient ):
         self._get_simulation_status()
         return self.state
             
-    
     def visualize_sever( self ):
         self._visualize_sever()
     

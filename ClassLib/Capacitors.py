@@ -62,7 +62,7 @@ class CWave2CPW( Element_Base ):
 
 class CWave( Complex_Base ):
     '''
-    Draws a condensator from a circle cutting it into 2 pieces.
+    Draws a condensator from a circle cutted into 2 pieces.
     '''
 
     def __init__(self, center, r_out, dr, n_segments, s, alpha, r_curve, delta=40e3, L0=0, n_pts=50, solid=True, trans_in=None ):
@@ -100,7 +100,7 @@ class CWave( Complex_Base ):
         self.r_curve = r_curve
         self.n_pts = n_pts
         self.delta = delta
-        self.L_full = 2*self.r_out - 2*self.delta
+        self.L_full = 2*(self.r_out - self.dr) - 2*self.delta
         # calculating parameters of the CPW_RL_Path #
         r = self.r_curve
         n = self.n_segments
@@ -126,8 +126,8 @@ class CWave( Complex_Base ):
         angles = []
         lengths = []
         # placing circle r_out with dr clearance from ground polygon
-        self.empt_circle = Circle( origin,self.r_out + self.dr, n_pts=self.n_pts, solid=False )
-        self.in_circle = Circle( origin, self.r_out, n_pts=self.n_pts, solid=True )
+        self.empt_circle = Circle( origin,self.r_out, n_pts=self.n_pts, solid=False )
+        self.in_circle = Circle( origin, self.r_out - self.dr, n_pts=self.n_pts, solid=True )
         self.empt_circle.empty_region -= self.in_circle.metal_region
         self.primitives["empt_circle"] = self.empt_circle
         self.primitives["in_circle"] = self.in_circle
