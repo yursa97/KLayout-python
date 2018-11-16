@@ -10,8 +10,10 @@ __all__ = ["BaseClasses",
             "Claw",
             "Tmon",
             "FluxCoil",
+           "Airbridge",
+           "BridgedCoplanars",
             "_PROG_SETTINGS",
-            ]
+           ]
 
 
 # from importlib import reload

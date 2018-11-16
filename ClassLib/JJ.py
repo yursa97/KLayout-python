@@ -2,21 +2,22 @@ import pya
 from math import sqrt, cos, sin, atan2, pi, copysign
 from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
-
+from numpy import around
 from ClassLib.BaseClasses import *
 from ClassLib.Coplanars import *
+from ClassLib._PROG_SETTINGS import *
 
 class SQUIDManhattan(Complex_Base):
 
     def __init__(self, origin, w_JJ, h_JJ, asymmetry, bridge_width, structure_length,
-        squid_width_top = 3e3, squid_width_bottom = 2e3, pad_width = 8e3, small_lead_width = .33e3,
-        top_tiny_lead_length = 1e3, bottom_tiny_lead_length = 1e3,
-        tiny_lead_outshoot = 500, trans_in = None):
+                 squid_width_top=3e3, squid_width_bottom=2e3, pad_width=8e3, small_lead_width=.65e3,
+                 top_tiny_lead_length = 1e3, bottom_tiny_lead_length = 1e3,
+                 tiny_lead_outshoot=1200, trans_in=None):
 
         self._w_JJ = w_JJ
         self._h_JJ = h_JJ
         self._asymmetry = asymmetry
-        self._bridge_width = bridge_width + 15
+        self._bridge_width = bridge_width
         self._structure_length = structure_length
         self._squid_width_top = squid_width_top
         self._squid_width_bottom = squid_width_bottom
@@ -25,19 +26,59 @@ class SQUIDManhattan(Complex_Base):
         self._top_tiny_lead_length = top_tiny_lead_length
         self._bottom_tiny_lead_length = bottom_tiny_lead_length
         self._tiny_lead_outshoot = tiny_lead_outshoot
+        self._correction = -30
+
+        self._bottom_left_w_JJ = sqrt(1 - self._asymmetry) * self._h_JJ
+        self._bottom_right_w_JJ = 1.5 * (1 + self._asymmetry) * self._h_JJ
+        self._top_left_h_JJ = sqrt(1 - self._asymmetry) * self._w_JJ
+        self._top_right_h_JJ = self._w_JJ / 1.5
+
+        app = pya.Application.instance()
+        mw = app.main_window()
+        lv = mw.current_view()
+        cv = lv.active_cellview()
 
         super().__init__(origin, trans_in)
+        # creating cell for BMSTU
+
+        params = around([self._bottom_left_w_JJ,
+                         self._bottom_right_w_JJ,
+                         self._top_left_h_JJ,
+                         self._top_right_h_JJ]).astype(int)
+        # names = ["xmon_l", "xmon_r", "ground_l", "ground_r"]
+        self._cell_name = "SQUID"
+        self._cell_name += "(%dx%d)" % (params[0], params[2]) + "(%dx%d); " % (params[1], params[3]) \
+                           + "bridge: %d; " % self._bridge_width + "corr: -30; " + "d: %.1f" % self._asymmetry
+
+        layout = cv.layout()
+        layout.dbu = 0.001
+
+        if not layout.has_cell(self._cell_name):
+            layout.create_cell(self._cell_name)
+
+            old_cell_name = cv.cell_name
+            cv.cell_name = self._cell_name
+            self._cell = cv.cell
+            cv.cell_name = old_cell_name
+
+            ebeam = layout.find_layer(LAYERS.ebeam)
+            self._cell.shapes(ebeam).insert(self.metal_region.merge())
+
+        else:
+            old_cell_name = cv.cell_name
+            cv.cell_name = self._cell_name
+            self._cell = cv.cell
+            cv.cell_name = old_cell_name
+
 
     def init_primitives(self):
 
-        bottom_left_w_JJ = sqrt(1-self._asymmetry)*self._h_JJ - 30
-        bottom_right_w_JJ = sqrt(1+self._asymmetry)*self._h_JJ - 30
-        top_left_h_JJ = sqrt(1-self._asymmetry)*self._w_JJ - 30
-        top_right_h_JJ = sqrt(1+self._asymmetry)*self._w_JJ - 30
+        bottom_left_w_JJ = self._bottom_left_w_JJ + self._correction
+        bottom_right_w_JJ = self._bottom_right_w_JJ + self._correction
+        top_left_h_JJ = self._top_left_h_JJ + self._correction
+        top_right_h_JJ = self._top_right_h_JJ + self._correction
 
         # Top
-
-
         cursor = DPoint(0, self._structure_length/2)
         self.primitives["top_pad"] =\
             CPW(self._pad_width, 0, cursor,
@@ -85,8 +126,7 @@ class SQUIDManhattan(Complex_Base):
                     -self._bottom_tiny_lead_length))
         cursor_l = self.primitives["bottom_left_small_lead"].end
 
-        cursor_l += DPoint(self._small_lead_width/2-bottom_left_w_JJ/2, 0)
-
+        cursor_l += DPoint(0, 0)
         self.primitives["bottom_left_tiny_lead"] =\
             CPW(bottom_left_w_JJ, 0, cursor_l,
                 cursor_l+DPoint(0, self._bottom_tiny_lead_length\
@@ -101,7 +141,7 @@ class SQUIDManhattan(Complex_Base):
                                    -self._bottom_tiny_lead_length))
         cursor_r = self.primitives["bottom_right_small_lead"].end
 
-        cursor_r += DPoint(-self._small_lead_width/2+bottom_right_w_JJ/2, 0)
+        cursor_r += DPoint(0, 0)
         self.primitives["bottom_right_tiny_lead"] =\
             CPW(bottom_right_w_JJ, 0, cursor_r,
                 cursor_r+DPoint(0, self._bottom_tiny_lead_length\
