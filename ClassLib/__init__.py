@@ -5,17 +5,17 @@ from ClassLib.BaseClasses import *
 from ClassLib.Capacitors import *
 from ClassLib.Coplanars import *
 from ClassLib.Couplers import *
-from ClassLib.JJ import *
 from ClassLib.Qbits import *
 from ClassLib.Resonators import *
 from ClassLib.Shapes import *
 from ClassLib.ContactPad import *
+from ClassLib.JosJ import *
 from ClassLib._PROG_SETTINGS import *
 
 reload(ClassLib.BaseClasses)
 reload(ClassLib.Capacitors)
 reload(ClassLib.Coplanars)
-reload(ClassLib.JJ)
+reload(ClassLib.JosJ)
 reload(ClassLib.Qbits)
 reload(ClassLib.Resonators)
 reload(ClassLib.Shapes)
@@ -26,10 +26,9 @@ from ClassLib.BaseClasses import *
 from ClassLib.Capacitors import *
 from ClassLib.Coplanars import *
 from ClassLib.Couplers import *
-from ClassLib.JJ import *
 from ClassLib.Qbits import *
 from ClassLib.Resonators import *
 from ClassLib.Shapes import *
 from ClassLib.ContactPad import *
+from ClassLib.JosJ import *
 from ClassLib._PROG_SETTINGS import *
-

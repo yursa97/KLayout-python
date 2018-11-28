@@ -116,7 +116,7 @@ if __name__ == "__main__":
     r_gap = 25e3
     n_semiwaves = 4
     s = 5e3  
-    alpha = pi/2
+    alpha = pi/3
     r_curve = 2e4
     n_pts_cwave = 50
     L0 = 20e3
@@ -135,7 +135,7 @@ if __name__ == "__main__":
                         Z1,d_alpha1,width1,gap1,Z2,d_alpha2,width2,gap2, n_pts_arcs]
     p = DPoint( CHIP.dx/2, CHIP.dy/2 )
     sfs = SFS_Csh_emb( p, params )
-    sfs.place( cell, layer_ph )
+    sfs.place(cell, layer_ph)
     # Single photon source photo layer drawing START #
     
     ### DRAW SECTION END ###
