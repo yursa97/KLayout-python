@@ -9,9 +9,12 @@ from collections import OrderedDict
 
 class Element_Base():
     '''
-    @brief: base class for simple elements and objects that are consisting of
-               single metal polygon and maybe several polygons that will be
-               erased from the background
+    @brief: base class for simple single-layer elements and objects that are consisting of
+            several polygons.
+            metal_region polygons will be added to the design
+            empty_region polygons will be erased from the background with 
+            metal region polygons already added.
+
     '''
     def __init__(self, origin, trans_in=None, inverse=False ):
         ## MUST BE IMPLEMENTED ##
@@ -31,6 +34,8 @@ class Element_Base():
         self.empty_region = Region()
         self.metal_regions = {}
         self.empty_regions = {}        
+        self.metal_regions["default"] = self.metal_region
+        self.empty_regions["default"] = self.empty_region
         
         self.metal_region.merged_semantics = True
         self.empty_region.merged_semantics = True
@@ -63,11 +68,6 @@ class Element_Base():
     # after all, origin should be updated
     def _init_regions_trans( self ):
         self.init_regions()         # must be implemented in every subclass
-        
-        # in case "inverse" is True
-        # interchanging empty and metal polygons
-        if( self.inverse is True ):
-            self.metal_region, self.empty_region = self.empty_region, self.metal_region
         
         dr_origin = DSimplePolygon( [DPoint(0,0)] )
         if( self.DCplxTrans_init is not None ):
