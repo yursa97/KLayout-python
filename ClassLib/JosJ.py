@@ -25,8 +25,6 @@ class Squid(Complex_Base):
             The width of curved rectangle leads which connect triangle contact pads and junctions.
         p_ext_r: float
             The angle radius of the pad extension
-        j_pos: DPoint
-            The position of the squid center.
         sq_len: float
             The length of the squid, along leads.
         sq_width: float
@@ -47,33 +45,33 @@ class Squid(Complex_Base):
         trans_in: Bool
             Initial transformation
     '''
-    def __init__(self, params, trans_in=None):
+    def __init__(self, origin, params, trans_in=None):
         self.pad_side = params[0]
         self.pad_r = params[1]
         self.pads_distance = params[2]
         self.p_ext_width = params[3]
         self.p_ext_r = params[4]
-        self.j_pos = params[5]
-        self.sq_len = params[6]
-        self.sq_area = params[7]
-        self.j_width = params[8]
-        self.low_lead_w = params[9]
-        self.b_ext = params[10]
-        self.j_length = params[11]
-        self.n = params[12]
-        self.bridge = params[13]
-        origin = DPoint(0,0)
+        self.sq_len = params[5]
+        self.sq_area = params[6]
+        self.j_width = params[7]
+        self.low_lead_w = params[8]
+        self.b_ext = params[9]
+        self.j_length = params[10]
+        self.n = params[11]
+        self.bridge = params[12]
+
         super().__init__(origin, trans_in)
 
 
     def init_primitives(self):
-        self._up_pad_center = self.j_pos + DVector(0,self.pads_distance/2)
-        self._down_pad_center = self.j_pos + DVector(0,-self.pads_distance/2)
+        origin = DPoint(0,0)
+        self._up_pad_center = origin + DVector(0,self.pads_distance/2)
+        self._down_pad_center = origin + DVector(0,-self.pads_distance/2)
         self.primitives["pad_down"] = Circle(self._down_pad_center, self.pad_side, n_pts=self.n, offset_angle=pi/2)
-        self.primitives["p_ext_down"] = Kolbaska(self._down_pad_center, self.j_pos + DVector(0,-self.sq_len/2),\
+        self.primitives["p_ext_down"] = Kolbaska(self._down_pad_center, origin + DVector(0,-self.sq_len/2),\
                                                 self.p_ext_width,self.p_ext_r)
         self.primitives["pad_up"] = Circle(self._up_pad_center, self.pad_side, n_pts=self.n, offset_angle=-pi/2)
-        self.primitives["p_ext_up"] = Kolbaska(self._up_pad_center, self.j_pos + DVector(0,self.sq_len/2),\
+        self.primitives["p_ext_up"] = Kolbaska(self._up_pad_center, origin + DVector(0,self.sq_len/2),\
                                                self.p_ext_width,self.p_ext_r)
         up_st_gap = self.sq_area/(2*self.sq_len)
         low_st_gap = up_st_gap + self.low_lead_w*2.5
@@ -81,12 +79,12 @@ class Squid(Complex_Base):
         low_st_start_p = self.primitives["p_ext_down"].connections[1]
         up_st_l_start = up_st_start_p + DVector(-up_st_gap/2,0)
         up_st_r_start = up_st_start_p + DVector(up_st_gap/2,0)
-        up_st_l_stop = self.j_pos + DVector(-up_st_gap/2,self.bridge/2)
-        up_st_r_stop = self.j_pos + DVector(up_st_gap/2,self.bridge/2)
+        up_st_l_stop = origin + DVector(-up_st_gap/2,self.bridge/2)
+        up_st_r_stop = origin + DVector(up_st_gap/2,self.bridge/2)
         low_st_l_start = low_st_start_p + DVector(-low_st_gap/2,0)
         low_st_r_start = low_st_start_p + DVector(low_st_gap/2,0)
-        low_st_l_stop = self.j_pos + DVector(-low_st_gap/2+self.b_ext,-self.bridge/2)
-        low_st_r_stop = self.j_pos + DVector(low_st_gap/2-self.b_ext,-self.bridge/2)
+        low_st_l_stop = origin + DVector(-low_st_gap/2+self.b_ext,-self.bridge/2)
+        low_st_r_stop = origin + DVector(low_st_gap/2-self.b_ext,-self.bridge/2)
 
         self.primitives["upp_st_left"] = Kolbaska(up_st_l_start,up_st_l_stop,self.j_width,self.j_width/4)
         self.primitives["upp_st_right"] = Kolbaska(up_st_r_start,up_st_r_stop,self.j_width,self.j_width/4)

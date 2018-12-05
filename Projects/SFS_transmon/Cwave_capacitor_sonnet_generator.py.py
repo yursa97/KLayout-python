@@ -1,20 +1,67 @@
-# script id: 1
-
 import pya
-from math import sqrt, cos, sin, atan2, pi, copysign
-from pya import Point, DPoint, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
+from math import sqrt, cos, sin, tan, atan2, pi, copysign
+from pya import Point, DPoint, Vector, DVector, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from ClassLib import * 
+from importlib import reload
+from ClassLib import *
+reload(ClassLib)
+from ClassLib import *
 
-import numpy as np
-import csv
-import os
-import shutil
+### START classes to /be delegated to different file ###
+class SFS_Csh_emb( Complex_Base ):
+    def __init__( self, origin, params, trans_in=None ):
+        self.params = params
+        self.r_out = params[0]
+        self.dr = params[1]
+        self.r_in = self.r_out - self.dr
+        self.n_semiwaves = params[2]
+        self.s = params[3]
+        self.alpha = params[4]
+        self.r_curve = params[5]
+        self.n_pts_cwave = params[6]
+        self.Z1 = params[7]
+        self.d_alpha1 = params[8]
+        self.width1 = params[9]
+        self.gap1 = params[10]
+        self.Z2 = params[11]
+        self.d_alpha2 = params[12]
+        self.width2 = params[13]
+        self.gap2 = params[14]
+        self.n_pts_arcs = params[15]
+        super( SFS_Csh_emb, self ).__init__( origin, trans_in )
+        '''
+        self.excitation_port = self.connections[0]
+        self.output_port = self.connections[1]
+        self.excitation_angle = self.angle_connections[0]
+        self.output_angle = self.angle_connections[1]
+        '''
+        
+    def init_primitives( self ):
+        origin = DPoint(0,0)
+        
+        self.c_wave = CWave( origin, self.r_out, self.dr, self.n_semiwaves, self.s, self.alpha, self.r_curve, n_pts=self.n_pts_cwave )
+        self.primitives["c_wave"] = self.c_wave
+        
+        Z1_start = origin + DPoint( 0, self.r_in+ self.gap1 + self.width1/2 )
+        Z1_end = Z1_start + DPoint( 0, -self.gap1 - self.width1/2 + self.dr )
+        self.cpw1 = CPW( self.Z1.width, self.Z1.gap, Z1_start, Z1_end )
+        self.primitives["cpw1"] = self.cpw1
+        
+        Z2_start = origin - DPoint( 0, self.r_in + self.gap1 + self.width1/2 )
+        Z2_end = Z2_start - DPoint( 0, -self.gap1 - self.width1/2 + self.dr )
+        self.cpw2 = CPW( self.Z2.width, self.Z2.gap, Z2_start, Z2_end )        
+        self.primitives["cpw2"] = self.cpw2
+        
+        self.c_wave_2_cpw_adapter = CWave2CPW( self.c_wave, self.params[7:15], n_pts=self.n_pts_arcs )
+        self.primitives["c_wave_2_cpw_adapter"] = self.c_wave_2_cpw_adapter
+       
+        self.connections = [Z1_end, Z2_end]
+        self.angle_connections = [pi/2, 3/2*pi]
+        
+# END classes to be delegated to different file ###
 
-SIMULATION_ID = "Cwave_first"
-SONNET_DIR = r"C:\Users\user\Documents\CWave_capacitance_simulations"
-
+# Enter your Python code here
 ### MAIN FUNCTION ###
 if __name__ == "__main__":
 # getting main references of the application
@@ -53,50 +100,38 @@ if __name__ == "__main__":
     ### DRAW SECTION START ###
     origin = DPoint(0,0)
     
-    # drawing ports
-    gap = 0
-    width = 30e3
-    length = 150e3
-    delta = 10e3
+    # Chip drwaing START #
+    Z_params = CPWParameters( 14.5e3, 6.7e3 ) 
+    chip = Chip5x10_with_contactPads( origin, Z_params )
+    chip.place( cell, layer_ph )
+    # Chip drawing END #
     
-    # CWave capacitor drawing START #
-    r_out = 200e3
-    r_gap = 0
-    n_semiwaves = 8
-    s = 5e3  
-    alpha = pi/2-0.1
-    r_curve = 10e3
-    n_pts_cwave = 50
-    L0 = 20e3
-    delta = 30e3
-
-    p0 = DPoint( r_out + length - delta, r_out*( 1 + 1/4 ) )
+    width = 300e3
+    gap = 200e3
+    Z = CPW( width,gap, DPoint(0,chip.chip_y/2), DPoint(chip.chip_x,chip.chip_y/2) )
+    Z.place( cell, layer_ph )
     
-    # writing description file    
-    with open( os.path.join(SONNET_DIR,SIMULATION_ID + ".csv"), "w" ) as csv_file:
-        writer = csv.writer( csv_file )
-        # header with parameters names
-        writer.writerow( ["file_id, r_out","dr","n_semiwaves","s","alpha","r_curve","delta","L0","n_pts_cwave"] )
-        
-        # cycle that generates .GDS files and writes them on the "sonnet_dir" directory
-        # also writing corresponding parameter rows to "sonnet_dir/desc_file.csv"
-        for file_id,alpha in enumerate(np.linspace( 0,pi/2-0.1,5 )):
-            Z_left = CPW( width, gap, p0 + DPoint( -r_out + delta,0 ), p0 + DPoint( -r_out - length + delta,0 ) )
-            Z_left.place( cell, layer_ph, merge=True )
-        
-            Z_right = CPW( width, gap, p0 - DPoint( -r_out + delta,0 ), p0 - DPoint( -r_out - length + delta,0 ) )
-            Z_right.place( cell, layer_ph, merge=True )
-            
-            cwave_params = [r_out,r_gap,n_semiwaves,s,alpha,r_curve,delta,L0,n_pts_cwave]
-            cap = CWave( p0, *cwave_params, trans_in=Trans.R90 )
-            cap.place( cell, layer_ph )
-            
-            layout.write( os.path.join( SONNET_DIR,SIMULATION_ID+ "_" + str(file_id) + ".gds" ) )
-            cell.clear()
-            writer.writerow( [file_id] + cwave_params )
-        
-    # copy generating script with its id to the sonnet directory
-    shutil.copy2( __file__, SONNET_DIR )
-    ### DRAW SECTION END ###
+    from SonnetLab import *
     
     lv.zoom_fit()
+    
+    writer = Matlab_commander()
+    print("starting connection...")
+    writer.send( CMD.SAY_HELLO )
+    writer.send( CMD.CLEAR_POLYGONS )
+    writer.send_boxProps( chip.chip_x,chip.chip_y, 200,400 )
+    poly_for_matlab = []
+    reg = Region(cell.begin_shapes_rec( layer_ph ))
+    for polygon in reg:
+        print( polygon.to_simple_polygon().points )
+        
+    writer.send_polygon( [0,0,100,100],[45,55,55,45], [1,3] )
+    writer.send_set_ABS_sweep( 1, 10 )
+    writer.send( CMD.SIMULATE )
+    file_name = writer.read_line().decode("ASCII")
+    print("visualizing...")
+    writer.send( CMD.VISUALIZE )
+    print("closing connection" )
+    writer.send( CMD.CLOSE_CONNECTION )
+    print("connection closed\n")
+    writer.close()

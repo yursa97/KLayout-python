@@ -65,7 +65,7 @@ class CWave( Complex_Base ):
     Draws a condensator from a circle cutted into 2 pieces.
     '''
 
-    def __init__(self, center, r_out, dr, n_segments, s, alpha, r_curve, delta=40e3, L0=0, n_pts=50, solid=True, trans_in=None ):
+    def __init__(self, center, r_out, dr, n_segments, s, alpha, r_curve, delta=40e3, n_pts=50, solid=True, trans_in=None ):
         '''
         Parameters:
         center: DPoint
@@ -84,8 +84,6 @@ class CWave( Complex_Base ):
             The radius of single arc.
         delta: float
             length of the horizontal lines on the ends of the cut
-        L0: float
-            The length of the initial and final "RLR" sections of the slice.
         n_pts: int
             The number of points on the perimeter of the circle.
         solid: ???
@@ -94,6 +92,7 @@ class CWave( Complex_Base ):
         '''
         self.r_out = r_out
         self.dr = dr
+        self.r_in = self.r_out - self.dr
         self.n_segments = n_segments
         self.s = s
         self.alpha = alpha

@@ -9,7 +9,7 @@ from collections import OrderedDict
 
 class Element_Base():
     '''
-    @brief: base class for simple single-layer elements and objects that are consisting of
+    @brief: base class for simple single-layer or multi-layer elements and objects that are consisting of
             several polygons.
             metal_region polygons will be added to the design
             empty_region polygons will be erased from the background with 
@@ -126,16 +126,23 @@ class Element_Base():
     
     def place( self, dest, layer_i=-1, region_name=None, merge=False ):
         r_cell = None
-        if( layer_i != -1 ): 
-            metal_region = None
-            empty_region = None
-            if( region_name == None ):
-                metal_region = self.metal_region
-                empty_region = self.empty_region
-            else:
+        metal_region = None
+        empty_region = None
+        if( region_name == None ):
+            metal_region = self.metal_region
+            empty_region = self.empty_region
+        else:
+            if( region_name in self.metal_regions ):
                 metal_region = self.metal_regions[region_name]
+            else:
+                metal_region = Region()
+            
+            if( region_name in self.empty_regions ):
                 empty_region = self.empty_regions[region_name]
-
+            else:
+                empty_region = Region()
+                    
+        if( layer_i != -1 ): 
             r_cell = Region( dest.begin_shapes_rec( layer_i ) )        
             temp_i = dest.layout().layer( pya.LayerInfo(PROGRAM.LAYER1_NUM,0) )
             r_cell += metal_region
@@ -149,8 +156,8 @@ class Element_Base():
             dest.layout().move_layer( temp_i, layer_i )
             dest.layout().delete_layer( temp_i )
         if( layer_i == -1 ): # dest is interpreted as instance of Region() class
-            dest += self.metal_region
-            dest -= self.empty_region
+            dest += metal_region
+            dest -= empty_region
             if( merge is True ):
                 dest.merge()
                 
@@ -167,7 +174,7 @@ class Element_Base():
 class Complex_Base( Element_Base ):
     def __init__( self, origin, trans_in=None ):
         super().__init__( origin,trans_in )
-        self.primitives = OrderedDict()
+        self.primitives = OrderedDict() # ensures order of placing and erasing of primitives is preserved
         self._init_primitives_trans()
     
     def _init_regions_trans( self ):
@@ -207,7 +214,7 @@ class Complex_Base( Element_Base ):
         if( layer_i != -1 ):
             r_cell = Region( dest.begin_shapes_rec( layer_i ) )
             for primitive in self.primitives.values():
-                primitive.place( r_cell )
+                primitive.place( r_cell, region_name=region_name )
             
             temp_i = dest.layout().layer( pya.LayerInfo(PROGRAM.LAYER1_NUM,0) ) 
             dest.shapes( temp_i ).insert( r_cell )
@@ -216,7 +223,7 @@ class Complex_Base( Element_Base ):
             dest.layout().delete_layer( temp_i )
         else:
             for primitive in self.primitives.values():
-                primitive.place( dest )
+                primitive.place( dest, region_name=region_name )
             
     
     def init_primitives( self ):

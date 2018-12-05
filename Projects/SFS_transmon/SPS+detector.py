@@ -126,7 +126,7 @@ if __name__ == "__main__":
     layer_el = layout.layer( info2 )
 
     # clear this cell and layer
-    #cell.clear()
+    cell.clear()
 
     # setting layout view
     lv.select_cell(cell.cell_index(), 0)
@@ -163,12 +163,12 @@ if __name__ == "__main__":
     # Single photon source photo layer drawing START #
     Z = CPWParameters(20e3, 10e3)
     Zl = CPWParameters(10e3,7e3)
-    r_out = 150e3
+    r_out = 200e3
     r_gap = 25e3
     n_segments = 2
     s = 10e3
     alpha = pi/2.2
-    r_curve = 30e3
+    r_curve = 20e3
     n_pts_cwave = 200
     L0 = 20e3
     d_alpha1 = pi/26
@@ -184,11 +184,11 @@ if __name__ == "__main__":
     p = DPoint( -CHIP.dx/4, CHIP.dy/4 )
     sfs = SFS_Csh_emb( p, params )
     sfs.place( cell, layer_photo)
-
+    '''
     f_l = sfs.connections[0] - cp_list[3].end
     feedline = CPW_RL_Path(cp_list[3].end, "L", Zl, 100e3, [f_l.y-1e3], [] ,trans_in = DTrans.R90)
     feedline.place(cell,layer_photo)
-
+    '''
 
     out_dist = cp_list[4].end - sfs.connections[1] 
     out_dist2 = cp_list[3].end - sfs.connections[1]
