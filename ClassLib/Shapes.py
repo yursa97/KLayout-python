@@ -1,6 +1,6 @@
 import pya
 from math import sqrt, cos, sin, atan2, pi, copysign
-from pya import Point,DPoint,DSimplePolygon,SimplePolygon,DPolygon,Polygon, Region,DPath,DVector
+from pya import Point,DPoint,DSimplePolygon,SimplePolygon,DPolygon,Polygon, Region,DPath,DVector,DBox
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from ClassLib._PROG_SETTINGS import *
@@ -10,7 +10,7 @@ class Rectangle( Element_Base ):
     def __init__( self, origin, a,b, trans_in=None, inverse=False ):
         self.a = a
         self.b = b
-        super( Rectangle,self ).__init__( origin, trans_in, inverse )
+        super().__init__( origin, trans_in, inverse )
         
     def init_regions( self ):
         origin = DPoint(0,0)
@@ -18,7 +18,10 @@ class Rectangle( Element_Base ):
         p2 = p1 + DPoint(0,self.b)
         p3 = p2 + DPoint(-self.a,0)
         pts_arr = [origin,p1,p2,p3]
-        self.metal_region.insert( SimplePolygon().from_dpoly( DSimplePolygon(pts_arr) ) )
+        if self.inverse:
+            self.empty_region.insert(SimplePolygon().from_dpoly(DSimplePolygon(pts_arr)))
+        else:
+            self.metal_region.insert(SimplePolygon().from_dpoly(DSimplePolygon(pts_arr)))
 
 class Cross( Element_Base ):
     def __init__( self, origin, inner_square_a, outer_square_a, trans_in=None ):
@@ -60,7 +63,7 @@ class Circle( Element_Base ):
         self.r = r
         self.n_pts = n_pts
         self.solid = solid
-        super(). __init__( center,trans_in )
+        super().__init__( center,trans_in )
 
     def init_regions(self):
         dpts_arr = [DPoint(self.r*cos(2*pi*i/self.n_pts+self._offset_angle),self.r*sin(2*pi*i/self.n_pts+self._offset_angle)) for i in range(0,self.n_pts)]
@@ -109,3 +112,85 @@ class Circle_arc( Element_Base ):
             self.empty_region.insert( SimplePolygon().from_dpoly( DSimplePolygon(dpts_arr) ) )
         self.connections.extend([self._center, self._center+DVector(0, -self.r)])
         self.angle_connections.extend([0,0])
+
+class Ring(Element_Base):
+    """@brief: class represents a ring (radius - thicknes < R < radius)
+        @params:  DPoint origin - the center of the ring
+                        float radius - outer radius of the ring
+                        float thickness - thickness of the ring
+                        int n_pts - number of points comprising the circumference of the ring (50 by default)
+                        Trans trans_in - initial transformation (None by default)
+                        bool inverse - if True then the ring is subtracted from a layer (False by default)
+    """
+    def __init__( self, origin, radius, thickness, n_pts=50, trans_in=None, inverse=False):
+        self.r = radius
+        self.t = thickness
+        self.n_pts = n_pts
+        super().__init__(origin, trans_in, inverse)
+        
+    def init_regions( self ):
+        origin = DPoint(0,0)
+        Rin = self.r - self.t
+        Rout = self.r
+        dpts_arr_Rout = [DPoint(Rout * cos(2 * pi * i / self.n_pts), Rout * sin(2 * pi * i / self.n_pts)) for i in range(0, self.n_pts)]
+        dpts_arr_Rin = [DPoint(Rin * cos(2 * pi * i / self.n_pts), Rin * sin(2 * pi * i / self.n_pts)) for i in range(0, self.n_pts)]
+        outer_circle = Region(SimplePolygon().from_dpoly(DSimplePolygon(dpts_arr_Rout)))
+        inner_circle = Region(SimplePolygon().from_dpoly(DSimplePolygon(dpts_arr_Rin)))
+        ring = outer_circle - inner_circle
+        #self.metal_region.insert(ring)   
+        if self.inverse:
+            self.empty_region = ring
+        else:
+            self.metal_region = ring
+
+class IsoTrapezoid(Element_Base):
+    
+    """@brief: class represents an isosceles trapezoid
+        @params:  DPoint origin - position of the left bottom node 
+                        float height - height of the trapezoid
+                        float bottom - length of the bottom side
+                        float top - length of the top side
+                        Trans trans_in - initial transformation (None by default)
+                        bool inverse - if True then the ring is subtracted from a layer (False by default)
+    """
+    def __init__( self, origin, height, bottom, top, trans_in=None, inverse=False):
+        self.h = height
+        self.b = bottom
+        self.t = top
+        super().__init__(origin, trans_in, inverse)
+        
+    def init_regions(self):
+        origin = DPoint(0, 0)
+        dx = (self.b - self.t) / 2
+        p1 = origin + DPoint(dx, self.h)
+        p2 = p1 + DPoint(self.t, 0)
+        p3 = p2 + DPoint(dx, -self.h)
+        pts_arr = [origin, p1, p2, p3]
+        if self.inverse:
+            self.empty_region.insert(SimplePolygon().from_dpoly(DSimplePolygon(pts_arr)))
+        else:
+            self.metal_region.insert(SimplePolygon().from_dpoly(DSimplePolygon(pts_arr)))
+
+class Cross2(Element_Base):
+    """@brief: class represents a cross
+        @params:  DPoint origin - center of the cross
+                        float thickness - thickness of the line
+                        float length - size of the cross
+                        Trans trans_in - initial transformation (None by default)
+                        bool inverse - if True then the ring is subtracted from a layer (False by default)
+    """
+    def __init__( self, origin, thickness, length, trans_in=None, inverse=False):
+        self.l = length
+        self.t = thickness
+        super().__init__(origin, trans_in, inverse)
+        
+    def init_regions(self):
+        origin = DPoint(0, 0)
+        hor_box = DBox(origin - DPoint(self.l/2, self.t/2), DPoint(self.l/2, self.t/2))
+        vert_box = DBox(origin - DPoint(self.t/2, self.l/2), DPoint(self.t/2, self.l/2))
+        cross = (Region(hor_box) + Region(vert_box)).merge()
+        if self.inverse:
+            self.empty_region.insert(cross)
+        else:
+            self.metal_region.insert(cross)
+

@@ -4,7 +4,7 @@ from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon, Re
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from ClassLib.BaseClasses import Complex_Base
-from ClassLib.Shapes import Cross,Rectangle
+from ClassLib.Shapes import *
 from ClassLib.Coplanars import CPWParameters, CPW_arc
 
 class Mark1( Complex_Base ):
@@ -45,5 +45,31 @@ class Mark1( Complex_Base ):
             r = self.leaf_inner + (self.leaf_outer - self.leaf_inner)/(self.empty_rings_N + 1)*i
             self.primitives["empty_ring_"+str(i)] = CPW_arc( Z_empty, DVector(0,-r), r, 2*pi )
         
+class Mark2 (Complex_Base):
+    def __init__(self, origin, trans_in=None):
+        self.ring1_radius = 300e3
+        self.ring1_thickness = 30e3
+        self.ring2_radius = 250e3
+        self.ring2_thickness = 30e3
+        self.inner_circle_radius = 200e3
+        self.trap_h = 150e3
+        self.trap_b = 1e3
+        self.trap_t = 100e3
+        self.trap_dist  = 3e3 # distance from the center
+        self.cross_thickness = 1e3
+        self.cross_size = 3e3
+        super().__init__(origin, trans_in)
         
-        
+    def init_primitives(self):
+        origin = DPoint(0, 0)
+        self.primitives["empty_ring1"] = Ring(origin, self.ring1_radius, self.ring1_thickness, inverse=True)
+        self.primitives["empty_ring2"] = Ring(origin, self.ring2_radius, self.ring2_thickness, inverse=True)
+        self.primitives["inner_circle"] = Circle(origin, self.inner_circle_radius, solid=False)
+        self.primitives["trap_top"] = IsoTrapezoid(origin + DPoint(-self.trap_b/2, self.trap_dist), self.trap_h, self.trap_b, self.trap_t)
+        self.primitives["trap_left"] = IsoTrapezoid(origin + DPoint(-self.trap_dist, -self.trap_b/2), self.trap_h, self.trap_b, self.trap_t, trans_in=Trans.R90)
+        self.primitives["trap_bottom"] = IsoTrapezoid(origin + DPoint(self.trap_b/2, -self.trap_dist), self.trap_h, self.trap_b, self.trap_t, trans_in=Trans.R180)
+        self.primitives["trap_right"] = IsoTrapezoid(origin + DPoint(self.trap_dist, self.trap_b/2), self.trap_h, self.trap_b, self.trap_t, trans_in=Trans.R270)
+        self.primitives["cross"] = Cross2(origin, self.cross_thickness, self.cross_size)
+            
+            
+

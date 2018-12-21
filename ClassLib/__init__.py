@@ -13,6 +13,8 @@ from ClassLib.ContactPad import *
 from ClassLib._PROG_SETTINGS import *
 from ClassLib.ChipTemplates import *
 from ClassLib.Marks import *
+from ClassLib.SFS import *
+from ClassLib.ChipDesign import *
 
 reload(ClassLib.BaseClasses)
 reload(ClassLib.Coplanars)
@@ -25,6 +27,8 @@ reload(ClassLib.ContactPad)
 reload(ClassLib._PROG_SETTINGS)
 reload(ClassLib.ChipTemplates)
 reload(ClassLib.Marks)
+reload(ClassLib.SFS)
+reload(ClassLib.ChipDesign)
 
 from ClassLib.BaseClasses import *
 from ClassLib.Coplanars import *
@@ -38,4 +42,6 @@ from ClassLib.ContactPad import *
 from ClassLib._PROG_SETTINGS import *
 from ClassLib.ChipTemplates import *
 from ClassLib.Marks import *
+from ClassLib.SFS import *
+from ClassLib.ChipDesign import *
 

@@ -14,16 +14,27 @@ class CWave2CPW( Element_Base ):
     '''
     def __init__( self, c_wave_cap, params, n_pts=50, trans_in=None ):
         self.c_wave_ref = c_wave_cap
-        self.Z1 = params[0]
-        self.d_alpha1 = params[1]
-        self.width1 = params[2]
-        self.gap1 = params[3]
-        self.Z2 = params[4]
-        self.d_alpha2 = params[5]
-        self.width2 = params[6]
-        self.gap2 = params[7]
+        if isinstance(params, dict):
+            self.Z1 = params['Z1']
+            self.d_alpha1 = params['d_alpha1']
+            self.width1 = params['width1']
+            self.gap1 = params['gap1']
+            self.Z2 = params['Z2']
+            self.d_alpha2 = params['d_alpha2']
+            self.width2 = params['width2']
+            self.gap2 = params['gap2']
+        else:
+            # not recommended
+            self.Z1 = params[0]
+            self.d_alpha1 = params[1]
+            self.width1 = params[2]
+            self.gap1 = params[3]
+            self.Z2 = params[4]
+            self.d_alpha2 = params[5]
+            self.width2 = params[6]
+            self.gap2 = params[7]
         self.n_pts = n_pts
-        super().__init__( self.c_wave_ref.origin, trans_in )
+        super().__init__(self.c_wave_ref.origin, trans_in)
 
     def _get_solid_arc( self, center, R, width, alpha_start, alpha_end, n_inner, n_outer ):
         pts = []
