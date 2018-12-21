@@ -6,30 +6,59 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 from ClassLib import *
 
 class SFS_Csh_emb( Complex_Base ):
-    def __init__( self, origin, params, trans_in=None ):
-        self.params = params
-
-        self.r_out = params[0]
-        self.dr = params[1]
-        self.r_in = self.r_out - self.dr
-        self.n_semiwaves = params[2]
-        self.s = params[3]
-        self.alpha = params[4]
-        self.r_curve = params[5]
-        self.n_pts_cwave = params[6]
-        self.Z1 = params[7]
-        self.d_alpha1 = params[8]
-        self.width1 = params[9]
-        self.gap1 = params[10]
-        self.Z2 = params[11]
-        self.d_alpha2 = params[12]
-        self.width2 = params[13]
-        self.gap2 = params[14]
-        self.n_pts_arcs = params[15]
-        
-        self.squid_params = self.params[16:]
-        
-        super( SFS_Csh_emb, self ).__init__( origin, trans_in )
+    """@brief: class represents a qubit for a single photon source
+        @params:  DPoint origin - position of the center of a qubit
+                        params - a dict or a list of parameters (len = 16),
+                                 a list is not recommended as it's difficult to use
+                        squid_params - a list of parameters for a dc-SQUID (can included in params
+                                as a list but not recommended)
+                        int squid_pos - position of a dc-squid in relation to a capacitor (-1 - left, 0 - center, 1 - right), is 0 by default
+                        Trans trans_in - initial transformation (None by default)
+    """
+    def __init__( self, origin, params, squid_params=None, squid_pos=0, trans_in=None ):
+        if squid_params is not None and isinstance(params, dict):
+            self.params = params
+            self.r_out = params['r_out']
+            self.dr = params['dr']
+            self.r_in = self.r_out - self.dr
+            self.n_semiwaves = params['n_semiwaves']
+            self.s = params['s']
+            self.alpha = params['alpha']
+            self.r_curve = params['r_curve']
+            self.n_pts_cwave = params['n_pts_cwave']
+            self.Z1 = params['Z1']
+            self.d_alpha1 = params['d_alpha1']
+            self.width1 = params['width1']
+            self.gap1 = params['gap1']
+            self.Z2 = params['Z2']
+            self.d_alpha2 = params['d_alpha2']
+            self.width2 = params['width2']
+            self.gap2 = params['gap2']
+            self.n_pts_arcs = params['n_pts_arcs']
+            self.squid_params = squid_params
+        else:
+            # not recommended, because dict is more convinient
+            self.params = params
+            self.r_out = params[0]
+            self.dr = params[1]
+            self.r_in = self.r_out - self.dr
+            self.n_semiwaves = params[2]
+            self.s = params[3]
+            self.alpha = params[4]
+            self.r_curve = params[5]
+            self.n_pts_cwave = params[6]
+            self.Z1 = params[7]
+            self.d_alpha1 = params[8]
+            self.width1 = params[9]
+            self.gap1 = params[10]
+            self.Z2 = params[11]
+            self.d_alpha2 = params[12]
+            self.width2 = params[13]
+            self.gap2 = params[14]
+            self.n_pts_arcs = params[15]
+            self.squid_params = self.params[16:]
+        self.squid_pos = squid_pos
+        super().__init__( origin, trans_in )
         '''
         self.excitation_port = self.connections[0]
         self.output_port = self.connections[1]
@@ -54,24 +83,31 @@ class SFS_Csh_emb( Complex_Base ):
         self.cpw2 = CPW( self.Z2.width, self.Z2.gap, Z2_start, Z2_end )        
         self.primitives["cpw2"] = self.cpw2
         
-        self.c_wave_2_cpw_adapter = CWave2CPW( self.c_wave, self.params[7:15], n_pts=self.n_pts_arcs )
+        if isinstance(self.params, dict):
+            self.c_wave_2_cpw_adapter = CWave2CPW( self.c_wave, self.params, n_pts=self.n_pts_arcs )
+        else:
+            # not recommended
+            self.c_wave_2_cpw_adapter = CWave2CPW( self.c_wave, self.params[7:15], n_pts=self.n_pts_arcs )
         self.primitives["c_wave_2_cpw_adapter"] = self.c_wave_2_cpw_adapter
         
         p_squid = None
         squid_trans_in = None
         
-        if( self.c_wave.n_segments%2 == 1 ):
-            squid_trans_in = DCplxTrans( 1, self.c_wave.alpha*180/pi, False, 0,0 )
-            p_squid = origin
+        if not self.squid_pos:
+            if( self.c_wave.n_segments%2 == 1 ):
+                squid_trans_in = DCplxTrans( 1, -self.c_wave.alpha*180/pi, False, 0,0 )
+                p_squid = origin
+            else:
+                squid_trans_in = None
+                second_parity = self.c_wave.n_segments/2
+                y_shift = self.c_wave.L0*sin(self.c_wave.alpha) - self.c_wave.r_curve*(1/cos(self.c_wave.alpha)-1)
+                if( second_parity%2 == 0 ):
+                    p_squid = origin + DPoint( 0, y_shift )
+                else:
+                    p_squid = origin + DPoint( 0, -y_shift )
         else:
             squid_trans_in = None
-            
-            second_parity = self.c_wave.n_segments/2
-            y_shift = self.c_wave.L0*sin(self.c_wave.alpha) - self.c_wave.r_curve*(1/cos(self.c_wave.alpha)-1)
-            if( second_parity%2 == 0 ):
-                p_squid = origin + DPoint( 0, y_shift )
-            else:
-                p_squid = origin + DPoint( 0, -y_shift )
+            p_squid = origin - DPoint(self.squid_pos * (self.r_out - 1.8 * self.dr), 0)
         
         self.squid = Squid( p_squid, self.squid_params, trans_in=squid_trans_in )
         self.primitives["qubit"] = self.squid
