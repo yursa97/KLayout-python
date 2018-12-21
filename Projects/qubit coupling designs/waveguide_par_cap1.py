@@ -4,8 +4,6 @@ from pya import Point, DPoint, DSimplePolygon, SimplePolygon, DPolygon, Polygon,
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from ClassLib import *
-reload( ClassLib )
-from ClassLib import *
 
 ### START classes to be delegated to different file ###
 
@@ -39,7 +37,7 @@ if __name__ == "__main__":
     info2 = pya.LayerInfo(2,0)
     layer_ph = layout.layer( info )
     layer_el = layout.layer( info2 )
-    
+
     # clear this cell and layer
     cell.clear()
 
@@ -49,8 +47,14 @@ if __name__ == "__main__":
 
     ### DRAW SECTION START ###
     origin = DPoint(0,0)
-    cros = Mark1( origin )
-    cros.place( cell, layer_ph )
-
+    Z_params = CPWParameters( 14.5e3, 6.7e3 )
+    
+    gap = 0e3
+    width = 30e3
+    length = 150e3
+    delta = 200e3
+    
+    
+    
     ### DRAW SECTION END ###
     lv.zoom_fit()

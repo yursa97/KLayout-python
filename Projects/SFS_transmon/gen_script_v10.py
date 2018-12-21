@@ -8,7 +8,60 @@ from ClassLib import *
 
 ### START classes to be delegated to different file ###
                 
+class SFS_Csh_emb( Complex_Base ):
+    def __init__( self, origin, params, trans_in=None ):
+        self.params = params
+        self.r_out = params[0]
+        self.dr = params[1]
+        self.n_semiwaves = params[2]
+        self.s = params[3]
+        self.alpha = params[4]
+        self.r_curve = params[5]
+        self.n_pts_cwave = params[6]
+        self.L0 = params[7]
+        self.Z1 = params[8]
+        self.d_alpha1 = params[9]
+        self.width1 = params[10]
+        self.gap1 = params[11]
+        self.Z2 = params[12]
+        self.d_alpha2 = params[13]
+        self.width2 = params[14]
+        self.gap2 = params[15]
+        self.n_pts_arcs = params[16]
+        super( SFS_Csh_emb, self ).__init__( origin, trans_in )
+        '''
+        self.excitation_port = self.connections[0]
+        self.output_port = self.connections[1]
+        self.excitation_angle = self.angle_connections[0]
+        self.output_angle = self.angle_connections[1]
+        '''
+        
+    def init_primitives( self ):
+        origin = DPoint(0,0)
+        
+        self.c_wave = CWave( origin, self.r_out, self.dr, self.n_semiwaves, self.s, self.alpha, self.r_curve, n_pts=self.n_pts_cwave, L0=self.L0 )
+        self.primitives["c_wave"] = self.c_wave
+        
+        Z1_start = origin + DPoint( 0,self.r_out + self.gap1 + self.width1/2 )
+        Z1_end = Z1_start + DPoint( 0, -self.gap1 - self.width1/2 + self.dr )
+        self.cpw1 = CPW( self.Z1.width, self.Z1.gap, Z1_start, Z1_end )
+        self.primitives["cpw1"] = self.cpw1
+        
+        Z2_start = origin - DPoint( 0,self.r_out + self.gap1 + self.width1/2 )
+        Z2_end = Z2_start - DPoint( 0, -self.gap1 - self.width1/2 + self.dr )
+        self.cpw2 = CPW( self.Z2.width, self.Z2.gap, Z2_start, Z2_end )        
+        self.primitives["cpw2"] = self.cpw2
+        
+        self.c_wave_2_cpw_adapter = CWave2CPW( self.c_wave, self.params[8:16], n_pts=self.n_pts_arcs )
+        self.primitives["c_wave_2_cpw_adapter"] = self.c_wave_2_cpw_adapter
+       
 
+        
+        self.connections = [Z1_end, Z2_end]
+        self.angle_connections = [pi/2, 3/2*pi]
+        
+        
+        
         
     
 # END classes to be delegated to different file ###
@@ -52,116 +105,39 @@ if __name__ == "__main__":
     ### DRAW SECTION START ###
     origin = DPoint(0,0)
     
-    # Coplanar parameters definition section
-    Z = CPWParameters(20e3, 10e3)
-    Zl = CPWParameters(10e3,7e3)
-    cpw_curve = 40e3
-    
     # Chip drwaing START #    
-    chip = Chip5x10_with_contactPads( origin, Z  )
-    chip.place( cell, layer_ph )
+    chip = pya.DBox( origin, DPoint( CHIP.dx, CHIP.dy ) )
+    cell.shapes( layer_ph ).insert( pya.Box().from_dbox(chip) )
     # Chip drawing END #
     
-    # Single photon source drawing START #
-    p1 = chip.connections[0]
-    p2 = chip.connections[2]
     
-
-    r_out = 175e3 # Radius of an outer ring including the empty region
-    r_gap = 25e3 # Gap in the outer ring
-    n_segments = 2
-    s = 10e3 # Gap between two pads of a central capacitor
-    alpha = pi/4 # period of a gap zigzag
-    r_curve = 30e3 # curvature of the roundings at the edges of a zigzag
-    n_pts_cwave = 200
-
-    Z1 = Zl # Parameters of a top CPW
-    d_alpha1 = 0 # width of a tip of a central conductor of the top CPW
-    width1 = 0 # width of a conductor in the bottom semiring
-    gap1 = r_gap - 1.33e3 # gap between the bottom semiring and the central capacitor
-    Z2 = Z # Paramters of a bottom CPW
-    d_alpha2 = 1/3*pi # length of a circumference covered by the bottom semiring
-    width2 = r_gap/3
+    # Single photon source photo layer drawing START #
+    r_out = 200e3
+    r_gap = 25e3
+    n_semiwaves = 4
+    s = 5e3  
+    alpha = pi/3
+    r_curve = 2e4
+    n_pts_cwave = 50
+    L0 = 20e3
+    
+    Z = CPW( 14.5e3, 6.7e3 )
+    Z1 = Z
+    d_alpha1 = pi/3
+    width1 = r_gap/3 
+    gap1 = width1
+    Z2 = Z
+    d_alpha2 = 2/3*pi
+    width2 = width1
     gap2 = width2
     n_pts_arcs = 50
-    params = [r_out, r_gap, n_segments, s, alpha, r_curve, n_pts_cwave,
-                  Z1, d_alpha1, width1, gap1, Z2, d_alpha2, width2, gap2 , n_pts_arcs]
-                        
-    pad_side = 5e3
-    pad_r = 1e3
-    pads_distance = 30e3
-    p_ext_width = 3e3
-    p_ext_r = 0.5e3
-    sq_len = 7e3
-    sq_area = 15e6
-    j_width = 0.4e3
-    low_lead_w = 0.5e3
-    b_ext =   0.9e3
-    j_length =  0.3e3
-    n = 7
-    bridge = 0.5e3
-
-    pars_squid = [pad_side,pad_r,pads_distance,p_ext_width,\
-                  p_ext_r,sq_len,sq_area,j_width,low_lead_w,\
-                  b_ext,j_length,n,bridge]
-                  
-    p = p1 + DPoint( (p2-p1).x, (p2-p1).y/2 )
-    sfs = SFS_Csh_emb( p, params + pars_squid, trans_in=Trans.R180 )
-    sfs.place(cell, layer_ph,layer_el )
+    params = [r_out, r_gap,n_semiwaves, s, alpha, r_curve, n_pts_cwave, L0,
+                        Z1,d_alpha1,width1,gap1,Z2,d_alpha2,width2,gap2, n_pts_arcs]
+    p = DPoint( CHIP.dx/2, CHIP.dy/2 )
+    sfs = SFS_Csh_emb( p, params )
+    sfs.place(cell, layer_ph)
+    # Single photon source photo layer drawing START #
     
-    sfs_line_in = CPW_RL_Path( p1, "LRL", Zl, cpw_curve, [(p2-p1).x,(p2-p1).y/2-r_out], pi/2 )
-    sfs_line_in.place( cell, layer_ph )
-    
-    sfs_line_out = CPW( Z.width, Z.gap, sfs.connections[1], p2 )
-    sfs_line_out.place( cell, layer_ph )
-    # Single photon source drawing END #
-    
-    ## probe qubit drawing section START ##
-    p1 = chip.connections[3]
-    p2 = chip.connections[4]
-    probe_line = CPW_RL_Path( p1, "LRLRL", Z, cpw_curve, [chip.chip_y/10,(p2-p1).x,chip.chip_y/10], [pi/2,pi/2], trans_in=Trans.R270 )
-    probe_line.place( cell, layer_ph )
-    
-    N_probes = 3
-    to_line = 40e3
-    for i in range(N_probes):
-        dx = abs( (p1-p2).x )/(N_probes + 1)
-        dy = abs( chip.chip_y/10 )
-        p = p1 + DPoint( dx*(i+1), -dy - to_line - r_out )
-        sfs = SFS_Csh_emb( p, params + pars_squid, trans_in=Trans.R180 )
-        sfs.place(cell, layer_ph,layer_el )
-    ## probe qubit drawing section END ##
-    
-    ## Check resonators drawing section START ##
-    p1 = chip.connections[5]
-    p2 = chip.connections[7]
-    probe_line = CPW_RL_Path( p1, "LRLRL", Z, cpw_curve, [chip.chip_y/10,abs((p1-p2).x),chip.chip_y/10], [-pi/2,-pi/2], trans_in=Trans.R90 )
-    probe_line.place( cell, layer_ph )
-    
-    L_coupling = 300e3
-    # corresponding to resonanse freq is linspaced in interval [6,9) GHz
-    L1_list = [261653., 239550., 219456., 201109]
-    r = 50e3
-    L2 = 270e3
-    gnd_width = 35e3
-    N = 4
-    width_res = 9.6e3
-    gap_res = 5.2e3
-    to_line = 40e3
-    Z_res = CPW( width_res, gap_res, origin, origin )
-    worms = []
-    N_res = 4
-    for i in range(N_res):
-        dx = abs( (p1-p2).x*(2/3)/(N_res) )
-        worm = EMResonator_TL2Qbit_worm( Z_res, p1 + DPoint( abs((p1- p2).x/3) + (i)*dx, chip.chip_y/10 + to_line ),
-                                                                L_coupling, L1_list[i], r, L2, N, trans_in=Trans.R180 )
-        worm.place( cell, layer_ph )
-        worms.append( worm )
-    ## Check resonators drawing section END ##
-    '''
-    Z_rand = CPW( Z.width, Z.gap, worms[0].connections[1], p2 )
-    Z_rand.place( cell, layer_ph )
-    '''
     ### DRAW SECTION END ###
     
     lv.zoom_fit()
