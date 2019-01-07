@@ -202,18 +202,18 @@ if __name__ == "__main__":
     outline.place(cell,layer_photo)
 
     # drawing stick qubit (sq)
-    '''
+    
     bb = outline.primitives['cpw_1'].empty_region.bbox()
     sq_y = bb.bottom
     sq_x = bb.center().x
-    ''
-    #jj = Line_N_JJCross(chip_centerБ )
+    chip_center = DPoint( chip.chip_x/2, chip.chip_y/2)
+    jj = Line_N_JJCross(chip_center)
 
-    #sq_c = StickQubit_Cap(DPoint(sq_x,sq_y-10e3),20e3,200e3,6e3,8e3)
-    #sq_c.place(cell,layer_photo)
+    sq_c = StickQubit_Cap(DPoint(sq_x,sq_y-10e3),20e3,200e3,6e3,8e3)
+    sq_c.place(cell,layer_photo)
 
-    #zonator = EMResonator_TL2Qbit_worm(Zl, sq_c.connections[0]-DPoint(0,5e4), 50e3, 20e4, 50e3, 5e4, 2)
-    #zonator.place(cell, layer_photo)
+    zonator = EMResonator_TL2Qbit_worm(Zl, sq_c.connections[0]-DPoint(0,5e4), 50e3, 20e4, 50e3, 5e4, 2)
+    zonator.place(cell, layer_photo)
     ### DRAW SECTION END ###
 
     lv.zoom_fit()
