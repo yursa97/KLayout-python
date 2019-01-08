@@ -1,5 +1,3 @@
-# $description: gen_script_v20
-# $show-in-menu
 #from Projects.SFS_transmon.MyDesign import My_Design
 
 import pya

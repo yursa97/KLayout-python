@@ -4,17 +4,10 @@ import time
 import csv
 
 import pya
-from math import sqrt, cos, sin, tan, atan2, pi, copysign
 from pya import Point, DPoint, Vector, DVector, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
-from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
-
 from ClassLib import *
-from sonnetLab.matlabClient import  MatlabClient
+from .matlabClient import MatlabClient
 
-import numpy as np
-
-import socket
-import struct
 import numpy as np
 
 class SonnetLab( MatlabClient ):        
@@ -28,14 +21,14 @@ class SonnetLab( MatlabClient ):
     def set_boxProps( self, dim_X_nm, dim_Y_nm, cells_X_num, cells_Y_num ):
         self._set_boxProps( dim_X_nm/1e3, dim_Y_nm/1e3, cells_X_num, cells_Y_num )
         
-    def set_ABS_sweep(self, start_f, stop_f ):
-        self._set_ABS_sweep( start_f, stop_f )
+    def set_ABS_sweep(self, start_f_GHz, stop_f_GHz):
+        self._set_ABS_sweep(start_f_GHz, stop_f_GHz)
     
     def send_element( self, el_class_obj ):
         el = el_class_obj # name alias
         
         if( el.metal_region.size() > 1 ):
-            print( "region consists of more than 1 polygon, this is not supported yet")
+            print( "SonnetLab class: region consists of more than 1 polygon, this is not supported yet")
             return None
         
         poly = el.metal_region[0].dup() # the only polygon in the region
@@ -48,7 +41,7 @@ class SonnetLab( MatlabClient ):
         print( "Sending polygon, edges: ", polygon.num_points_hull() )
         if( port_edges_indexes is not None ):
             print( "port edges indexes passing is not implemented yet." )
-            raise NotImplementedError
+            raise NotImplemented
         
         port_edges_indexes = []    
         prev_pt = None
@@ -67,10 +60,10 @@ class SonnetLab( MatlabClient ):
         print( port_edges_indexes )
         self._send_polygon( pts_x,pts_y, port_edges_indexes )
         
-    def send_cell_layer( self, cell, layer_i, port_connections ):
-        r_cell = Region( cell.begin_shapes_rec( layer_i ) )
+    def send_cell_layer( self, cell, layer_i, connections ):
+        r_cell = Region(cell.begin_shapes_rec(layer_i))
         for poly in r_cell:
-            self.send_polygon( poly, port_connections )
+            self.send_polygon(poly, connections=connections)
     
     def start_simulation( self, wait=True ):
         '''
@@ -89,9 +82,10 @@ class SonnetLab( MatlabClient ):
             return
         # send simulation command
         self._send_simulate()
-                
+
         if( wait == True ):
             while( self.state == self.STATE.BUSY_SIMULATING ):
+                print( "self.state == self.STATE_BUSY_SIMULATING")
                 self.get_simulation_status() # updates self.state
             
     def get_simulation_status( self ):
@@ -101,11 +95,10 @@ class SonnetLab( MatlabClient ):
     def visualize_sever( self ):
         self._visualize_sever()
     
-    def release( self ):
-        print( "closing connection" )
-        self._send( CMD.CLOSE_CONNECTION )
-        print("connection closed\n")
+    def release(self):
+        print("closing connection...")
         self._close()
+        print("connection closed\n")
 
 if __name__ == "__main__":
 # getting main references of the application

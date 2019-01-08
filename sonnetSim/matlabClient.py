@@ -57,6 +57,7 @@ class MatlabClient():
             print(e)    
     
     def _close(self):
+        self._send(CMD.CLOSE_CONNECTION)
         self.sock.close()
     
     def _send_float64( self, val ):
@@ -119,6 +120,7 @@ class MatlabClient():
     def _send_simulate( self ):
         self._send( CMD.SIMULATE, confirmation_value=RESPONSE.START_SIMULATION )
         self.state = self.STATE.BUSY_SIMULATING
+        print("simulation command is sent")
         
     def _get_simulation_status( self ):
         if( self.state == self.STATE.BUSY_SIMULATING ):
@@ -129,20 +131,20 @@ class MatlabClient():
                 print(e)
                 
             if( len(response) < 2 ):
+                # leaving nonblocking mode on return
+                self.sock.settimeout(MatlabClient.TIMEOUT)
                 return self.state # equals to self.STATE.BUSY_SIMULATING
             
             self.sock.settimeout(MatlabClient.TIMEOUT) # leaving nonblocking mode
             
-            response = self.sock.recv(2) # transfering data from socket input QUEUE
-            response = struct.unpack("!H",response)[0]
-                
+            response = self.sock.recv(2) # transferring data from socket input QUEUE
+            response = struct.unpack("!H", response)[0]
             if( response == RESPONSE.SIMULATION_FINISHED ):
                 self.state = self.STATE.SIMULATION_FINISHED
             else:
                 self.state = self.STATE.ERROR
                 
             return self.state
-
     
     def _visualize_sever( self ):
         self._send( CMD.VISUALIZE )

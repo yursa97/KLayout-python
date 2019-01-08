@@ -4,7 +4,10 @@ from pya import Point, DPoint, DSimplePolygon, SimplePolygon, DPolygon, Polygon,
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from ClassLib import *
-from sonnetLab.sonnetLab import SonnetLab
+
+import sonnetSim
+reload(sonnetSim)
+from sonnetSim.sonnetLab import SonnetLab
 
 import numpy as np
 import csv
@@ -41,14 +44,13 @@ if( __name__ == "__main__" ):
 
     # clear this cell and layer
     cell.clear()
+    cell_reg_photo = Region()
 
     # setting layout view  
     lv.select_cell(cell.cell_index(), 0)
     lv.add_missing_layers()
     
     ### DRAW SECTION START ###
-    reg = Region()
-    
     X_SIZE = 700e3
     Y_SIZE = 700e3
     
@@ -74,18 +76,41 @@ if( __name__ == "__main__" ):
     
     p0 = DPoint(sonnet_box.center())
     
-    cwave_params = [r_out,r_gap,n_semiwaves,s,alpha,r_curve,delta,L0,n_pts_cwave]
+    cwave_params = [r_out,r_gap,n_semiwaves,s,alpha,r_curve,delta,n_pts_cwave]
     cap = CWave( p0, *cwave_params, trans_in=Trans.R90 )
-    cap.place( cell, layer_ph )
+    cap.place(cell_reg_photo)
     
     overlap = 2e3
     
-    Z_left = CPW( width, gap, DPoint( 0, Y_SIZE/2 ), p0 + DPoint( -r_in + overlap ,0 ) )
-    Z_left.place( cell, layer_ph, merge=True )
+    Z_left = CPW(width, gap, DPoint(0, Y_SIZE/2), p0 + DPoint(-r_in + overlap, 0))
+    Z_left.place(cell_reg_photo, merge=True)
     
-    Z_right = CPW( width, gap,DPoint( X_SIZE, Y_SIZE/2 ), p0 + DPoint( r_in - overlap ,0 ) )
-    Z_right.place( cell, layer_ph, merge=True )
-    ### DRAW SECTION START ###
-    
+    Z_right = CPW(width, gap, DPoint(X_SIZE, Y_SIZE/2), p0 + DPoint(r_in - overlap, 0))
+    Z_right.place(cell_reg_photo, merge=True)
+    ### DRAW SECTION END ###
+    cell.shapes(layer_ph).insert(cell_reg_photo)
     lv.zoom_fit()
+
+
+    ### SIMULATION SECTION START ###
+    x_cells_N = 50
+    y_cells_N = 50
+
+    start_freq = 1
+    stop_freq = 3
+
     SL = SonnetLab()
+    SL.clear()
+
+    SL.set_boxProps(X_SIZE,Y_SIZE, x_cells_N, y_cells_N)
+    SL.set_ABS_sweep(start_freq, stop_freq)
+
+    SL.send_cell_layer(cell, layer_ph, [Z_left.start, Z_right.start])
+
+    SL.start_simulation(wait=True)
+    print(SL.read_line())
+
+    SL.visualize_sever()
+    SL.release()
+    ### SIMULATION SECTION END ###
+    
