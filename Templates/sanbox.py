@@ -1,62 +1,34 @@
-import pya
-from math import sqrt, cos, sin, atan2, pi, copysign
-from pya import Point, DPoint, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
+from pya import Point, DPoint, Vector, DVector, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
+from importlib import reload
+
+from ClassLib import *
+reload(ClassLib)
 from ClassLib import *
 
-### START classes to be delegated to different file ###
+class Tshaped_Capacitor_Example(Chip_Design):
+    origin = DPoint(0, 0)
+    Z = CPWParameters(20e3, 10e3)  # normal CPW
+    Z_narrow = CPWParameters(10e3, 7e3)  # narrow CPW
+    cpw_curve = 200e3  # Curvature of CPW angles
+    chip = None
 
-# END classes to be delegated to different file ###
+    # Call other methods drawing parts of the design from here
+    def draw(self):
+        self.draw_Tshaped_capcitor()
 
-# Enter your Python code here
+    def draw_Tshaped_capacitor(self):
+        raise NotImplemented
+
+    def get_Tshaped_capacitor_parameter(self):
+        raise NotImplemented
+
+
+
+
 ### MAIN FUNCTION ###
 if __name__ == "__main__":
-# getting main references of the application
-    app = pya.Application.instance()
-    mw = app.main_window()
-    lv = mw.current_view()
-    cv = None
-
-    #this insures that lv and cv are valid objects
-    if( lv == None ):
-        cv = mw.create_layout(1)
-        lv = mw.current_view()
-    else:
-        cv = lv.active_cellview()
-
-# find or create the desired by programmer cell and layer
-    layout = cv.layout()
-    layout.dbu = 0.001
-    if( layout.has_cell( "testScript") ):
-        pass
-    else:
-        cell = layout.create_cell( "testScript" )
-
-    info = pya.LayerInfo(1,0)
-    info2 = pya.LayerInfo(2,0)
-    layer_ph = layout.layer( info )
-    layer_el = layout.layer( info2 )
-
-    # clear this cell and layer
-    cell.clear()
-
-    # setting layout view
-    lv.select_cell(cell.cell_index(), 0)
-    lv.add_missing_layers()
-
-    ### DRAW SECTION START ###
-    origin = DPoint(0,0)
-    Z_params = CPWParameters( 14.5e3, 6.7e3 )
-    chip = Chip5x10_with_contactPads( origin, Z_params )
-    chip.place( cell, layer_ph )
-
-    gap = 0e3
-    width = 30e3
-    length = 150e3
-    delta = 200e3
-    Z_left = CPW( width, gap, origin + DPoint( 0, chip.chip_y/2 ), origin + DPoint( chip.chip_x/2, chip.chip_y/2 ) )
-    Z_left.place( cell,layer_ph )
-    ### DRAW SECTION END ###
-    CPW()
-    lv.zoom_fit()
+    my_design = Tshaped_Capacitor_Example('testScript')
+    my_design.show()
+    # my_design.save_as_gds2(r'C:\Users\andre\Documents\chip_designs\chip_design.gds2')

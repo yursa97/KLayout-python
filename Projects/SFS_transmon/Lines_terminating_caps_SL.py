@@ -1,13 +1,17 @@
-import pya
 from math import sqrt, cos, sin, atan2, pi, copysign
+
 from pya import Point, DPoint, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
+from importlib import reload
+
+import ClassLib
+reload(ClassLib)
 from ClassLib import *
 
 import sonnetSim
 reload(sonnetSim)
-from sonnetSim.sonnetLab import SonnetLab
+from sonnetSim import SonnetLab
 
 import numpy as np
 import csv
