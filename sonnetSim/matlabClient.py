@@ -35,7 +35,6 @@ class MatlabClient():
     
     def _send( self, byte_arr, confirmation_value=RESPONSE.OK ):
         confirm_byte = None
-        #print( "sending: ", byte_arr )
         self.sock.sendall( byte_arr )
         
         # waiting for 2 confirmation bytes received or timeout expired
@@ -43,7 +42,6 @@ class MatlabClient():
             while( True ):
                 confirm_byte = self.sock.recv(2,socket.MSG_PEEK)
                 if( len(confirm_byte) == 2 ):
-                    #print("msg picking")
                     confirm_byte = self.sock.recv(2)
                     confirm_val = struct.unpack("!H",confirm_byte)[0]
                     if( confirm_val == confirmation_value ):
@@ -51,7 +49,6 @@ class MatlabClient():
                     else:
                         self.state = self.STATE.ERROR
                         return False
-            #print( "received: ", confirm_val==RESPONSE.OK )
         except Exception as e:
             print("exception on reception of confirm byte, following exception:")
             print(e)    
@@ -98,7 +95,6 @@ class MatlabClient():
         if( port_edges_numbers_list is None or len(port_edges_numbers_list)==0 ):
             self._send( FLAG.FALSE )
         else:
-            print( "edges true")
             self._send( FLAG.TRUE )
             self._send_array_uint32( port_edges_numbers_list )
         
@@ -120,7 +116,6 @@ class MatlabClient():
     def _send_simulate( self ):
         self._send( CMD.SIMULATE, confirmation_value=RESPONSE.START_SIMULATION )
         self.state = self.STATE.BUSY_SIMULATING
-        print("simulation command is sent")
         
     def _get_simulation_status( self ):
         if( self.state == self.STATE.BUSY_SIMULATING ):

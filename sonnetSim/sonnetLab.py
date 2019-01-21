@@ -11,6 +11,12 @@ class SonnetLab( MatlabClient ):
     def __init__(self, host="localhost", port=MatlabClient.MATLAB_PORT ):
         super(SonnetLab,self).__init__()
         self.state = self.STATE.READY
+
+        # file that stores results of the last successful simulation
+        self.sim_res_file = None
+        self.ports = None
+        self.freqs = None
+        self.sMatrices = None
     
     def clear( self ):    
         self._clear()
@@ -20,6 +26,9 @@ class SonnetLab( MatlabClient ):
         
     def set_ABS_sweep(self, start_f_GHz, stop_f_GHz):
         self._set_ABS_sweep(start_f_GHz, stop_f_GHz)
+
+    def set_ports(self, dpoint_array):
+        self.ports = dpoint_array
     
     def send_element( self, el_class_obj ):
         el = el_class_obj # name alias
@@ -32,10 +41,10 @@ class SonnetLab( MatlabClient ):
         sonnet_port_connection_indexes = []
         self.send_polygon( poly, el.sonnet_port_edge_indexes )
         
-    def send_polygon( self, polygon, connections=None, port_edges_indexes=None ):
+    def send_polygon( self, polygon, port_edges_indexes=None ):
         pts_x = np.zeros(polygon.num_points(), dtype=np.float64 )
         pts_y = np.zeros(polygon.num_points(), dtype=np.float64 )
-        print( "Sending polygon, edges: ", polygon.num_points_hull() )
+        #print( "Sending polygon, edges: ", polygon.num_points_hull() )
         if( port_edges_indexes is not None ):
             print( "port edges indexes passing is not implemented yet." )
             raise NotImplemented
@@ -46,21 +55,19 @@ class SonnetLab( MatlabClient ):
             pts_x[i] = edge.p1.x/1.0e3
             pts_y[i] = edge.p1.y/1.0e3
                 
-            for conn_pt in connections:
+            for conn_pt in self.ports:
                 r_middle = (edge.p1 + edge.p2)*0.5
                 R = conn_pt.distance( r_middle )
                 if( R < 10 ): # distance from connection point to the middle of the edge <10 nm
                     port_edges_indexes.append(i+1) # matlab polygon edge indexing starts from 1
-                    print(edge.p1, edge.p2, conn_pt)
                     break
-            
-        print( port_edges_indexes )
+
         self._send_polygon( pts_x,pts_y, port_edges_indexes )
         
-    def send_cell_layer( self, cell, layer_i, connections ):
+    def send_cell_layer( self, cell, layer_i):
         r_cell = Region(cell.begin_shapes_rec(layer_i))
         for poly in r_cell:
-            self.send_polygon(poly, connections=connections)
+            self.send_polygon(poly)
     
     def start_simulation( self, wait=True ):
         '''
@@ -82,12 +89,60 @@ class SonnetLab( MatlabClient ):
 
         if( wait == True ):
             while( self.state == self.STATE.BUSY_SIMULATING ):
-                print( "self.state == self.STATE_BUSY_SIMULATING")
                 self.get_simulation_status() # updates self.state
+
+        self.sim_res_file = self.read_line()
             
     def get_simulation_status( self ):
         self._get_simulation_status()
         return self.state
+
+    def get_s_params(self):
+        '''
+        @brief: Function parses last csv file output from
+                matlab. Works only in case if matlab server
+                and sonnet server are executed at this machine.
+        @return:    (freqs, sMatrices)
+                    freqs : 1D numpy array of length freqs_N
+                        stores simulation frequencies
+
+                    sMatrices : 3D numpy array with shape (freqs_N, ports_N, ports_N)
+                        ports_N - number of ports in the simulation
+                        1st index - index of the frequency in freqs
+                        2nd and 3rd indexes - row and column indexes
+                        of the S-matrix that corresponds to the frequency
+                        freq[1st index]
+        '''
+        if( self.sim_res_file is None ):
+            print("sonnetLab.get_s_params: self.sim_res_file is None\n\
+                   None is returned")
+            return None
+
+        data = None
+        with open(self.sim_res_file, "r") as my_csv_file:
+            data = np.array(list(csv.reader(my_csv_file))[8:], dtype=np.float64)
+        freqs = np.array(data[:, 0], dtype=np.float64)
+        s_data = np.array(data[:, 1::2] + 1j*data[:, 2::2], dtype=np.complex128)
+
+        ports_N = len(self.ports)
+        file_ports_N = int(round(np.sqrt(s_data.shape[1])))
+        if( ports_N != file_ports_N ):
+            print("sonnetLab.get_s_params(): internal ports number does not match\
+                  file ports number,\nfile ports number:{}".format(file_ports_N))
+
+        '''
+        The original data is shaped as follows:
+        0 - frequency index for example
+        data[0] = [S11,S21,S31,...,Sn1, S21,S22,...,Sn2, ...,Snn]
+        we want to reshape it to the following form:
+        data[0] = [ [S11, S12, ..., S1n],
+                    [S21, S22, ..., S2n],
+                          ...          ,
+                    [Sn1, Sn2, ..., Snn] ]
+        '''
+        sMatrices = s_data.reshape((len(freqs), file_ports_N, file_ports_N)).transpose(0, 2, 1)
+        return freqs, sMatrices
+
             
     def visualize_sever( self ):
         self._visualize_sever()

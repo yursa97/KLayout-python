@@ -369,7 +369,10 @@ class CPW_RL_Path(Complex_Base):
                         self._segment_lengths[L_index] -= self._turn_radiuses[R_index-1]*coeff
                         
                 if( self._segment_lengths[L_index] < 0 ):
-                    print( "CPW_RL_Path warning: segment length is less than zero" )
+                    print(self._segment_lengths[L_index])
+                    print("CPW_RL_Path warning: segment length is less than zero")
+                    print("L_index = {}".format(L_index))
+
                     
                 cpw = CPW(self._cpw_parameters[i].width, self._cpw_parameters[i].gap,
                         prev_primitive_end, prev_primitive_end + DPoint(self._segment_lengths[L_index], 0),

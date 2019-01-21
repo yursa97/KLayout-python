@@ -1,4 +1,5 @@
 import pya
+from pya import Region
 
 class Chip_Design:
     """ @brief:     inherit this class for working on a chip design
@@ -13,6 +14,9 @@ class Chip_Design:
         mw = app.main_window()
         self.lv = mw.current_view()
         self.cv = None
+        self.cell = None
+        self.region_ph = Region()
+        self.region_el = Region()
         
         #this insures that lv and cv are valid objects
         if(self.lv == None):
@@ -43,9 +47,22 @@ class Chip_Design:
     
     # Call other methods drawing parts of the design from here
     def draw(self):
-        pass
+        '''
+        @brief: Purely virtual base-class method that is ought to be
+                implemented in child classes.
+                Responsible for calling functions that draw separate
+                objects.
+        '''
+        raise NotImplementedError
     
     def __end_drawing(self):
+        # this too methods assumes that all previous drawing
+        # functions are placing their object on regions
+        # in order to avoid extensive copying of the polygons
+        # to/from cell.shapes during the logic operations on
+        # polygons
+        self.cell.shapes(self.layer_ph).insert(self.region_ph)
+        self.cell.shapes(self.layer_el).insert(self.region_el)
         self.lv.zoom_fit()
     
     # Call this m

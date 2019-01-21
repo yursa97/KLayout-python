@@ -3,7 +3,11 @@ from math import sqrt, cos, sin, atan2, pi, copysign
 from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from ClassLib import *
+from importlib import reload
+
+from .BaseClasses import Complex_Base
+from .Coplanars import CPW_RL_Path, CPW
+from .Coplanars import Coil_type_1, CPW_arc # backward compatibility TODO: delete classes
 
 class CPWResonator():
     
@@ -22,7 +26,7 @@ class CPWResonator():
         
         Parameters:
             origin: DPoint
-                The point where the resonator's couling tail ends
+                The point where the resonator's coupling tail ends
                 and the meander starts
             cpw_parameters: CPWParameters
                 CPW parameters for the resonator
@@ -103,32 +107,31 @@ class CPWResonator2(Complex_Base):
     def __init__(self, origin, cpw_parameters, turn_radius, frequency, ɛ, 
         wavelength_fraction = 1/4, coupling_length = 200e3,
         meander_periods = 4, neck_length = 100e3, trans_in = None):
-        '''
+        """
         A CPW resonator of wavelength fraction with automatic length calculation
         from given frequency.
 
         Modification: with a neck along the resonator
-        
+
         It is also possible to attach a primitive to the end of the resonator which
         should provide a get_phase_shift(   ) method to calculate its effective length
         as if it was just a straight CPW piece.
-        
+
         Parameters:
             origin: DPoint
-                The point where the resonator's coupling tail ends
-                and the meander starts
+                The point where the resonator's coupling tail starts
             cpw_parameters: CPWParameters
                 CPW parameters for the resonator
             turn_radius: float
-                Raduis of the resonator's meander turns 
+                Raduis of the resonator's meander turns
             frequency: float, GHz
                 The frequency that the resonator will have
             ɛ: float
                 Substrate relative permittivity
             wavelength_fraction: float
-                The fraction of the wavelength the resonator's 
+                The fraction of the wavelength the resonator's
                 fundamental mode has at resonance. This parameter
-                is not checked for consistensy with the resonator's 
+                is not checked for consistency with the resonator's
                 boundaries
             coupling_length: float
                 The length of the segment parallel to the feedline
@@ -137,7 +140,7 @@ class CPWResonator2(Complex_Base):
             neck_length: float
                 The length of the straight part before the uncoupled end
                 of the resonator
-        '''
+        """
         self.Z = cpw_parameters
         self.R = turn_radius
         self.cpl_L = coupling_length
@@ -147,25 +150,29 @@ class CPWResonator2(Complex_Base):
         self.wavelength_fraction = wavelength_fraction
         self.eps = ɛ
         self.len = self._calculate_total_length()
+
+        self.line = None # RL path that represents meandr
+        self.open_end = None # open-ended coplanar at the and of the resonator
+
         super().__init__(origin, trans_in)
+
+        self.start = self.line.connections[0]
+        self.end = self.line.connections[1]
+        self.alpha_start = self.line.angle_connections[0]
+        self.alpha_end = self.line.angle_connections[1]
         
     def init_primitives(self):
         origin = DPoint(0, 0)
         meander_length = (self.len - self.cpl_L - (5 / 2 + 2 * self.N) * pi * self.R + 3 * self.R - self.neck) / (2 * self.N + 3 / 2)
         shape = "LRL" + self.N * "RLRL" + "RLRL"
-        segment_lengths = [-self.cpl_L, meander_length] + 2 * self.N * [meander_length] + [meander_length + 3 * self.R, self.neck]
+        segment_lengths = [self.cpl_L, meander_length] + 2 * self.N * [meander_length] + [meander_length + 3 * self.R, self.neck]
         turn_angles = [pi] + self.N * [-pi, pi]+[-pi, -pi/2]
         
         self.line = CPW_RL_Path(origin, shape, self.Z, self.R, segment_lengths, turn_angles)
         self.primitives['line'] = self.line
 
-        self.open_end = CPW( 0, self.Z.b/2, self.line.end, self.line.end + DPoint(0, self.Z.b) )
+        self.open_end = CPW(0, self.Z.b/2, self.line.end, self.line.end + DPoint(0, self.Z.b))
         self.primitives['open_end'] = self.open_end
-        
-        self.start = self.line.connections[0]
-        self.end = self.line.connections[1]
-        self.alpha_start = self.line.angle_connections[0]
-        self.alpha_end = self.line.angle_connections[1]
         
     def _calculate_total_length(self):
         length = self._c / self.freq / sqrt(self.eps/2 + 0.5) / 1e9 * self.wavelength_fraction
@@ -191,7 +198,7 @@ class EMResonator_TL2Qbit_worm( Complex_Base ):
         
     def init_primitives( self ):
         name = "coil0"
-        setattr(self,name, Coil_type_1(self.Z0, DPoint(0,0), self.L_coupling, self.r, self.L1) )
+        setattr(self, name, Coil_type_1(self.Z0, DPoint(0,0), self.L_coupling, self.r, self.L1) )
         self.primitives[name] = getattr( self, name )      
         # coils filling        
         for i in range(self.N):
