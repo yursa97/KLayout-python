@@ -69,12 +69,17 @@ class MatlabClient():
     def _send_uint32( self, val ):
         raw_data = struct.pack( "!I", np.uint32(val) )
         self._send( raw_data )
-    
+
+    def _send_array_uint16(self, array ):
+        raw_data = struct.pack("!{0}H".format(len(array)), *array)
+        self._send_uint32(len(array))
+        self._send(raw_data)
+
     def _send_array_uint32( self, array ):
         raw_data = struct.pack( "!{0}I".format(len(array)), *array ) 
         self._send_uint32( len(array) )
         self._send( raw_data )
-        
+
     def read_line( self ):
         self.sock.settimeout(None) # entering nonblocking mode
         while( True ):
@@ -89,7 +94,7 @@ class MatlabClient():
                 
         return data
         
-    def _send_polygon( self, array_x, array_y, port_edges_numbers_list=None ):
+    def _send_polygon( self, array_x, array_y, port_edges_numbers_list=None, port_edges_types=None ):
         self._send( CMD.POLYGON )
         
         if( port_edges_numbers_list is None or len(port_edges_numbers_list)==0 ):
@@ -97,6 +102,7 @@ class MatlabClient():
         else:
             self._send( FLAG.TRUE )
             self._send_array_uint32( port_edges_numbers_list )
+            self._send_array_uint16( port_edges_types )
         
         self._send_array_float64( array_x )
         self._send_array_float64( array_y )
