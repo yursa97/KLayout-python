@@ -37,12 +37,12 @@ class Squid(Complex_Base):
         b_ext: float
             The extension of bended leads after bending
         j_length: float
-            THe length of the jj and the width of bended parts of the lower leads
+            The length of the jj and the width of bended parts of the lower leads
         n: int
             The number of angle in regular polygon which serves as a large contact pad
         bridge: float
-            THe value of the gap between two parts of junction in the design
-        trans_in: Bool
+            The value of the gap between two parts of junction in the design
+        trans_in: Trans
             Initial transformation
     '''
     def __init__(self, origin, params, trans_in=None):
@@ -116,7 +116,7 @@ class Line_N_JJCross(Element_Base):
 
         self.poly1 = self._make_polygon( self.b, self.w, self.d1, self.f1,   self.d2 )
 
-        super( Line_N_JJ,self ).__init__( origin, trans_in )
+        super().__init__( origin, trans_in )
 
     def _make_polygon( self, length, w, d, f, overlapping ):
         polygon = DSimplePolygon

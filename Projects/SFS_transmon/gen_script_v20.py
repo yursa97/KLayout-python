@@ -1,5 +1,3 @@
-#from Projects.SFS_transmon.MyDesign import My_Design
-
 import pya
 from math import sqrt, cos, sin, tan, atan2, pi, copysign
 from pya import Point, DPoint, Vector, DVector, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
@@ -89,10 +87,10 @@ class SFS_Csh_par(Complex_Base):
 class My_Design(Chip_Design):
 
     origin = DPoint(0, 0)
-    Z = CPWParameters(20e3, 10e3)  # normal CPW
-    Z_res = Z  # resonator CPW
-    Z_narrow = CPWParameters(10e3,7e3)  # narrow CPW
-    cpw_curve = 200e3  # Curvature of CPW angles
+    Z = CPWParameters(20e3, 10e3) # normal CPW
+    Z_res = Z
+    Z_narrow = CPWParameters(10e3,7e3) # narrow CPW
+    cpw_curve = 200e3 # Curvature of CPW angles
     chip = None
 
     # Call other methods drawing parts of the design from here
@@ -144,38 +142,40 @@ class My_Design(Chip_Design):
     
     def draw_mixing_qubit(self):
         # Ports to which a maxing qubit is connected
-        p1 = self.chip.connections[3]
+        p1 = self.chip.connections[2]
         p2 = self.chip.connections[4]
 
         # Mixing qubit and dc-SQUID parameters
         pars = self.get_mixing_qubit_params()
         pars_squid = self.get_dc_squid_params()
         pars_coupling = self.get_mixing_qubit_coupling_params()
-
+    
         # Drawing the probe line
-        probe_line = CPW_RL_Path(p1, "LRLRL", self.Z, self.cpw_curve, [self.chip.chip_y/10, (p2-p1).x, self.chip.chip_y/10], [pi/2, pi/2], trans_in=Trans.R270)
+        v = self.chip.chip_y/7 # vertical size of the probe line
+        h = (p2-p1).x # horizontal size of the probe line
+        probe_line = CPW_RL_Path(p1, "LRLRL", self.Z, self.cpw_curve, [v, h, v], [pi/2, pi/2], trans_in=Trans.R270)
         probe_line.place(self.cell, self.layer_ph)
         
         # Drawing the qubit near the probe line
-        p = DPoint((p2.x + p1.x)/2,
-                   p1.y - abs(self.chip.chip_y/10) - pars_coupling["to_line"] - pars['r_out'])  # Position of the qubit
-        mq1 = SFS_Csh_par(p, pars, pars_squid, pars_coupling)
+        p = DPoint((p2.x + p1.x)/2 + 1.1 * pars['r_out'],
+                   p1.y - v + pars_coupling['to_line'] + pars['r_out'])  # Position of the qubit
+        # mq1 = SFS_Csh_par(p, pars, pars_squid, pars_coupling)
+        mq1 = SFS_Csh_emb(p, pars, pars_squid, squid_pos=1)
         mq1.place(self.cell, self.layer_ph, self.layer_el)
 
         # Drawing a flux bias line
-        p3 = self.chip.connections[2] # port connected to the flux bias line
+        p3 = self.chip.connections[3] # port connected to the flux bias line
         conn_len = 50e3 # length of a connection between two parts of the line
-        dx = (p-p3).x - pars['r_out'] - 40e3 - conn_len
-        dy = p3.y - p.y + pars['r_out']
-        flux_line1 = CPW_RL_Path(p3, 'LRL', self.Z, self.cpw_curve, [dy, dx], pi/2, trans_in=Trans.R270)
-        flux_line1.place(self.cell, self.layer_ph)
         Z_end = CPWParameters(5e3, 5e3) # parameters of a CPW at the end of the line
-        p_start = p3 + DPoint(dx, -dy)
-        p_end = p3 + DPoint(dx + conn_len, -dy)
-        flux_conn = CPW2CPW(self.Z, Z_end, p_start, p_end)
-        flux_conn.place(self.cell, self.layer_ph)
-        flux_line2 = CPW_RL_Path(p_end, 'RL', Z_end, 50e3, [pars['r_out'] + 40e3], pi/2, trans_in=None)
-        flux_line2.place(self.cell, self.layer_ph)
+        fl1_end = p3 - DPoint(0, v - 3 * pars['r_out'])
+        fl2_start = fl1_end - DPoint(0, conn_len)
+        fl2_end = fl2_start - DPoint(0, 2 * pars['r_out'])
+        fl1 = CPW(self.Z.width, self.Z.gap, p3, fl1_end)
+        fl1.place(self.cell, self.layer_ph)
+        fl_conn = CPW2CPW(self.Z, Z_end, fl1_end, fl2_start)
+        fl_conn.place(self.cell, self.layer_ph)
+        fl2 = CPW(Z_end.width, Z_end.gap, fl2_start, fl2_end)
+        fl2.place(self.cell, self.layer_ph)
 
     def draw_resonators_with_qubits(self):
         # drawing the line
@@ -184,40 +184,46 @@ class My_Design(Chip_Design):
         probe_line = CPW_RL_Path(p1, "LRL", self.Z, self.cpw_curve, [(p1-p2).x, (p1-p2).y], pi / 2, trans_in = Trans.R180)
         probe_line.place(self.cell, self.layer_ph)
 
-        # drawing resonators
-        pars = self.get_mixing_qubit_params()
+        # drawing resonators with qubits
+        pars = self.get_sps_params()
         pars_squid = self.get_dc_squid_params()
-        pars_coupling = self.get_mixing_qubit_coupling_params()
-        res_to_line = 30e3
+        res_to_line = 30e3 # distance between a resonator and a line
 
-        worm1 = self.draw_one_resonator(DPoint(p2.x + res_to_line + 2 * (self.Z.width/2 + self.Z.gap), p1.y * 1/3 + p2.y * 2/3), freq=5, trans_in=(Trans.R90*Trans.R180))
-        # Drawing the qubit near the worm1
-        p = worm1.end + DPoint(worm1.Z.b, -pars_coupling["to_line"] - pars['r_out'])
-        mq1 = SFS_Csh_par(p, pars, pars_squid, pars_coupling)
+        # Top left resonator + qubit
+        worm_pos = DPoint(p1.x * 2/5 + p2.x * 3/5 , p1.y - res_to_line - 2 * (self.Z.width/2 + self.Z.gap))
+        worm1 = self.draw_one_resonator(worm_pos, freq=6.8, extra_neck_length=pars['r_out'], trans_in=Trans.R180)
+        q_pos = worm1.end + DPoint(0, pars['r_out'] - worm1.Z.b) # qubit position
+        mq1 = SFS_Csh_emb(q_pos, pars, pars_squid)
         mq1.place(self.cell, self.layer_ph, self.layer_el)
 
-        worm2 = self.draw_one_resonator(DPoint(p1.x * 2/5 + p2.x * 3/5 , p1.y - res_to_line - 2 * (self.Z.width/2 + self.Z.gap)), freq=5.1, trans_in=Trans.R180)
-        # Drawing the qubit near the worm2
-        p = worm2.end + DPoint(-pars_coupling["to_line"] - pars['r_out'], -worm2.Z.b)
-        mq2 = SFS_Csh_par(p, pars, pars_squid, pars_coupling, trans_in=Trans.R270)
+        # Top right resonator + qubit
+        worm_pos = DPoint(p1.x * 4/5 + p2.x * 1/5, p1.y - res_to_line - 2 * (self.Z.width/2 + self.Z.gap)) # resonator position
+        worm2 = self.draw_one_resonator(worm_pos, freq=7, extra_neck_length=pars['r_out'], trans_in=Trans.R180)
+        q_pos = worm2.end + DPoint(0, pars['r_out'] - worm2.Z.b) # qubit position
+        mq2 = SFS_Csh_emb(q_pos, pars, pars_squid)
         mq2.place(self.cell, self.layer_ph, self.layer_el)
 
-        worm3 = self.draw_one_resonator(DPoint(p1.x * 4/5 + p2.x * 1/5, p1.y - res_to_line - 2 * (self.Z.width/2 + self.Z.gap)), freq=4.9, trans_in=Trans.R180)
-        # Drawing the qubit near the worm3
-        p = worm3.end + DPoint(-pars_coupling["to_line"] - pars['r_out'], -worm3.Z.b)
-        mq2 = SFS_Csh_par(p, pars, pars_squid, pars_coupling, trans_in=Trans.R270)
-        mq2.place(self.cell, self.layer_ph, self.layer_el)
-
-    def draw_one_resonator(self, pos, freq, trans_in=None):
+        # Bottom left resonator + qubit
+        worm_pos = DPoint(p2.x + res_to_line + 2 * (self.Z.width/2 + self.Z.gap), p1.y/2)
+        worm3 = self.draw_one_resonator(worm_pos, freq=7.2, no_neck=True, trans_in=Trans.R270)
+        q_pos = worm3.end - DPoint(0, pars['r_out'] - worm2.Z.b)
+        # Moving a capacitive coupling to the top of a qubit
+        pars['Z1'],       pars['Z2']       = pars['Z2'],       pars['Z1']
+        pars['d_alpha1'], pars['d_alpha2'] = pars['d_alpha2'], pars['d_alpha1']
+        pars['width1'],   pars['width2']   = pars['width2'],   pars['width1']
+        pars['gap1'],     pars['gap2']     = pars['gap2'],     pars['gap1']
+        mq3 = SFS_Csh_emb(q_pos, pars, pars_squid)
+        mq3.place(self.cell, self.layer_ph, self.layer_el)
+    
+    def draw_one_resonator(self, pos, freq, no_neck=False, extra_neck_length=0, trans_in=None):
         turn_radius = 50e3
         eps = 11.45
         wavelength_fraction = 1/4
         coupling_length = 300e3
-        meander_periods = 4
-        neck_length = 700e3
-
-        worm = CPWResonator2(pos, self.Z_res, turn_radius, freq, eps, wavelength_fraction,
-                             coupling_length, meander_periods, neck_length, trans_in=trans_in)
+        meander_periods = 3
+        neck_length = 200e3
+        worm = CPWResonator2(pos, self.Z, turn_radius, freq, eps, wavelength_fraction, coupling_length, meander_periods, neck_length,
+                            no_neck=no_neck, extra_neck_length=extra_neck_length, trans_in=trans_in)
         worm.place(self.cell, self.layer_ph)
         return worm
 
@@ -239,7 +245,7 @@ class My_Design(Chip_Design):
                 'd_alpha1'	:	0, # width of a tip  of a central conductor of the top CPW
                 'width1'	:	0, # width of a conductor in the top semiring
                 'gap1'	:	25e3 - 1.33e3, # gap between the top semiring and the central capacitor
-                'Z2'	:	self.Z, # Paramters of a bottom CPW
+                'Z2'	:	self.Z, # Parameters of a bottom CPW
                 'd_alpha2'	:	2 / 9 * pi, # length of a circumference covered by the bottom semiring
                 'width2'	:	25e3/3, # width of a conductor in the bottom semiring
                 'gap2'	:	25e3/3, # gap between the bottom semiring and the central capacitor
@@ -276,19 +282,19 @@ class My_Design(Chip_Design):
         return pars
 
     def get_dc_squid_params(self):
-        pad_side = 5e3
-        pad_r = 1e3
-        pads_distance = 30e3
-        p_ext_width = 3e3
-        p_ext_r = 0.5e3
-        sq_len = 7e3
-        sq_area = 15e6
-        j_width = 0.2e3
-        low_lead_w = 0.5e3
-        b_ext =   0.9e3
-        j_length =  0.1e3
-        n = 7
-        bridge = 0.2e3
+        pad_side = 5e3 # A length of the side of triangle pad
+        pad_r = 1e3 # The radius of round angle of the contact pad
+        pads_distance = 30e3 # The distance between triangle contact pads
+        p_ext_width = 3e3 # The width of curved rectangle leads which connect triangle contact pads and junctions
+        p_ext_r = 0.5e3 # The angle radius of the pad extension
+        sq_len = 7e3 # The length of the squid, along leads
+        sq_area = 15e6 # The total area of the squid
+        j_width = 0.2e3 # The width of the upper small leads (straight) and also a width of the junction
+        low_lead_w = 0.5e3 # The width g the lower small bended leads before bending
+        b_ext =   0.9e3 # The extension of bended leads after bending
+        j_length =  0.1e3 # The length of the jj and the width of bended parts of the lower leads
+        n = 7 # The number of angle in regular polygon which serves as a large contact pad
+        bridge = 0.2e3 # The value of the gap between two parts of junction in the design
         return [pad_side, pad_r, pads_distance, p_ext_width,
                 p_ext_r, sq_len, sq_area, j_width, low_lead_w,
                 b_ext, j_length, n,bridge]
