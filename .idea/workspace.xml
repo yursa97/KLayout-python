@@ -3,16 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="5e83f3b2-727d-454b-b087-abad5ef3dc46" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClassLib/ChipDesign.py" beforeDir="false" afterPath="$PROJECT_DIR$/ClassLib/ChipDesign.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClassLib/Coplanars.py" beforeDir="false" afterPath="$PROJECT_DIR$/ClassLib/Coplanars.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClassLib/Resonators.py" beforeDir="false" afterPath="$PROJECT_DIR$/ClassLib/Resonators.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ClassLib/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/ClassLib/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Projects/SFS_transmon/Lines_terminating_caps_SL.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Projects/SFS_transmon/gen_script_v20.py" beforeDir="false" afterPath="$PROJECT_DIR$/Projects/SFS_transmon/gen_script_v20.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ClassLib/Capacitors.py" beforeDir="false" afterPath="$PROJECT_DIR$/ClassLib/Capacitors.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Templates/sanbox.py" beforeDir="false" afterPath="$PROJECT_DIR$/Templates/sanbox.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sonnetSim/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/sonnetSim/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sonnetSim/matlabClient.py" beforeDir="false" afterPath="$PROJECT_DIR$/sonnetSim/matlabClient.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sonnetSim/sonnetLab.py" beforeDir="false" afterPath="$PROJECT_DIR$/sonnetSim/sonnetLab.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -27,120 +19,59 @@
           <entry key="project.closed" value="7" />
           <entry key="project.open.time.0" value="1" />
           <entry key="project.open.time.1" value="1" />
-          <entry key="project.open.time.10" value="1" />
+          <entry key="project.open.time.10" value="2" />
           <entry key="project.open.time.12" value="1" />
           <entry key="project.open.time.13" value="1" />
           <entry key="project.open.time.9" value="2" />
-          <entry key="project.opened" value="7" />
+          <entry key="project.opened" value="8" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="py" value="49" />
+          <entry key="py" value="50" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Python" value="49" />
+          <entry key="Python" value="50" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="dummy" value="1" />
-          <entry key="py" value="10416" />
+          <entry key="py" value="10439" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="1" />
-          <entry key="Python" value="10416" />
+          <entry key="Python" value="10439" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Projects/SFS_transmon/gen_script_v20.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="342">
-              <caret line="206" column="80" selection-start-line="206" selection-start-column="80" selection-end-line="206" selection-end-column="80" />
-              <folding>
-                <element signature="e#55#65#0" expanded="true" />
-                <element signature="e#424#2283#0" />
-                <element signature="e#2407#3123#0" />
-                <element signature="e#3159#4071#0" />
-                <element signature="e#4181#4294#0" />
-                <element signature="e#2599#2777#0" />
-                <element signature="e#2816#2974#0" />
-                <element signature="e#3015#3140#0" />
-                <element signature="e#3198#4060#0" />
-                <element signature="e#5966#7662#0" />
-                <element signature="e#7117#7501#0" />
-                <element signature="e#7541#8795#0" />
-                <element signature="e#10118#10580#0" />
-                <marker date="1548093423284" expanded="true" signature="13620:13864" ph="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ClassLib/ChipDesign.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="154">
-              <caret line="48" column="8" selection-start-line="48" selection-start-column="8" selection-end-line="48" selection-end-column="8" />
-              <folding>
-                <element signature="e#0#10#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ClassLib/SFS.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1850">
-              <caret line="17" column="8" selection-start-line="17" selection-start-column="8" selection-end-line="17" selection-end-column="8" />
-              <folding>
-                <element signature="e#0#10#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ClassLib/Resonators.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1199">
-              <caret line="106" column="8" selection-start-line="106" selection-start-column="8" selection-end-line="106" selection-end-column="8" />
-              <folding>
-                <element signature="e#0#10#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ClassLib/Coplanars.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="22">
-              <caret line="21" column="8" selection-start-line="21" selection-start-column="8" selection-end-line="21" selection-end-column="8" />
-              <folding>
-                <element signature="e#0#10#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Templates/sanbox.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="416">
-              <caret line="77" column="23" selection-start-line="77" selection-start-column="23" selection-end-line="77" selection-end-column="23" />
+            <state relative-caret-position="770">
+              <caret line="65" column="13" selection-start-line="65" selection-start-column="13" selection-end-line="65" selection-end-column="13" />
               <folding>
                 <element signature="e#0#115#0" expanded="true" />
-                <marker date="1547650759108" expanded="true" signature="406:415" ph="..." />
+                <marker date="1548872527218" expanded="true" signature="399:408" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/ClassLib/Capacitors.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="108">
+              <caret line="123" column="41" lean-forward="true" selection-start-line="123" selection-start-column="41" selection-end-line="123" selection-end-column="41" />
+              <folding>
+                <element signature="e#0#10#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -202,6 +133,7 @@
         <option value="$PROJECT_DIR$/ClassLib/__init__.py" />
         <option value="$PROJECT_DIR$/ClassLib/Resonators.py" />
         <option value="$PROJECT_DIR$/Projects/SFS_transmon/gen_script_v20.py" />
+        <option value="$PROJECT_DIR$/ClassLib/Capacitors.py" />
       </list>
     </option>
   </component>
@@ -216,7 +148,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -249,6 +180,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -376,13 +308,7 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/ClassLib/_PROG_SETTINGS.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/ClassLib/BaseClasses.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -398,24 +324,11 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3696">
           <caret line="169" column="15" lean-forward="true" selection-start-line="169" selection-start-column="15" selection-end-line="169" selection-end-column="15" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-            <element signature="e#976#1001#0" />
-            <marker date="1547654756335" expanded="true" signature="967:1011" ph="..." />
-            <marker date="1547654756335" expanded="true" signature="3891:5974" ph="..." />
-            <marker date="1547654756335" expanded="true" signature="6002:6011" ph="..." />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/ClassLib/ContactPad.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/sonnetSim/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -425,41 +338,33 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/ClassLib/JosJ.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/ClassLib/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="308">
           <caret line="14" column="14" lean-forward="true" selection-start-line="14" selection-start-column="14" selection-end-line="14" selection-end-column="14" />
-          <folding>
-            <element signature="e#0#28#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Templates/sanbox.py">
+    <entry file="file://$PROJECT_DIR$/Projects/SFS_transmon/gen_script_v20.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="416">
-          <caret line="77" column="23" selection-start-line="77" selection-start-column="23" selection-end-line="77" selection-end-column="23" />
+        <state relative-caret-position="865">
+          <caret line="277" column="34" selection-start-line="277" selection-start-column="34" selection-end-line="277" selection-end-column="34" />
           <folding>
-            <element signature="e#0#115#0" expanded="true" />
-            <marker date="1547650759108" expanded="true" signature="406:415" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ClassLib/Coplanars.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="22">
-          <caret line="21" column="8" selection-start-line="21" selection-start-column="8" selection-end-line="21" selection-end-column="8" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#55#65#0" expanded="true" />
+            <element signature="e#4707#5170#0" />
+            <element signature="e#5209#5367#0" />
+            <element signature="e#5414#5512#0" />
+            <element signature="e#5570#6432#0" />
+            <element signature="e#6479#8264#0" />
+            <element signature="e#8317#10085#0" />
+            <element signature="e#10155#10567#0" />
+            <element signature="e#10609#10993#0" />
+            <element signature="e#11033#12287#0" />
+            <element signature="e#12336#13571#0" />
+            <element signature="e#13629#13858#0" />
+            <element signature="e#13903#14365#0" />
           </folding>
         </state>
       </provider>
@@ -476,7 +381,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ClassLib/SFS.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1850">
+        <state relative-caret-position="22">
           <caret line="17" column="8" selection-start-line="17" selection-start-column="8" selection-end-line="17" selection-end-column="8" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
@@ -486,7 +391,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ClassLib/Resonators.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1199">
+        <state relative-caret-position="22">
           <caret line="106" column="8" selection-start-line="106" selection-start-column="8" selection-end-line="106" selection-end-column="8" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
@@ -494,25 +399,33 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Projects/SFS_transmon/gen_script_v20.py">
+    <entry file="file://$PROJECT_DIR$/ClassLib/Coplanars.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="206" column="80" selection-start-line="206" selection-start-column="80" selection-end-line="206" selection-end-column="80" />
+        <state relative-caret-position="22">
+          <caret line="21" column="8" selection-start-line="21" selection-start-column="8" selection-end-line="21" selection-end-column="8" />
           <folding>
-            <element signature="e#55#65#0" expanded="true" />
-            <element signature="e#424#2283#0" />
-            <element signature="e#2407#3123#0" />
-            <element signature="e#3159#4071#0" />
-            <element signature="e#4181#4294#0" />
-            <element signature="e#2599#2777#0" />
-            <element signature="e#2816#2974#0" />
-            <element signature="e#3015#3140#0" />
-            <element signature="e#3198#4060#0" />
-            <element signature="e#5966#7662#0" />
-            <element signature="e#7117#7501#0" />
-            <element signature="e#7541#8795#0" />
-            <element signature="e#10118#10580#0" />
-            <marker date="1548093423284" expanded="true" signature="13620:13864" ph="..." />
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Templates/sanbox.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="770">
+          <caret line="65" column="13" selection-start-line="65" selection-start-column="13" selection-end-line="65" selection-end-column="13" />
+          <folding>
+            <element signature="e#0#115#0" expanded="true" />
+            <marker date="1548872527218" expanded="true" signature="399:408" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ClassLib/Capacitors.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="123" column="41" lean-forward="true" selection-start-line="123" selection-start-column="41" selection-end-line="123" selection-end-column="41" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
           </folding>
         </state>
       </provider>

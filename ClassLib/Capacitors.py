@@ -9,8 +9,6 @@ from ClassLib.Shapes import *
 class CWave2CPW( Element_Base ):
     '''
     Draws a semi-circle coupler from coplanar waveguide to jelly capacitance plates.
-
-
     '''
     def __init__( self, c_wave_cap, params, n_pts=50, trans_in=None ):
         self.c_wave_ref = c_wave_cap
@@ -112,21 +110,18 @@ class CWave( Complex_Base ):
         self.delta = delta
         self.L_full = 2*(self.r_out - self.dr) - 2*self.delta
         # calculating parameters of the CPW_RL_Path #
-        r = self.r_curve
-        n = self.n_segments
         L_full = self.L_full
         alpha = self.alpha
         if abs(self.alpha) != pi:
-            self.L1 = L_full/((n_segments+1)*cos(alpha))
+            self.L1 = L_full/((self.n_segments+1)*cos(alpha))
             self.L0 = self.L1/2
-            r = self.r_curve
         else:
             raise ValueError("180 degrees turns in CWave are not supported.")
 
-        if( self.L0 < 0 or self.L1 < 0 ):
-            print( "CPW_RL_Path: impossible parameters combination" )
+        if( self.L0 < 0 ):
+            print("CPW_RL_Path: impossible parameters combination")
 
-        super(). __init__( center,trans_in )
+        super(). __init__(center,trans_in)
 
     def init_primitives(self):
         origin = DPoint(0,0)

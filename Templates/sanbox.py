@@ -3,7 +3,7 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from importlib import reload
 
-from ClassLib import *
+import ClassLib
 reload(ClassLib)
 from ClassLib import *
 
