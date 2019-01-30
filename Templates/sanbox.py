@@ -9,7 +9,7 @@ from ClassLib import *
 
 import sonnetSim
 reload(sonnetSim)
-from sonnetSim import SonnetLab
+from sonnetSim import SonnetLab, PORT_TYPES
 
 class Sandbox(Chip_Design):
     def __init__(self, cell_name):
@@ -62,7 +62,7 @@ class Sandbox(Chip_Design):
                              self.sim_X_N, self.sim_Y_N)
         self.SL.set_ABS_sweep(1, 5)
 
-        self.SL.set_ports(self.cop_waveguide.connections)
+        self.SL.set_ports(self.cop_waveguide.connections, len(self.cop_waveguide.connections)*[PORT_TYPES.BOX_WALL])
         self.SL.send_cell_layer(self.cell, self.layer_ph)
 
         self.SL.start_simulation(wait=True)
