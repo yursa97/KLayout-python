@@ -3,6 +3,8 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from importlib import reload
 
+import pickle as pkl
+
 import ClassLib
 reload(ClassLib)
 from ClassLib import *
@@ -76,4 +78,8 @@ if __name__ == "__main__":
     my_design.show()
     my_design.simulate()
     freqs, sMatrices = my_design.SL.get_s_params()
+    with open(r"C:\Users\user\Documents\KLayout-python\result.pkl", "wb") as f:
+        pkl.dump({"freqs": freqs, "sMatrices": sMatrices}, f)
+
+            
     # my_design.save_as_gds2(r'C:\Users\andre\Documents\chip_designs\chip_design.gds2')
