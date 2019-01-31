@@ -140,9 +140,9 @@ class SonnetLab( MatlabClient ):
         self._visualize_sever()
     
     def release(self):
-        print("closing connection...")
+        # print("closing connection...")
         self._close()
-        print("connection closed\n")
+        # print("connection closed\n")
 
 if __name__ == "__main__":
 # getting main references of the application

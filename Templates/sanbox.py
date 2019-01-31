@@ -28,36 +28,36 @@ class Sandbox(Chip_Design):
         self.sim_X_N = 200
         self.sim_Y_N = 200
 
-        self.SL = SonnetLab()
+        self.SL = None
         ## SIMULATION PARAMETERS SECTION END ##
-
-        p1 = DPoint(self.sim_X/2, self.sim_Y/2 - self.Z.width/2 - self.Z.gap*2/3 )
-        self.square = DBox( p1, p1 + DPoint(self.Z.b, self.Z.gap/3))
 
         super().__init__(cell_name)
 
     # Call other methods drawing parts of the design from here
-    def draw(self):
+    def draw(self, design_params_dict):
         self.cell.clear()
-        self.draw_sim_box()
-        self.draw_waveguide()
-        self.draw_square()
+        self.draw_sim_box(design_params_dict)
+        self.draw_waveguide(design_params_dict)
+        self.draw_square(design_params_dict)
 
-    def draw_sim_box(self):
+    def draw_sim_box(self, design_params_dict):
         sim_box = Box(self.origin,
                       self.origin + DPoint(self.sim_X, self.sim_Y))
         self.region_ph.insert(sim_box)
 
-    def draw_waveguide(self):
+    def draw_waveguide(self, design_params_dict):
         self.cop_waveguide = CPW(cpw_params=self.Z,
                                  start=DPoint(0, self.sim_Y/2),
                                  end=DPoint(self.sim_X, self.sim_Y/2))
         self.cop_waveguide.place(self.region_ph)
 
-    def draw_square(self):
-        self.region_ph.insert(Box().from_dbox(self.square))
+    def draw_square(self, design_params_dict):
+        p1 = DPoint(self.sim_X / 2+design_params_dict["dx"], self.sim_Y / 2 - self.Z.width / 2 - self.Z.gap * 2 / 3)
+        square = DBox(p1, p1 + DPoint(self.Z.b, self.Z.gap / 3))
+        self.region_ph.insert(Box().from_dbox(square))
 
     def simulate(self):
+        self.SL = SonnetLab()
         self.SL.clear()
 
         self.SL.set_boxProps(self.sim_X, self.sim_Y,
@@ -71,15 +71,48 @@ class Sandbox(Chip_Design):
 
         self.SL.release()
 
+import numpy as np
+class SimulationResult:
+    def __init__(self):
+        # structure is {"sweep_par_name":sweep_par_values_list}
+        # simulation is intended to happen across tensor product
+        # of all parameters
+        self._swept_pars = OrderedDict()
+        self.freqs = None
+        self.sMatrices = None
 
+    def set_swept_parameters(self, sweep_parameters):
+        self._swept_pars = sweep_parameters
+
+    def set_dimensions(self, freqs_N, ports_N):
+        self.freqs = np.zeros(tuple(len(swept_par_list) for swept_par_list in self._swept_pars.values()) + (freqs_N,),
+                               dtype=np.float64)
+        self.sMatrices = np.zeros(tuple(len(swept_par_list) for swept_par_list in self._swept_pars.values())+(freqs_N,ports_N,ports_N),
+                                   dtype=np.complex128)
+    def get_Sij(self, i, j):
+        return self.sMatrices[..., i+1, j+1]
+
+import numpy as np
 ### MAIN FUNCTION ###
 if __name__ == "__main__":
     my_design = Sandbox('testScript')
-    my_design.show()
-    my_design.simulate()
-    freqs, sMatrices = my_design.SL.get_s_params()
-    with open(r"C:\Users\user\Documents\KLayout-python\result.pkl", "wb") as f:
-        pkl.dump({"freqs": freqs, "sMatrices": sMatrices}, f)
+    design_params_dict = OrderedDict([("dx", 0)])
 
-            
+    dx_vals = np.arange(-my_design.sim_X/3,my_design.sim_X/3,my_design.sim_X/20)
+    
+    SR = SimulationResult()
+    SR.set_swept_parameters({"dx": dx_vals})
+    for i, dx in enumerate(dx_vals):
+        design_params_dict["dx"] = dx
+        my_design.show(design_params_dict)
+        my_design.simulate()
+        freqs, sMatrices = my_design.SL.get_s_params()
+        if i == 0:
+            SR.set_dimensions(len(freqs), sMatrices.shape[1])
+        SR.freqs[i] = freqs
+        SR.sMatrices[i] = sMatrices
+
+    with open(r"C:\Users\user\Documents\Sandbox\KLayout\SimRes.pkl", "wb") as f:
+        pkl.dump(SR, f)
+        
     # my_design.save_as_gds2(r'C:\Users\andre\Documents\chip_designs\chip_design.gds2')
