@@ -3,7 +3,11 @@ __pycache__/
 *.py[cod]
 *.pkl
 *$py.class
-.idea
+.idea/
+.idea/*
+
+# Graphics design files
+*.cdr
 
 # C extensions
 *.so
