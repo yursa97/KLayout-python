@@ -46,7 +46,7 @@ class Chip_Design:
         self.lv.add_missing_layers()
     
     # Call other methods drawing parts of the design from here
-    def draw(self, design_params_dict):
+    def draw(self):
         '''
         @brief: Purely virtual base-class method that is ought to be
                 implemented in child classes.
@@ -66,8 +66,8 @@ class Chip_Design:
         self.lv.zoom_fit()
     
     # Call this m
-    def show(self, design_params_dict):
-        self.draw(design_params_dict)
+    def show(self):
+        self.draw()
         self.__end_drawing()
     
     # Save your design as GDS-II

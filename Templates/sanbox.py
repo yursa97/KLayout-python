@@ -29,30 +29,31 @@ class Sandbox(Chip_Design):
         self.sim_Y_N = 200
 
         self.SL = None
+        self.dx = 0
         ## SIMULATION PARAMETERS SECTION END ##
 
         super().__init__(cell_name)
 
     # Call other methods drawing parts of the design from here
-    def draw(self, design_params_dict):
+    def draw(self):
         self.cell.clear()
-        self.draw_sim_box(design_params_dict)
-        self.draw_waveguide(design_params_dict)
-        self.draw_square(design_params_dict)
+        self.draw_sim_box()
+        self.draw_waveguide()
+        self.draw_square()
 
-    def draw_sim_box(self, design_params_dict):
+    def draw_sim_box(self):
         sim_box = Box(self.origin,
                       self.origin + DPoint(self.sim_X, self.sim_Y))
         self.region_ph.insert(sim_box)
 
-    def draw_waveguide(self, design_params_dict):
+    def draw_waveguide(self):
         self.cop_waveguide = CPW(cpw_params=self.Z,
                                  start=DPoint(0, self.sim_Y/2),
                                  end=DPoint(self.sim_X, self.sim_Y/2))
         self.cop_waveguide.place(self.region_ph)
 
-    def draw_square(self, design_params_dict):
-        p1 = DPoint(self.sim_X / 2+design_params_dict["dx"], self.sim_Y / 2 - self.Z.width / 2 - self.Z.gap * 2 / 3)
+    def draw_square(self):
+        p1 = DPoint(self.sim_X / 2 + self.dx, self.sim_Y / 2 - self.Z.width / 2 - self.Z.gap * 2 / 3)
         square = DBox(p1, p1 + DPoint(self.Z.b, self.Z.gap / 3))
         self.region_ph.insert(Box().from_dbox(square))
 
@@ -115,4 +116,5 @@ if __name__ == "__main__":
     with open(r"C:\Users\user\Documents\Sandbox\KLayout\SimRes.pkl", "wb") as f:
         pkl.dump(SR, f)
         
+
     # my_design.save_as_gds2(r'C:\Users\andre\Documents\chip_designs\chip_design.gds2')
