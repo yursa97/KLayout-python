@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 *.pkl
 *$py.class
-.idea/
+.idea
 
 # C extensions
 *.so
@@ -104,3 +104,12 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+
+# Sonnet temporary files and tables like .xls/xlsx/csv
+*.xls
+*.xlsx
+*.csv
+*.son
+*.sid
+/Sonnet projects
