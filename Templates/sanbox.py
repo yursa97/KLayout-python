@@ -3,7 +3,7 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from importlib import reload
 
-from ClassLib import *
+import ClassLib
 reload(ClassLib)
 from ClassLib import *
 
@@ -66,7 +66,7 @@ class Sandbox(Chip_Design):
         self.SL.send_cell_layer(self.cell, self.layer_ph)
 
         self.SL.start_simulation(wait=True)
-
+        self.SL.visualize_sever()
         self.SL.release()
 
 

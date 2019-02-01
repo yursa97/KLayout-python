@@ -62,7 +62,7 @@ class MatlabClient():
         self._send( raw_data )
         
     def _send_array_float64( self, array ):
-        raw_data = struct.pack( ">{0}d".format(len(array)), *array ) 
+        raw_data = struct.pack( ">{0}d".format(len(array)), *array )
         self._send_uint32( len(array) )
         self._send( raw_data )
     
@@ -71,7 +71,7 @@ class MatlabClient():
         self._send( raw_data )
     
     def _send_array_uint32( self, array ):
-        raw_data = struct.pack( "!{0}I".format(len(array)), *array ) 
+        raw_data = struct.pack( "!{0}I".format(len(array)), *array )
         self._send_uint32( len(array) )
         self._send( raw_data )
         
@@ -96,6 +96,7 @@ class MatlabClient():
             self._send( FLAG.FALSE )
         else:
             self._send( FLAG.TRUE )
+            print("sending port edges nums array")
             self._send_array_uint32( port_edges_numbers_list )
         
         self._send_array_float64( array_x )

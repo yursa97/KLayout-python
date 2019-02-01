@@ -1,11 +1,11 @@
 import pya
-from math import sqrt, cos, sin, atan2, pi, copysign
-from pya import Point,DPoint,DSimplePolygon,SimplePolygon,DPolygon,Polygon,Region
-from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans,DVector,DPath
+from math import pi
+from pya import DPoint,DSimplePolygon,SimplePolygon
+from pya import Trans,DTrans,DVector,DPath
 
-from ClassLib.BaseClasses import *
-from ClassLib.Shapes import *
-from ClassLib.Coplanars import *
+from ClassLib.BaseClasses import Element_Base, Complex_Base
+from ClassLib.Shapes import Circle, Kolbaska
+from ClassLib.Coplanars import CPWParameters, CPW_RL_Path
 
 class Squid(Complex_Base):
     '''
@@ -73,8 +73,8 @@ class Squid(Complex_Base):
         self.primitives["pad_up"] = Circle(self._up_pad_center, self.pad_side, n_pts=self.n, offset_angle=-pi/2)
         self.primitives["p_ext_up"] = Kolbaska(self._up_pad_center, origin + DVector(0,self.sq_len/2),\
                                                self.p_ext_width,self.p_ext_r)
-        up_st_gap = self.sq_area/(2*self.sq_len)
-        low_st_gap = up_st_gap + self.low_lead_w*2.5
+        up_st_gap = self.sq_area / (2*self.sq_len)
+        low_st_gap = up_st_gap + self.low_lead_w * 2.5
         up_st_start_p = self.primitives["p_ext_up"].connections[1]
         low_st_start_p = self.primitives["p_ext_down"].connections[1]
         up_st_l_start = up_st_start_p + DVector(-up_st_gap/2,0)
@@ -88,6 +88,8 @@ class Squid(Complex_Base):
 
         self.primitives["upp_st_left"] = Kolbaska(up_st_l_start,up_st_l_stop,self.j_width,self.j_width/4)
         self.primitives["upp_st_right"] = Kolbaska(up_st_r_start,up_st_r_stop,self.j_width,self.j_width/4)
+        self.primitives["upp_st_left_thick"] = Kolbaska(up_st_l_start,up_st_l_stop + DPoint(0, 400),2*self.j_width,self.j_width/2)
+        self.primitives["upp_st_right_thick"] = Kolbaska(up_st_r_start,up_st_r_stop + DPoint(0, 400),2*self.j_width,self.j_width/2)
         Z_low = CPWParameters(self.j_length,0)
         len_ry = (low_st_r_stop - low_st_r_start).y
         len_rb = (low_st_r_stop - low_st_r_start).x

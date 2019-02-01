@@ -103,3 +103,10 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+.vscode/
+.vscode/*
+.gitignore
+
+sonnetSim/
+matlab_project/

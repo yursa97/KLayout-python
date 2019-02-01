@@ -44,13 +44,12 @@ class SonnetLab( MatlabClient ):
     def send_polygon( self, polygon, port_edges_indexes=None ):
         pts_x = np.zeros(polygon.num_points(), dtype=np.float64 )
         pts_y = np.zeros(polygon.num_points(), dtype=np.float64 )
-        #print( "Sending polygon, edges: ", polygon.num_points_hull() )
+        print( "Sending polygon, edges: ", polygon.num_points_hull() )
         if( port_edges_indexes is not None ):
             print( "port edges indexes passing is not implemented yet." )
             raise NotImplemented
         
-        port_edges_indexes = []    
-        prev_pt = None
+        port_edges_indexes = []
         for i,edge in enumerate(polygon.each_edge()):
             pts_x[i] = edge.p1.x/1.0e3
             pts_y[i] = edge.p1.y/1.0e3

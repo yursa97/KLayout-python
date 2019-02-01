@@ -206,7 +206,7 @@ class My_Design(Chip_Design):
         # Bottom left resonator + qubit
         worm_pos = DPoint(p2.x + res_to_line + 2 * (self.Z.width/2 + self.Z.gap), p1.y/2)
         worm3 = self.draw_one_resonator(worm_pos, freq=7.2, no_neck=True, trans_in=Trans.R270)
-        q_pos = worm3.end - DPoint(0, pars['r_out'] - worm2.Z.b)
+        q_pos = worm3.end - DPoint(0, pars['r_out'] - worm3.Z.b)
         # Moving a capacitive coupling to the top of a qubit
         pars['Z1'],       pars['Z2']       = pars['Z2'],       pars['Z1']
         pars['d_alpha1'], pars['d_alpha2'] = pars['d_alpha2'], pars['d_alpha1']
@@ -256,7 +256,7 @@ class My_Design(Chip_Design):
     def get_mixing_qubit_params(self):
         pars = {'r_out'	:	175e3, # Radius of an outer ring including the empty region
                 'dr'	:	25e3, # Gap in the outer ring
-                'n_semiwaves'	:	2,
+                'n_semiwaves':2,
                 's'	:	10e3, # Gap between two pads of a central capacitor
                 'alpha'	:	pi/4, # period of a gap zigzag
                 'r_curve'	:	30e3, # curvature of the rotundings at the edges of a zigzag
@@ -289,12 +289,12 @@ class My_Design(Chip_Design):
         p_ext_r = 0.5e3 # The angle radius of the pad extension
         sq_len = 7e3 # The length of the squid, along leads
         sq_area = 15e6 # The total area of the squid
-        j_width = 0.2e3 # The width of the upper small leads (straight) and also a width of the junction
-        low_lead_w = 0.5e3 # The width g the lower small bended leads before bending
-        b_ext =   0.9e3 # The extension of bended leads after bending
-        j_length =  0.1e3 # The length of the jj and the width of bended parts of the lower leads
+        j_width = 0.3e3 # The width of the upper small leads (straight) and also a width of the junction
+        low_lead_w = 0.5e3 # The width of the lower small bended leads before bending
+        b_ext = 0.9e3 # The extension of bended leads after bending
+        j_length =  0.2e3 # The length of the jj and the width of bended parts of the lower leads
         n = 7 # The number of angle in regular polygon which serves as a large contact pad
-        bridge = 0.2e3 # The value of the gap between two parts of junction in the design
+        bridge = 0.3e3 # The value of the gap between two parts of junction in the design
         return [pad_side, pad_r, pads_distance, p_ext_width,
                 p_ext_r, sq_len, sq_area, j_width, low_lead_w,
                 b_ext, j_length, n,bridge]
