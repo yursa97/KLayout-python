@@ -51,8 +51,7 @@ class MatlabClient():
                         return False
         except Exception as e:
             print("exception on reception of confirm byte, following exception:")
-            print(e)
-            raise e
+            print(e)    
     
     def _close(self):
         self._send(CMD.CLOSE_CONNECTION)
@@ -63,24 +62,19 @@ class MatlabClient():
         self._send( raw_data )
         
     def _send_array_float64( self, array ):
-        raw_data = struct.pack( ">{0}d".format(len(array)), *array ) 
+        raw_data = struct.pack( ">{0}d".format(len(array)), *array )
         self._send_uint32( len(array) )
         self._send( raw_data )
     
     def _send_uint32( self, val ):
         raw_data = struct.pack( "!I", np.uint32(val) )
         self._send( raw_data )
-
-    def _send_array_uint16(self, array ):
-        raw_data = struct.pack("!{0}H".format(len(array)), *array)
-        self._send_uint32(len(array))
-        self._send(raw_data)
-
+    
     def _send_array_uint32( self, array ):
-        raw_data = struct.pack( "!{0}I".format(len(array)), *array ) 
+        raw_data = struct.pack( "!{0}I".format(len(array)), *array )
         self._send_uint32( len(array) )
         self._send( raw_data )
-
+        
     def read_line( self ):
         self.sock.settimeout(None) # entering nonblocking mode
         while( True ):
@@ -95,20 +89,20 @@ class MatlabClient():
                 
         return data
         
-    def _send_polygon( self, array_x, array_y, port_edges_numbers_list=None, port_edges_types=None ):
-        self._send(CMD.POLYGON)
+    def _send_polygon( self, array_x, array_y, port_edges_numbers_list=None ):
+        self._send( CMD.POLYGON )
         
-        if (port_edges_numbers_list is None) or (len(port_edges_numbers_list)==0):
-            self._send(FLAG.FALSE)
+        if( port_edges_numbers_list is None or len(port_edges_numbers_list)==0 ):
+            self._send( FLAG.FALSE )
         else:
-            self._send(FLAG.TRUE)
-            self._send_array_uint32(port_edges_numbers_list)
-            self._send_array_uint16(port_edges_types)
+            self._send( FLAG.TRUE )
+            print("sending port edges nums array")
+            self._send_array_uint32( port_edges_numbers_list )
         
-        self._send_array_float64(array_x)
-        self._send_array_float64(array_y)
+        self._send_array_float64( array_x )
+        self._send_array_float64( array_y )
         
-    def _set_boxProps(self, dim_X_um, dim_Y_um, cells_X_num, cells_Y_num):
+    def _set_boxProps( self, dim_X_um, dim_Y_um, cells_X_num, cells_Y_num ):
         self._send( CMD.BOX_PROPS )
         self._send_float64( dim_X_um )
         self._send_float64( dim_Y_um )

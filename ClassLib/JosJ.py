@@ -90,15 +90,20 @@ class Squid(Complex_Base):
         self.primitives["upp_st_right"] = Kolbaska(up_st_r_start,up_st_r_stop,self.j_width,self.j_width/4)
         self.primitives["upp_st_left_thick"] = Kolbaska(up_st_l_start,up_st_l_stop + DPoint(0, 400),2*self.j_width,self.j_width/2)
         self.primitives["upp_st_right_thick"] = Kolbaska(up_st_r_start,up_st_r_stop + DPoint(0, 400),2*self.j_width,self.j_width/2)
-        Z_low = CPWParameters(self.j_length,0)
-        len_ry = (low_st_r_stop - low_st_r_start).y
-        len_rb = (low_st_r_stop - low_st_r_start).x
-        len_ly = (low_st_l_stop - low_st_l_start).y
-        len_lb = (low_st_l_stop - low_st_l_start).x
-        self.primitives["low_st_left"] = CPW_RL_Path(low_st_l_start, 'LRL', Z_low, 0.2e3,\
-        [len_ly,len_lb],[-pi/2],trans_in = DTrans.R90)
-        self.primitives["low_st_right"] = CPW_RL_Path(low_st_r_start, 'LRL', Z_low, 0.2e3,\
-        [len_ry,-len_rb],[pi/2],trans_in = DTrans.R90)
+        Z_low = CPWParameters(self.j_length, 0)
+        Z_low2 = CPWParameters(self.j_length * 2, 0)
+        len_ry = (low_st_r_stop - low_st_r_start).y - self.j_length/2
+        len_rb = (low_st_r_stop - low_st_r_start).x + self.j_length
+        len_ly = (low_st_l_stop - low_st_l_start).y - self.j_length/2
+        len_lb = (low_st_l_stop - low_st_l_start).x - self.j_length
+        self.primitives["low_st_left"] = CPW_RL_Path(low_st_l_start, 'LR', Z_low2, 0.2e3,\
+                                                    [len_ly],[-pi/2],trans_in = DTrans.R90)
+        self.primitives["low_st_right"] = CPW_RL_Path(low_st_r_start, 'LR', Z_low2, 0.2e3,\
+                                                    [len_ry],[pi/2],trans_in = DTrans.R90)
+        self.primitives["low_st_left_jj"] = CPW_RL_Path(low_st_l_start + DPoint(self.j_length, len_ly + self.j_length/2), 'L', Z_low, 0.2e3,\
+                                                    [len_lb],[],trans_in = None)
+        self.primitives["low_st_right_jj"] = CPW_RL_Path(low_st_r_start + DPoint(-self.j_length, len_ry + self.j_length/2), 'L', Z_low, 0.2e3,\
+                                                    [len_rb],[],trans_in = None)
 
 
 class Line_N_JJCross(Element_Base):

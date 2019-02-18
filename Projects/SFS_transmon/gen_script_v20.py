@@ -107,7 +107,11 @@ class My_Design(Chip_Design):
         self.draw_mixing_qubit()
         self.draw_resonators_with_qubits()
         #self.draw_test_squids()
-    
+        side = 2e6
+        lowerleft = DPoint((self.chip.chip_x - side)/2, self.chip.chip_y-side)
+        #self.cut_a_piece(self.layer_ph, DBox(lowerleft, lowerleft + DVector(side, side)))
+        #self.cut_a_piece(self.layer_el, DBox(lowerleft, lowerleft + DVector(side, side)))
+
     def draw_chip(self):
         Z_params = [self.Z_narrow] + [self.Z]*7
         self.chip = Chip5x10_with_contactPads(self.origin, Z_params)
@@ -187,25 +191,31 @@ class My_Design(Chip_Design):
         # drawing resonators with qubits
         pars = self.get_sps_params()
         pars_squid = self.get_dc_squid_params()
-        res_to_line = 30e3 # distance between a resonator and a line
+        res_to_line = 5e3 # distance between a resonator and a line
 
         # Top left resonator + qubit
+        # frequency from Sonnet = 6.8166 GHz
+        # Qc = 5190
         worm_pos = DPoint(p1.x * 2/5 + p2.x * 3/5 , p1.y - res_to_line - 2 * (self.Z.width/2 + self.Z.gap))
-        worm1 = self.draw_one_resonator(worm_pos, freq=6.8, extra_neck_length=pars['r_out'], trans_in=Trans.R180)
+        worm1 = self.draw_one_resonator(worm_pos, freq=6.8, coupling_length=350e3, extra_neck_length=pars['r_out'], trans_in=Trans.R180)
         q_pos = worm1.end + DPoint(0, pars['r_out'] - worm1.Z.b) # qubit position
         mq1 = SFS_Csh_emb(q_pos, pars, pars_squid)
         mq1.place(self.cell, self.layer_ph, self.layer_el)
 
         # Top right resonator + qubit
+        # frequency from Sonnet = 7.0251 GHz
+        # Qc = 4860
         worm_pos = DPoint(p1.x * 4/5 + p2.x * 1/5, p1.y - res_to_line - 2 * (self.Z.width/2 + self.Z.gap)) # resonator position
-        worm2 = self.draw_one_resonator(worm_pos, freq=7, extra_neck_length=pars['r_out'], trans_in=Trans.R180)
+        worm2 = self.draw_one_resonator(worm_pos, freq=7, coupling_length=350e3, extra_neck_length=pars['r_out'], trans_in=Trans.R180)
         q_pos = worm2.end + DPoint(0, pars['r_out'] - worm2.Z.b) # qubit position
         mq2 = SFS_Csh_emb(q_pos, pars, pars_squid)
         mq2.place(self.cell, self.layer_ph, self.layer_el)
 
         # Bottom left resonator + qubit
+        # frequency from Sonnet = 7.2103 GHz
+        # Qc = 5160
         worm_pos = DPoint(p2.x + res_to_line + 2 * (self.Z.width/2 + self.Z.gap), p1.y/2)
-        worm3 = self.draw_one_resonator(worm_pos, freq=7.2, no_neck=True, trans_in=Trans.R270)
+        worm3 = self.draw_one_resonator(worm_pos, freq=7.2, coupling_length=330e3, no_neck=True, trans_in=Trans.R270)
         q_pos = worm3.end - DPoint(0, pars['r_out'] - worm3.Z.b)
         # Moving a capacitive coupling to the top of a qubit
         pars['Z1'],       pars['Z2']       = pars['Z2'],       pars['Z1']
@@ -215,11 +225,10 @@ class My_Design(Chip_Design):
         mq3 = SFS_Csh_emb(q_pos, pars, pars_squid)
         mq3.place(self.cell, self.layer_ph, self.layer_el)
     
-    def draw_one_resonator(self, pos, freq, no_neck=False, extra_neck_length=0, trans_in=None):
+    def draw_one_resonator(self, pos, freq, coupling_length, no_neck=False, extra_neck_length=0, trans_in=None):
         turn_radius = 50e3
         eps = 11.45
         wavelength_fraction = 1/4
-        coupling_length = 300e3
         meander_periods = 3
         neck_length = 200e3
         worm = CPWResonator2(pos, self.Z, turn_radius, freq, eps, wavelength_fraction, coupling_length, meander_periods, neck_length,
@@ -274,7 +283,7 @@ class My_Design(Chip_Design):
         return pars
 
     def get_mixing_qubit_coupling_params(self):
-        pars = {"to_line": 40e3,  # length between outer circle and the center of the coplanar
+        pars = {"to_line": 35.1e3,  # length between outer circle and the center of the coplanar
                 "cpw_params": self.Z_res,
                 "width": 10e3,
                 "overlap": 10e3
@@ -299,8 +308,18 @@ class My_Design(Chip_Design):
                 p_ext_r, sq_len, sq_area, j_width, low_lead_w,
                 b_ext, j_length, n,bridge]
 
+    def cut_a_piece(self, layer, box):
+        r_cell = Region(self.cell.begin_shapes_rec(layer))
+        emptyregion = Region(box)
+        temp_i = self.cell.layout().layer(pya.LayerInfo(PROGRAM.LAYER1_NUM,0) ) 
+        inverse_region = r_cell - emptyregion
+        self.cell.shapes(temp_i).insert(r_cell - inverse_region)
+        self.cell.layout().clear_layer(layer)
+        self.cell.layout().move_layer(temp_i, layer)
+        self.cell.layout().delete_layer(temp_i)
+
 ### MAIN FUNCTION ###
 if __name__ == "__main__":
     my_design = My_Design('testScript')
     my_design.show()
-    # my_design.save_as_gds2(r'C:\Users\andre\Documents\chip_designs\chip_design.gds2')
+    my_design.save_as_gds2(r'C:\Users\andre\Documents\chip_designs\mixingqubit_onrealchip_2000_2000_toline_45.gds')

@@ -8,7 +8,7 @@ from ClassLib import Chip_Design, CPWParameters, CPW, CPWResonator2, SFS_Csh_emb
 
 import sonnetSim
 reload(sonnetSim)
-from sonnetSim import SonnetLab
+from sonnetSim import SonnetLab, PORT_TYPES
 
 class ResonatorSimulator(Chip_Design):
 
@@ -19,58 +19,64 @@ class ResonatorSimulator(Chip_Design):
     cpw_curve = 200e3 # Curvature of CPW angles
     chip_x = 1.5e6
     chip_y = 1.5e6
-    ncells_x = 300
-    ncells_y = 300
+    ncells_x = 400
+    ncells_y = 400
     cpw = None
 
     # Call other methods drawing parts of the design from here
     def draw(self):
         self.draw_chip()
-        self.cpw = self.draw_line()
-        self.draw_bottom_left_resonator()
-        # self.draw_top_left_resonator()
+        self.cpw = self.draw_line(vert=True)
+        self.draw_bottom_left_resonator(330e3)
     
     def draw_chip(self):
         origin = DPoint(0, 0)
         chip = Rectangle(origin, self.chip_x, self.chip_y)
         chip.place(self.cell, self.layer_ph)
     
-    def draw_line(self):
-        start = DPoint(self.chip_x * 0.2, 0)
-        end = DPoint(self.chip_x * 0.2, self.chip_y)
+    def draw_line(self, vert=False):
+        if vert:
+          start = DPoint(self.chip_x * 0.2, 0)
+          end = DPoint(self.chip_x * 0.2, self.chip_y)
+        else:
+          start = DPoint(0, self.chip_y * 0.8)
+          end = DPoint(self.chip_y, self.chip_y * 0.8)
         cpw = CPW(self.Z.width, self.Z.gap, start, end)
         cpw.place(self.cell, self.layer_ph)
         return cpw
     
-    def draw_top_left_resonator(self):
-        # frequency from Sonnet = 6.803376723883772 GHz
-        # Qc = 4.27e3
+    def draw_top_left_resonator(self, coupling_length=350e3):
+        # frequency from Sonnet = 6.8166 GHz
+        # Qc = 5190
+        coupling_length = 350e3
         pars = self.get_sps_params()
         pars_squid = self.get_dc_squid_params()
         res_to_line = 5e3 # distance between a resonator and a line
 
         worm_pos = DPoint(self.chip_x / 2, self.cpw.start.y - res_to_line - 2 * (self.Z.width/2 + self.Z.gap))
-        worm1 = self.draw_one_resonator(worm_pos, freq=6.8, extra_neck_length=pars['r_out'], trans_in=Trans.R180)
+        worm1 = self.draw_one_resonator(worm_pos, 6.8, coupling_length, extra_neck_length=pars['r_out'], trans_in=Trans.R180)
         q_pos = worm1.end + DPoint(0, pars['r_out'] - worm1.Z.b) # qubit position
         mq1 = SFS_Csh_emb(q_pos, pars, pars_squid)
         mq1.place(self.cell, self.layer_ph, self.layer_el)
 
-    def draw_top_right_resonator(self):
-        # frequency from Sonnet = 7.005075784728694 GHz
-        # Qc = 4.01e3
+    def draw_top_right_resonator(self, coupling_length=350e3):
+        # frequency from Sonnet = 7.0251 GHz
+        # Qc = 4860
+        coupling_length = 350e3
         pars = self.get_sps_params()
         pars_squid = self.get_dc_squid_params()
         res_to_line = 5e3 # distance between a resonator and a line
 
         worm_pos = DPoint(self.chip_x / 2, self.cpw.start.y - res_to_line - 2 * (self.Z.width/2 + self.Z.gap))
-        worm2 = self.draw_one_resonator(worm_pos, freq=7, extra_neck_length=pars['r_out'], trans_in=Trans.R180)
+        worm2 = self.draw_one_resonator(worm_pos, 7, coupling_length, extra_neck_length=pars['r_out'], trans_in=Trans.R180)
         q_pos = worm2.end + DPoint(0, pars['r_out'] - worm2.Z.b) # qubit position
         mq2 = SFS_Csh_emb(q_pos, pars, pars_squid)
         mq2.place(self.cell, self.layer_ph, self.layer_el)
 
-    def draw_bottom_left_resonator(self):
-        # frequency from Sonnet = 7.232399309960986 GHz
-        # Qc = 3.78e3
+    def draw_bottom_left_resonator(self, coupling_length=330e3):
+        # frequency from Sonnet = 7.2103 GHz
+        # Qc = 5160
+        coupling_length = 330e3
         pars = self.get_sps_params()
         pars_squid = self.get_dc_squid_params()
         res_to_line = 5e3 # distance between a resonator and a line
@@ -81,7 +87,7 @@ class ResonatorSimulator(Chip_Design):
         pars['gap1'],     pars['gap2']     = pars['gap2'],     pars['gap1']
 
         worm_pos = DPoint(self.cpw.start.x + res_to_line + 2 * (self.Z.width/2 + self.Z.gap), self.chip_y / 2)
-        worm3 = self.draw_one_resonator(worm_pos, freq=7.4, no_neck=True, trans_in=Trans.R270)
+        worm3 = self.draw_one_resonator(worm_pos, 7.4, coupling_length, no_neck=True, vert=False, trans_in=Trans.R270)
         q_pos = worm3.end - DPoint(0, pars['r_out'] - worm3.Z.b)
         mq3 = SFS_Csh_emb(q_pos, pars, pars_squid)
         mq3.place(self.cell, self.layer_ph, self.layer_el)
@@ -91,25 +97,28 @@ class ResonatorSimulator(Chip_Design):
         SL.clear()
 
         SL.set_boxProps(self.chip_x, self.chip_y,
-                             self.ncells_x, self.ncells_y)
-        SL.set_ABS_sweep(6.768, 6.77)
-        SL.set_ports(self.cpw.connections)
+                        self.ncells_x, self.ncells_y)
+        SL.set_ABS_sweep(7.2, 7.22)
+        SL.set_ports(self.cpw.connections, [0, 0])
         SL.send_cell_layer(self.cell, self.layer_ph)
         SL.start_simulation(wait=True)
         SL.visualize_sever()
         SL.release()
 
-    def draw_one_resonator(self, pos, freq, no_neck=False, extra_neck_length=0, trans_in=None):
+    def draw_one_resonator(self, pos, freq, coupling_length, no_neck=False, extra_neck_length=0, vert=True, trans_in=None):
         turn_radius = 50e3
         eps = 11.45
         wavelength_fraction = 1/4
-        coupling_length = 400e3
         meander_periods = 3
         neck_length = 200e3
-        pos = pos + DPoint(0, (coupling_length + extra_neck_length)/2 + 2 * turn_radius)
+        if vert:
+            pos = pos + DPoint((coupling_length + extra_neck_length)/2 + 2 * turn_radius, 0)
+        else:
+            pos = pos + DPoint(0, (coupling_length + extra_neck_length)/2 + 2 * turn_radius)
         worm = CPWResonator2(pos, self.Z, turn_radius, freq, eps, wavelength_fraction, coupling_length, meander_periods, neck_length,
                             no_neck=no_neck, extra_neck_length=extra_neck_length, trans_in=trans_in)
         worm.place(self.cell, self.layer_ph)
+        print(worm._calculate_total_length())
         return worm
 
     def get_sps_params(self):
@@ -154,5 +163,5 @@ class ResonatorSimulator(Chip_Design):
 if __name__ == "__main__":
     resSim = ResonatorSimulator('resonatorsSim')
     resSim.show()
-    # resSim.simulate()
-    resSim.save_as_gds2(r'C:\Users\andre\Documents\chip_designs\chip_design.gds2')
+    resSim.simulate()
+    # resSim.save_as_gds2(r'C:\Users\andre\Documents\chip_designs\chip_design.gds2')

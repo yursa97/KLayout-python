@@ -6,7 +6,7 @@ from resonator_tools import circuit
 from IPython.display import display
 
 #%%
-table = pd.read_csv(r"C:\Users\andre\Documents\chip_designs\chip_design_good_5_400_7GHz.csv",
+table = pd.read_csv(r"./Projects/SFS_transmon/Simulations/res7.2_330.csv",
     header=None, skiprows=2, names=["Frequency (GHz)","RE[S11]","IM[S11]","RE[S12]","IM[S12]","RE[S21]","IM[S21]","RE[S22]","IM[S22]"],
     delimiter=" ")
 table.head()

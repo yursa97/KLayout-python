@@ -15,7 +15,6 @@ class SonnetLab( MatlabClient ):
         # file that stores results of the last successful simulation
         self.sim_res_file = None
         self.ports = None
-        self.ports_types = None # ports types array of PORT_TYPES class instances
         self.freqs = None
         self.sMatrices = None
     
@@ -28,41 +27,48 @@ class SonnetLab( MatlabClient ):
     def set_ABS_sweep(self, start_f_GHz, stop_f_GHz):
         self._set_ABS_sweep(start_f_GHz, stop_f_GHz)
 
-    def set_ports(self, dpoint_array, ports_types):
+    def set_ports(self, dpoint_array):
         self.ports = dpoint_array
-        self.ports_types = ports_types
+    
+    def send_element( self, el_class_obj ):
+        el = el_class_obj # name alias
         
-    def send_polygon( self, polygon, port_edges_indexes=None, port_edges_types=None ):
+        if( el.metal_region.size() > 1 ):
+            print( "SonnetLab class: region consists of more than 1 polygon, this is not supported yet")
+            return None
+        
+        poly = el.metal_region[0].dup() # the only polygon in the region
+        sonnet_port_connection_indexes = []
+        self.send_polygon( poly, el.sonnet_port_edge_indexes )
+        
+    def send_polygon( self, polygon, port_edges_indexes=None ):
         pts_x = np.zeros(polygon.num_points(), dtype=np.float64 )
         pts_y = np.zeros(polygon.num_points(), dtype=np.float64 )
-        # print( "Sending polygon, edges: ", polygon.num_points_hull() )
-        if port_edges_indexes is not None :
+        print( "Sending polygon, edges: ", polygon.num_points_hull() )
+        if( port_edges_indexes is not None ):
             print( "port edges indexes passing is not implemented yet." )
             raise NotImplemented
-        else:
-            port_edges_indexes = []
-            port_edges_types = []
-
-            for i, edge in enumerate(polygon.each_edge()):
-                pts_x[i] = edge.p1.x/1.0e3
-                pts_y[i] = edge.p1.y/1.0e3
-
-                for port_i, conn_pt in enumerate(self.ports):
-                    r_middle = (edge.p1 + edge.p2)*0.5
-                    R = conn_pt.distance( r_middle )
-                    if R < 10 : # distance from connection point to the middle of the edge <10 nm
-                        port_edges_indexes.append(i+1) # matlab polygon edge indexing starts from 1
-                        port_edges_types.append(self.ports_types[port_i]) # choosing appropriate port type
-                        break
-
-        self._send_polygon(pts_x, pts_y, port_edges_indexes, port_edges_types)
         
-    def send_cell_layer(self, cell, layer_i):
+        port_edges_indexes = []
+        for i,edge in enumerate(polygon.each_edge()):
+            pts_x[i] = edge.p1.x/1.0e3
+            pts_y[i] = edge.p1.y/1.0e3
+                
+            for conn_pt in self.ports:
+                r_middle = (edge.p1 + edge.p2)*0.5
+                R = conn_pt.distance( r_middle )
+                if( R < 10 ): # distance from connection point to the middle of the edge <10 nm
+                    port_edges_indexes.append(i+1) # matlab polygon edge indexing starts from 1
+                    break
+
+        self._send_polygon( pts_x,pts_y, port_edges_indexes )
+        
+    def send_cell_layer( self, cell, layer_i):
         r_cell = Region(cell.begin_shapes_rec(layer_i))
         for poly in r_cell:
-            self.send_polygon(poly.resolved_holes())
+            self.send_polygon(poly)
     
-    def start_simulation(self, wait=True):
+    def start_simulation( self, wait=True ):
         '''
         @brief: function that start simulation on the remote matlab-sonnet server
         @params:
@@ -136,13 +142,14 @@ class SonnetLab( MatlabClient ):
         sMatrices = s_data.reshape((len(freqs), file_ports_N, file_ports_N)).transpose(0, 2, 1)
         return freqs, sMatrices
 
+            
     def visualize_sever( self ):
         self._visualize_sever()
     
     def release(self):
-        # print("closing connection...")
+        print("closing connection...")
         self._close()
-        # print("connection closed\n")
+        print("connection closed\n")
 
 if __name__ == "__main__":
 # getting main references of the application
