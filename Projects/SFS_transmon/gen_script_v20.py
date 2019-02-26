@@ -7,7 +7,6 @@ from importlib import reload
 import ClassLib
 reload(ClassLib)
 from ClassLib import *
-
 class Test_Squid(Complex_Base):
     """ @brief:     class represents a rectangular capacitor with a dc-SQUID between its plates
         @params:    DPoint origin - position of the center of a structure
@@ -98,7 +97,7 @@ class My_Design(Chip_Design):
         self.draw_chip()
 
         self.draw_mark(500e3, self.chip.chip_y - 500e3)
-        self.draw_mark(self.chip.chip_x/2 - 500e3, self.chip.chip_y/2)
+        #self.draw_mark(self.chip.chip_x/2 - 500e3, self.chip.chip_y/2)
         self.draw_mark(500e3, 500e3)
         self.draw_mark(self.chip.chip_x - 500e3, self.chip.chip_y - 500e3)
         self.draw_mark(self.chip.chip_x - 500e3, 500e3)
@@ -106,16 +105,13 @@ class My_Design(Chip_Design):
         self.draw_single_photon_source()
         self.draw_mixing_qubit()
         self.draw_resonators_with_qubits()
-        #self.draw_test_squids()
-        side = 2e6
-        lowerleft = DPoint((self.chip.chip_x - side)/2, self.chip.chip_y-side)
-        #self.cut_a_piece(self.layer_ph, DBox(lowerleft, lowerleft + DVector(side, side)))
-        #self.cut_a_piece(self.layer_el, DBox(lowerleft, lowerleft + DVector(side, side)))
+        self.draw_test_squids()
+        #self.cut_a_piece()
 
     def draw_chip(self):
         Z_params = [self.Z_narrow] + [self.Z]*7
         self.chip = Chip5x10_with_contactPads(self.origin, Z_params)
-        self.chip.place(self.cell, self.layer_ph)  
+        self.chip.place(self.cell, self.layer_ph)
     
     def draw_mark(self, x, y):
         # Placing the mark
@@ -283,7 +279,7 @@ class My_Design(Chip_Design):
         return pars
 
     def get_mixing_qubit_coupling_params(self):
-        pars = {"to_line": 35.1e3,  # length between outer circle and the center of the coplanar
+        pars = {"to_line": 34.4e3,  # length between outer circle and the center of the coplanar
                 "cpw_params": self.Z_res,
                 "width": 10e3,
                 "overlap": 10e3
@@ -307,19 +303,15 @@ class My_Design(Chip_Design):
         return [pad_side, pad_r, pads_distance, p_ext_width,
                 p_ext_r, sq_len, sq_area, j_width, low_lead_w,
                 b_ext, j_length, n,bridge]
-
-    def cut_a_piece(self, layer, box):
-        r_cell = Region(self.cell.begin_shapes_rec(layer))
-        emptyregion = Region(box)
-        temp_i = self.cell.layout().layer(pya.LayerInfo(PROGRAM.LAYER1_NUM,0) ) 
-        inverse_region = r_cell - emptyregion
-        self.cell.shapes(temp_i).insert(r_cell - inverse_region)
-        self.cell.layout().clear_layer(layer)
-        self.cell.layout().move_layer(temp_i, layer)
-        self.cell.layout().delete_layer(temp_i)
+                
+    def cut_a_piece(self):
+        side = 2e6
+        lowerleft = DPoint(self.chip.chip_x/2 - side/2, self.chip.chip_y - side)
+        upperright = DPoint(self.chip.chip_x/2 + side/2, self.chip.chip_y)
+        self.select_box(DBox(lowerleft, upperright))
 
 ### MAIN FUNCTION ###
 if __name__ == "__main__":
     my_design = My_Design('testScript')
     my_design.show()
-    my_design.save_as_gds2(r'C:\Users\andre\Documents\chip_designs\mixingqubit_onrealchip_2000_2000_toline_45.gds')
+    my_design.save_as_gds2(r'C:\Users\andre\Documents\chip_designs\SPS_25_25.gds')
