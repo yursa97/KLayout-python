@@ -46,6 +46,7 @@ class Squid(Complex_Base):
             Initial transformation
     '''
     def __init__(self, origin, params, side=0, trans_in=None):
+        # To draw only a half of a squid use 'side'
         # side = -1 is left, 1 is right, 0 is both (default)
         self.pad_side = params[0]
         self.pad_r = params[1]
