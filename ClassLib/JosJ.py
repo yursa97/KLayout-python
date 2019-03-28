@@ -5,7 +5,7 @@ from pya import Trans,DTrans,DVector,DPath
 
 from ClassLib.BaseClasses import Element_Base, Complex_Base
 from ClassLib.Shapes import Circle, Kolbaska
-from ClassLib.Coplanars import CPWParameters, CPW_RL_Path
+from ClassLib.Coplanars import CPWParameters, CPW, CPW_RL_Path
 
 class Squid(Complex_Base):
     '''
@@ -33,7 +33,7 @@ class Squid(Complex_Base):
         j_width: float
             The width of the upper small leads (straight) and also a width of the junction
         low_lead_w: float
-            The width g the lower small bended leads before bending
+            The width of the lower small bended leads before bending
         b_ext: float
             The extension of bended leads after bending
         j_length: float
@@ -45,7 +45,8 @@ class Squid(Complex_Base):
         trans_in: Trans
             Initial transformation
     '''
-    def __init__(self, origin, params, trans_in=None):
+    def __init__(self, origin, params, side=0, trans_in=None):
+        # side = -1 is left, 1 is right, 0 is both (default)
         self.pad_side = params[0]
         self.pad_r = params[1]
         self.pads_distance = params[2]
@@ -60,6 +61,8 @@ class Squid(Complex_Base):
         self.n = params[11]
         self.bridge = params[12]
 
+        self.side = side
+
         super().__init__(origin, trans_in)
 
 
@@ -73,38 +76,35 @@ class Squid(Complex_Base):
         self.primitives["pad_up"] = Circle(self._up_pad_center, self.pad_side, n_pts=self.n, offset_angle=-pi/2)
         self.primitives["p_ext_up"] = Kolbaska(self._up_pad_center, origin + DVector(0,self.sq_len/2),\
                                                self.p_ext_width,self.p_ext_r)
+        if self.side == 0:
+            self.init_half(origin, side=1) # right
+            self.init_half(origin, side=-1) # left
+        else:
+            self.init_half(origin, side=self.side)
+
+    def init_half(self, origin, side=-1):
+        # side = -1 is left, 1 is right
         up_st_gap = self.sq_area / (2*self.sq_len)
         low_st_gap = up_st_gap + self.low_lead_w * 2.5
         up_st_start_p = self.primitives["p_ext_up"].connections[1]
         low_st_start_p = self.primitives["p_ext_down"].connections[1]
-        up_st_l_start = up_st_start_p + DVector(-up_st_gap/2,0)
-        up_st_r_start = up_st_start_p + DVector(up_st_gap/2,0)
-        up_st_l_stop = origin + DVector(-up_st_gap/2,self.bridge/2)
-        up_st_r_stop = origin + DVector(up_st_gap/2,self.bridge/2)
-        low_st_l_start = low_st_start_p + DVector(-low_st_gap/2,0)
-        low_st_r_start = low_st_start_p + DVector(low_st_gap/2,0)
-        low_st_l_stop = origin + DVector(-low_st_gap/2+self.b_ext,-self.bridge/2)
-        low_st_r_stop = origin + DVector(low_st_gap/2-self.b_ext,-self.bridge/2)
-
-        self.primitives["upp_st_left"] = Kolbaska(up_st_l_start,up_st_l_stop,self.j_width,self.j_width/4)
-        self.primitives["upp_st_right"] = Kolbaska(up_st_r_start,up_st_r_stop,self.j_width,self.j_width/4)
-        self.primitives["upp_st_left_thick"] = Kolbaska(up_st_l_start,up_st_l_stop + DPoint(0, 400),2*self.j_width,self.j_width/2)
-        self.primitives["upp_st_right_thick"] = Kolbaska(up_st_r_start,up_st_r_stop + DPoint(0, 400),2*self.j_width,self.j_width/2)
+        
+        up_st_start = up_st_start_p + DVector(side * up_st_gap/2, 0)
+        up_st_stop = origin + DVector(side * up_st_gap/2, self.bridge/2)
+        low_st_start = low_st_start_p + DVector(side * low_st_gap/2, 0)
+        low_st_stop = origin + DVector(side * (low_st_gap/2 - self.b_ext), -self.bridge/2)
         Z_low = CPWParameters(self.j_length, 0)
-        Z_low2 = CPWParameters(self.j_length * 2, 0)
-        len_ry = (low_st_r_stop - low_st_r_start).y - self.j_length/2
-        len_rb = (low_st_r_stop - low_st_r_start).x + self.j_length
-        len_ly = (low_st_l_stop - low_st_l_start).y - self.j_length/2
-        len_lb = (low_st_l_stop - low_st_l_start).x - self.j_length
-        self.primitives["low_st_left"] = CPW_RL_Path(low_st_l_start, 'LR', Z_low2, 0.2e3,\
-                                                    [len_ly],[-pi/2],trans_in = DTrans.R90)
-        self.primitives["low_st_right"] = CPW_RL_Path(low_st_r_start, 'LR', Z_low2, 0.2e3,\
-                                                    [len_ry],[pi/2],trans_in = DTrans.R90)
-        self.primitives["low_st_left_jj"] = CPW_RL_Path(low_st_l_start + DPoint(self.j_length, len_ly + self.j_length/2), 'L', Z_low, 0.2e3,\
-                                                    [len_lb],[],trans_in = None)
-        self.primitives["low_st_right_jj"] = CPW_RL_Path(low_st_r_start + DPoint(-self.j_length, len_ry + self.j_length/2), 'L', Z_low, 0.2e3,\
-                                                    [len_rb],[],trans_in = None)
+        Z_low2 = CPWParameters(self.low_lead_w, 0)
+        len_ly = (low_st_stop - low_st_start).y - Z_low2.width/2
+        len_lb = side * (low_st_start - low_st_stop).x - Z_low2.width/2
 
+        suff = "_left" if side < 0 else "_right"
+        self.primitives["upp_st" + suff] = Kolbaska(up_st_start, up_st_stop, self.j_width, self.j_width/4)
+        self.primitives["upp_st_thick" + suff] = Kolbaska(up_st_start,up_st_stop + DPoint(0, 400), self.low_lead_w, self.low_lead_w/2)
+        self.primitives["low_st" + suff] = CPW_RL_Path(low_st_start, 'LR', Z_low2, Z_low2.width/2,\
+                                                    [len_ly],[side * pi/2],trans_in = DTrans.R90)
+        self.primitives["low_st_jj" + suff] = CPW(Z_low.width, Z_low.gap, low_st_stop + DPoint(side * (self.b_ext - Z_low2.width/2),\
+                                                 -self.j_length/2), low_st_stop + DPoint(0, -self.j_length/2))
 
 class Line_N_JJCross(Element_Base):
     def __init__( self, origin, params, trans_in=None  ):

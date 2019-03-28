@@ -15,12 +15,14 @@ class Test_Squid(Complex_Base):
                     squid_params - a list with dc-SQUID parameters
                     Trans trans_in - initial transformation (None by default)
     """
-    def __init__(self, origin, params, squid_params, trans_in=None):
+    def __init__(self, origin, params, squid_params, side=0, trans_in=None):
+        # side = -1 is left, 1 is right, 0 is both
         self.width = params['width']
         self.height = params['height']
         self.innergap = params['innergap']
         self.outergap = params['outergap']
         self.squid_params = squid_params
+        self.side = side
         super().__init__(origin, trans_in)
 
     def init_primitives(self):
@@ -35,54 +37,13 @@ class Test_Squid(Complex_Base):
         self.primitives['bottom_rect'] = Rectangle(origin - DPoint(self.width/2, self.height + self.innergap / 2),
                                     self.width,
                                     self.height)  
-        self.squid = Squid(origin, self.squid_params)
+        self.squid = Squid(origin, self.squid_params, side=self.side)
         self.primitives['qubit'] = self.squid
 
     def place(self, dest, layer_ph=-1, layer_el=-1):
         for prim_name in list(self.primitives.keys())[:-1]:
             self.primitives[prim_name].place(dest, layer_ph)
         self.squid.place(dest, layer_el)  
-
-class SFS_Csh_par(Complex_Base):
-    def __init__(self, origin, cwave_pars, squid_pars, coupling_pars, trans_in=None):
-        self.cwave_pars = cwave_pars
-        self.cwave_pars["d_alpha1"] = 0  # width of a tip  of a central conductor of the top CPW
-        self.cwave_pars['width1'] = 0  # width of a conductor in the top semi-ring
-        self.cwave_pars['gap1'] = self.cwave_pars["dr"]  # gap between the top semi-ring and the central capacitor
-        self.cwave_pars['d_alpha2'] = 0  # length of a circumference covered by the bottom semiring
-        self.cwave_pars['width2'] = 0  # width of a conductor in the bottom semi-ring
-        self.cwave_pars['gap2'] = self.cwave_pars["dr"]  # gap between the bottom semi-ring and the central capacitor
-
-        self.squid_pars = squid_pars
-        self.coupling_pars = coupling_pars
-        super().__init__(origin, trans_in)
-
-    def init_primitives(self):
-        origin = DPoint(0, 0)
-        self.csh = SFS_Csh_emb(origin, self.cwave_pars, self.squid_pars)
-        self.primitives["csh"] = self.csh
-
-        # drawing coupling rectangle of the mixing qubit
-        top_circle_p = self.csh.origin + DPoint(0, self.csh.r_in)
-        to_line = self.coupling_pars["to_line"]
-        Z = self.coupling_pars["cpw_params"]
-        width = self.coupling_pars["width"]
-
-        coupling_to_line = Z.gap / 2
-        coupling_gap = Z.gap / 2
-        coupling_y = self.csh.dr + to_line - Z.width / 2 - coupling_to_line
-        self.cpw_coupling = CPW(width, coupling_gap,
-                           top_circle_p, top_circle_p + DPoint(0, coupling_y))
-        self.primitives["cpw_coupling"] = self.cpw_coupling
-
-        overlap = self.coupling_pars["overlap"]
-        self.overlap_rec = Rectangle(self.cpw_coupling.start + DPoint(-width / 2, -overlap / 2), width, overlap)
-        self.primitives["overlap_rec"] = self.overlap_rec
-
-    def place(self, cell, layer_ph=-1, layer_el=-1):
-        self.csh.place( cell, layer_ph, layer_el )
-        self.cpw_coupling.place( cell, layer_ph )
-        self.overlap_rec.place( cell, layer_ph )
 
 class My_Design(Chip_Design):
 
@@ -98,7 +59,7 @@ class My_Design(Chip_Design):
         self.draw_chip()
 
         self.draw_mark(500e3, self.chip.chip_y - 500e3)
-        self.draw_mark(self.chip.chip_x/2 - 500e3, self.chip.chip_y/2)
+        self.draw_mark(self.chip.chip_x/2 - 1e6, self.chip.chip_y/2)
         self.draw_mark(500e3, 500e3)
         self.draw_mark(self.chip.chip_x - 500e3, self.chip.chip_y - 500e3)
         self.draw_mark(self.chip.chip_x - 500e3, 500e3)
@@ -106,7 +67,7 @@ class My_Design(Chip_Design):
         self.draw_single_photon_source()
         self.draw_mixing_qubit()
         self.draw_resonators_with_qubits()
-        #self.draw_test_squids()
+        self.draw_test_squids()
         side = 2e6
         lowerleft = DPoint((self.chip.chip_x - side)/2, self.chip.chip_y-side)
         #self.cut_a_piece(self.layer_ph, DBox(lowerleft, lowerleft + DVector(side, side)))
@@ -189,7 +150,7 @@ class My_Design(Chip_Design):
         probe_line.place(self.cell, self.layer_ph)
 
         # drawing resonators with qubits
-        pars = self.get_sps_params()
+        pars = self.get_resonator_qubit_params()
         pars_squid = self.get_dc_squid_params()
         res_to_line = 5e3 # distance between a resonator and a line
 
@@ -205,11 +166,29 @@ class My_Design(Chip_Design):
         # Top right resonator + qubit
         # frequency from Sonnet = 7.0251 GHz
         # Qc = 4860
-        worm_pos = DPoint(p1.x * 4/5 + p2.x * 1/5, p1.y - res_to_line - 2 * (self.Z.width/2 + self.Z.gap)) # resonator position
+        shift_x = self.cpw_curve
+        worm_pos = DPoint(p1.x * 4/5 + p2.x * 1/5 + shift_x, p1.y - res_to_line - 2 * (self.Z.width/2 + self.Z.gap)) # resonator position
         worm2 = self.draw_one_resonator(worm_pos, freq=7, coupling_length=350e3, extra_neck_length=pars['r_out'], trans_in=Trans.R180)
         q_pos = worm2.end + DPoint(0, pars['r_out'] - worm2.Z.b) # qubit position
-        mq2 = SFS_Csh_emb(q_pos, pars, pars_squid)
+        mq2 = SFS_Csh_emb(q_pos, pars, pars_squid, squid_pos=1)
         mq2.place(self.cell, self.layer_ph, self.layer_el)
+
+        # Flux line to the top right qubit with a resonator
+        p3 = self.chip.connections[7]
+        conn_len = 50e3 # length of a connection between two parts of the line
+        xlen = (q_pos - p3).x - 1.1 * pars['r_out']
+        ylen1 = 400e3
+        ylen2 = (q_pos - p3).y - ylen1 - conn_len - pars['r_out']
+        Z_end = CPWParameters(5e3, 5e3) # parameters of a CPW at the end of the line
+        fl1 = CPW_RL_Path(p3, "LRLRL", self.Z, self.cpw_curve, [ylen1, xlen, ylen2], [-pi / 2, pi / 2], trans_in = Trans.R90)
+        fl1.place(self.cell, self.layer_ph)
+        fl1_end = fl1.connections[1]
+        fl2_start = fl1_end + DPoint(0, conn_len)
+        fl2_end = fl2_start + DPoint(0, 2 * pars['r_out'])
+        fl_conn = CPW2CPW(self.Z, Z_end, fl1_end, fl2_start)
+        fl_conn.place(self.cell, self.layer_ph)
+        fl2 = CPW(Z_end.width, Z_end.gap, fl2_start, fl2_end)
+        fl2.place(self.cell, self.layer_ph)
 
         # Bottom left resonator + qubit
         # frequency from Sonnet = 7.2103 GHz
@@ -239,8 +218,11 @@ class My_Design(Chip_Design):
     def draw_test_squids(self):
         pars_probe = {'width': 300e3, 'height': 200e3, 'innergap': 30e3, 'outergap': 30e3}
         pars_squid = self.get_dc_squid_params()
-        Test_Squid(DPoint(1e6, 1e6), pars_probe, pars_squid).place(self.cell, self.layer_ph, self.layer_el)
-        Test_Squid(DPoint(self.chip.chip_x - 1e6, self.chip.chip_y - 1e6), pars_probe, pars_squid).place(self.cell, self.layer_ph, self.layer_el)
+        pars_squid[2] = pars_probe['innergap'] + 3 * pars_squid[0]
+        Test_Squid(DPoint(1.5e6, 1e6), pars_probe, pars_squid, side=1).place(self.cell, self.layer_ph, self.layer_el)
+        Test_Squid(DPoint(1.5e6, 4e6), pars_probe, pars_squid, side=-1).place(self.cell, self.layer_ph, self.layer_el)
+        Test_Squid(DPoint(4e6, 1e6), pars_probe, pars_squid, side=1).place(self.cell, self.layer_ph, self.layer_el)
+        Test_Squid(DPoint(8.5e6, 3.5e6), pars_probe, pars_squid, side=-1).place(self.cell, self.layer_ph, self.layer_el)
 
     def get_sps_params(self):
         pars = {'r_out'	:	175e3, # Radius of an outer ring including the empty region
@@ -278,6 +260,26 @@ class My_Design(Chip_Design):
                 'd_alpha2'	:	0, # length of a circumference covered by the bottom semiring
                 'width2'	:	0, # width of a conductor in the bottom semi-ring
                 'gap2'	:	25e3, # gap between the bottom semi-ring and the central capacitor
+                'n_pts_arcs'	:	 50, # number of points for drawing a circle
+                }
+        return pars
+    
+    def get_resonator_qubit_params(self):
+        pars = {'r_out'	:	175e3, # Radius of an outer ring including the empty region
+                'dr'	:	25e3, # Gap in the outer ring
+                'n_semiwaves'	:	2,
+                's'	:	10e3, # Gap between two pads of a central capacitor
+                'alpha'	:	pi/4, # period of a gap zigzag
+                'r_curve'	:	30e3, # curvature of the roundings at the edges of a zigzag
+                'n_pts_cwave'	:	200, # number of points for drawing a wave gap between to conductors
+                'Z1'	:	self.Z_narrow, # Parameters of a top CPW
+                'd_alpha1'	:	0, # width of a tip  of a central conductor of the top CPW
+                'width1'	:	0, # width of a conductor in the top semiring
+                'gap1'	:	25e3 - 1.33e3, # gap between the top semiring and the central capacitor
+                'Z2'	:	self.Z, # Parameters of a bottom CPW
+                'd_alpha2'	:	4 / 9 * pi, # length of a circumference covered by the bottom semiring
+                'width2'	:	15e3, # width of a conductor in the bottom semiring
+                'gap2'	:	5e3, # gap between the bottom semiring and the central capacitor
                 'n_pts_arcs'	:	 50, # number of points for drawing a circle
                 }
         return pars
@@ -322,4 +324,4 @@ class My_Design(Chip_Design):
 if __name__ == "__main__":
     my_design = My_Design('testScript')
     my_design.show()
-    my_design.save_as_gds2(r'C:\Users\andre\Documents\chip_designs\mixingqubit_onrealchip_2000_2000_toline_45.gds')
+    # my_design.save_as_gds2(r'C:\Users\andre\Documents\chip_designs\mixingqubit_onrealchip_2000_2000_toline_45.gds')

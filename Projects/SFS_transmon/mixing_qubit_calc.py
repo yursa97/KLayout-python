@@ -14,7 +14,7 @@ ng = 0
 def H_C(E_c,n_g,N):
     return E_c*(ch_op - n_g)**2 / 2
 def H_J(E_j,N):
-    return -E_j/2*qp.tunneling(2*N+1,1)
+    return -E_j/2*qp.tunneling(2*N+1, 1)
 
 #%%
 def calc_params(filename):
@@ -52,6 +52,7 @@ def calc_params(filename):
     T = 1 / gamma1
     gamma1 = gamma1 * 1000 / 2 / const.pi
     return Csh, E_c, kappa, n01_abs2, nu01, A, gamma1, T
+
 #%%
 def print_one(filename):
     Csh, E_c, kappa, n01_abs2, nu01, A, gamma1, T = calc_params(filename)
@@ -100,7 +101,7 @@ C1g = []
 C2g = []
 C12 = []
 for size in sizesy:
-    filename = './Projects/SFS_transmon/Simulations_new/MixingQubit_%s.txt' % size
+    filename = '~/Documents/Simulations/Simulations_new/MixingQubit_%s.txt' % size
     caps = pd.read_table(filename, skiprows=5, nrows=4, index_col=0,
                     usecols=range(1,6), float_precision="round_trip") * -1000 * eps
     C1c.append(caps["PIN1"]["CPW"])
@@ -127,7 +128,7 @@ A_arr = []
 G1_arr = []
 T_arr = []
 for size in sizesy:
-    filename = './Projects/SFS_transmon/Simulations_new/MixingQubit_%s.txt' % size
+    filename = '~/Documents/Simulations/Simulations_new/MixingQubit_%s.txt' % size
     Csh, E_c, kappa, n01_abs2, nu01, A, gamma1, T = calc_params(filename)
     Csh_arr.append(Csh)
     E_c_arr.append(E_c)
@@ -184,7 +185,7 @@ C1g = []
 C2g = []
 C12 = []
 for size in toline:
-    filename = './Projects/SFS_transmon/Simulations_new/MixingQubit_2000_2000_toline_%d.txt' % size
+    filename = '~/Documents/Simulations/Simulations_new/MixingQubit_2000_2000_toline_%d.txt' % size
     caps = pd.read_table(filename, skiprows=5, nrows=4, index_col=0,
                     usecols=range(1,6), float_precision="round_trip") * -1000 * eps
     C1c.append(caps["PIN1"]["CPW"])
@@ -211,7 +212,7 @@ A_arr = []
 G1_arr = []
 T_arr = []
 for size in toline:
-    filename = './Projects/SFS_transmon/Simulations_new/MixingQubit_2000_2000_toline_%d.txt' % size
+    filename = '~/Documents/Simulations/Simulations_new/MixingQubit_2000_2000_toline_%d.txt' % size
     Csh, E_c, kappa, n01_abs2, nu01, A, gamma1, T = calc_params(filename)
     Csh_arr.append(Csh)
     E_c_arr.append(E_c)
