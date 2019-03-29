@@ -117,3 +117,13 @@ venv.bak/
 *.son
 *.sid
 /Sonnet projects
+
+.vscode/
+.vscode/*
+
+sonnetSim/
+matlab_project/
+'SonnetLab Matlab server/'*
+
+Projects/SFS_transmon/Simulations/
+Projects/SFS_transmon/Simulations_new/

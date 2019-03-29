@@ -93,11 +93,10 @@ class CPWResonator():
         
     def _calculate_total_length(self):
         length = self._c/self._frequency/(sqrt(self._ɛ/2+0.5))/1e9*self._wavelength_fraction
-        if self._end_primitive is not None:
-            claw_phase_shift = self._claw.get_phase_shift(self._frequency)
-            claw_effective_length = 1/180*claw_phase_shift/self._frequency/1e9*self._c/2/sqrt(self._ɛ/2+0.5)/2
-            length -= claw_effective_length
-            
+        # if self._end_primitive is not None:
+        #     claw_phase_shift = self._claw.get_phase_shift(self._frequency)
+        #     claw_effective_length = 1/180*claw_phase_shift/self._frequency/1e9*self._c/2/sqrt(self._ɛ/2+0.5)/2
+        #     length -= claw_effective_length
         return length*1e9 # in nm
 
 class CPWResonator2(Complex_Base):
@@ -106,7 +105,7 @@ class CPWResonator2(Complex_Base):
     
     def __init__(self, origin, cpw_parameters, turn_radius, frequency, ɛ, 
         wavelength_fraction = 1/4, coupling_length = 200e3,
-        meander_periods = 4, neck_length = 100e3, trans_in = None):
+        meander_periods = 4, neck_length = 100e3, no_neck=False, extra_neck_length=0, end_primitive=None, trans_in = None):
         """
         A CPW resonator of wavelength fraction with automatic length calculation
         from given frequency.
@@ -140,6 +139,10 @@ class CPWResonator2(Complex_Base):
             neck_length: float
                 The length of the straight part before the uncoupled end
                 of the resonator
+            no_neck: bool
+                If no_neck is true then the neck is absent
+            extra_neck_length: float
+                The length of the segment perpendicular to the neck
         """
         self.Z = cpw_parameters
         self.R = turn_radius
@@ -149,10 +152,12 @@ class CPWResonator2(Complex_Base):
         self.freq = frequency
         self.wavelength_fraction = wavelength_fraction
         self.eps = ɛ
+        self.no_neck = no_neck
+        self.extra_neck_length = extra_neck_length
         self.len = self._calculate_total_length()
 
         self.line = None # RL path that represents meandr
-        self.open_end = None # open-ended coplanar at the and of the resonator
+        self.open_end = end_primitive # open-ended coplanar at the and of the resonator
 
         super().__init__(origin, trans_in)
 
@@ -163,15 +168,17 @@ class CPWResonator2(Complex_Base):
         
     def init_primitives(self):
         origin = DPoint(0, 0)
-        meander_length = (self.len - self.cpl_L - (5 / 2 + 2 * self.N) * pi * self.R + 3 * self.R - self.neck) / (2 * self.N + 3 / 2)
-        shape = "LRL" + self.N * "RLRL" + "RLRL"
-        segment_lengths = [self.cpl_L, meander_length] + 2 * self.N * [meander_length] + [meander_length + 3 * self.R, self.neck]
-        turn_angles = [pi] + self.N * [-pi, pi]+[-pi, -pi/2]
+        total_neck_length =  pi * self.R / 2 + self.neck if not self.no_neck else 0
+        meander_length = (self.len - self.cpl_L - 2 * (1 + self.N) * pi * self.R - 3 * self.R - total_neck_length - self.extra_neck_length) / (2 * self.N + 3 / 2)
+        shape = "LRL" + self.N * "RLRL" + "RL" + ("RL" if not self.no_neck else "")
+        segment_lengths = [self.cpl_L, meander_length] + 2 * self.N * [meander_length] + [meander_length + 3 * self.R + self.extra_neck_length] + ([self.neck] if not self.no_neck else [])
+        turn_angles = [pi] + self.N * [-pi, pi]+[-pi] + ([-pi/2] if not self.no_neck else [])
         
         self.line = CPW_RL_Path(origin, shape, self.Z, self.R, segment_lengths, turn_angles)
         self.primitives['line'] = self.line
 
-        self.open_end = CPW(0, self.Z.b/2, self.line.end, self.line.end + DPoint(0, self.Z.b))
+        if self.open_end == None:
+            self.open_end = CPW(0, self.Z.b/2, self.line.end, self.line.end + (DPoint(0, -self.Z.b) if not self.no_neck else DPoint(-self.Z.b, 0)))
         self.primitives['open_end'] = self.open_end
         
     def _calculate_total_length(self):

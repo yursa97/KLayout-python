@@ -3,15 +3,13 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from importlib import reload
 
-import pickle as pkl
-
-import ClassLib
+from ClassLib import *
 reload(ClassLib)
 from ClassLib import *
 
 import sonnetSim
 reload(sonnetSim)
-from sonnetSim import SonnetLab, PORT_TYPES
+from sonnetSim import SonnetLab
 
 class Sandbox(Chip_Design):
     def __init__(self, cell_name):
@@ -72,18 +70,6 @@ class Sandbox(Chip_Design):
 
         self.SL.release()
 
-import numpy as np
-class SimulationResult:
-    def __init__(self):
-        # structure is {"sweep_par_name":sweep_par_values_list}
-        # simulation is intended to happen across tensor product
-        # of all parameters
-        self._swept_pars = OrderedDict()
-        self.freqs = None
-        self.sMatrices = None
-
-    def set_swept_parameters(self, sweep_parameters):
-        self._swept_pars = sweep_parameters
 
     def set_dimensions(self, freqs_N, ports_N):
         self.freqs = np.zeros(tuple(len(swept_par_list) for swept_par_list in self._swept_pars.values()) + (freqs_N,),
@@ -100,7 +86,7 @@ if __name__ == "__main__":
     design_params_dict = OrderedDict([("dx", 0)])
 
     dx_vals = np.arange(-my_design.sim_X/3,my_design.sim_X/3,my_design.sim_X/20)
-    
+
     SR = SimulationResult()
     SR.set_swept_parameters({"dx": dx_vals})
     for i, dx in enumerate(dx_vals):
@@ -115,6 +101,6 @@ if __name__ == "__main__":
 
     with open(r"C:\Users\user\Documents\Sandbox\KLayout\SimRes.pkl", "wb") as f:
         pkl.dump(SR, f)
-        
+
 
     # my_design.save_as_gds2(r'C:\Users\andre\Documents\chip_designs\chip_design.gds2')
