@@ -132,7 +132,7 @@ class MatlabClient():
             except Exception as e:
                 print(e)
                 
-            if( len(response) < 2 ):
+            if( len(response) < 2 ): # TODO: add large timeout if the simulation side is dead?
                 # leaving nonblocking mode on return
                 self.sock.settimeout(MatlabClient.TIMEOUT)
                 return self.state # equals to self.STATE.BUSY_SIMULATING

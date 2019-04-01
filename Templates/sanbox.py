@@ -3,13 +3,13 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from importlib import reload
 
-from ClassLib import *
+import ClassLib
 reload(ClassLib)
 from ClassLib import *
 
 import sonnetSim
 reload(sonnetSim)
-from sonnetSim import SonnetLab
+from sonnetSim import SonnetLab, PORT_TYPES, Simulator
 
 class Sandbox(Chip_Design):
     def __init__(self, cell_name):
@@ -55,20 +55,7 @@ class Sandbox(Chip_Design):
         square = DBox(p1, p1 + DPoint(self.Z.b, self.Z.gap / 3))
         self.region_ph.insert(Box().from_dbox(square))
 
-    def simulate(self):
-        self.SL = SonnetLab()
-        self.SL.clear()
 
-        self.SL.set_boxProps(self.sim_X, self.sim_Y,
-                             self.sim_X_N, self.sim_Y_N)
-        self.SL.set_ABS_sweep(1, 5)
-
-        self.SL.set_ports(self.cop_waveguide.connections, len(self.cop_waveguide.connections)*[PORT_TYPES.BOX_WALL])
-        self.SL.send_cell_layer(self.cell, self.layer_ph)
-
-        self.SL.start_simulation(wait=True)
-
-        self.SL.release()
 
 
     def set_dimensions(self, freqs_N, ports_N):
@@ -87,11 +74,11 @@ if __name__ == "__main__":
 
     dx_vals = np.arange(-my_design.sim_X/3,my_design.sim_X/3,my_design.sim_X/20)
 
-    SR = SimulationResult()
+    SR = Simulator()
     SR.set_swept_parameters({"dx": dx_vals})
     for i, dx in enumerate(dx_vals):
-        design_params_dict["dx"] = dx
-        my_design.show(design_params_dict)
+        my_design.dx = dx
+        my_design.show()
         my_design.simulate()
         freqs, sMatrices = my_design.SL.get_s_params()
         if i == 0:

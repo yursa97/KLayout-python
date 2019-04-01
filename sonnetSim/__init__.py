@@ -10,3 +10,7 @@ from .sonnetLab import SonnetLab
 from . import pORT_TYPES
 reload(pORT_TYPES)
 from .pORT_TYPES import PORT_TYPES
+
+from . import simulatedDesign
+reload(simulatedDesign)
+from .simulatedDesign import Simulator

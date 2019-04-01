@@ -134,7 +134,7 @@ class SonnetLab( MatlabClient ):
                     [Sn1, Sn2, ..., Snn] ]
         '''
         sMatrices = s_data.reshape((len(freqs), file_ports_N, file_ports_N)).transpose(0, 2, 1)
-        return freqs, sMatrices
+        return sMatrices
 
     def visualize_sever( self ):
         self._visualize_sever()

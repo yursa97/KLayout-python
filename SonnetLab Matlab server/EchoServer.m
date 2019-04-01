@@ -1,4 +1,3 @@
-
 sock = tcpip("localhost",30000,'NetworkRole', 'server');
 sock.InputBufferSize = 100000*8;
 

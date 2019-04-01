@@ -65,7 +65,7 @@ class Chip_Design:
         self.cell.shapes(self.layer_ph).insert(self.region_ph)
         self.cell.shapes(self.layer_el).insert(self.region_el)
         self.lv.zoom_fit()
-    
+
     # Call this m
     def show(self):
         self.draw()

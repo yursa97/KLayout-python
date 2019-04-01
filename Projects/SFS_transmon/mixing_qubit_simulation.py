@@ -125,5 +125,5 @@ class MixingQubitSimulator(Chip_Design):
 if __name__ == "__main__":
     mqSim = MixingQubitSimulator('mixingQubitSim')
     mqSim.show()
-    # mqSim.simulate()
-    mqSim.save_as_gds2(r'C:\Users\andre\Documents\chip_designs\mixing_qubit_2000_3000.gds')
+    mqSim.simulate()
+    #mqSim.save_as_gds2(r'C:\Users\andre\Documents\chip_designs\mixing_qubit_2000_3000.gds')
