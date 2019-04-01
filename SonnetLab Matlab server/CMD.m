@@ -10,5 +10,6 @@ classdef CMD < uint16
       SET_ABS(7)
       SIMULATE(8)
       VISUALIZE(9)
+      SET_LINSPACE_SWEEP(10)
    end
 end

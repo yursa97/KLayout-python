@@ -2,6 +2,8 @@ import pya
 from pya import Region
 from ClassLib import PROGRAM
 
+from collections import OrderedDict
+
 class Chip_Design:
     """ @brief:     inherit this class for working on a chip design
                     and override draw() method where other drawing
@@ -45,9 +47,12 @@ class Chip_Design:
         # setting layout view  
         self.lv.select_cell(self.cell.cell_index(), 0)
         self.lv.add_missing_layers()
+
+        # current design parameters instance
+        self.design_pars = OrderedDict()  # nested structure that contains device parameters for drawing
     
     # Call other methods drawing parts of the design from here
-    def draw(self):
+    def draw(self, **design_params):
         '''
         @brief: Purely virtual base-class method that is ought to be
                 implemented in child classes.
@@ -67,8 +72,8 @@ class Chip_Design:
         self.lv.zoom_fit()
 
     # Call this m
-    def show(self):
-        self.draw()
+    def show(self, **design_params):
+        self.draw(**design_params)
         self.__end_drawing()
     
     # Erases everything outside the box

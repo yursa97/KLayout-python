@@ -28,6 +28,9 @@ class SonnetLab( MatlabClient ):
     def set_ABS_sweep(self, start_f_GHz, stop_f_GHz):
         self._set_ABS_sweep(start_f_GHz, stop_f_GHz)
 
+    def set_linspace_sweep(self, start_f_GHz, stop_f_GHz, points_n):
+        self._set_linspace_sweep(start_f_GHz, stop_f_GHz, points_n)
+
     def set_ports(self, dpoint_array, ports_types):
         self.ports = dpoint_array
         self.ports_types = ports_types

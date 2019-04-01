@@ -7,13 +7,13 @@ from ClassLib.ChipDesign import Chip_Design
 from .sonnetLab import SonnetLab
 
 class SonnetPort:
-    def __init__(self):
-        self.pt = None
-        self.type = None
+    def __init__(self, point=None, port_type=None):
+        self.point = point
+        self.port_type = port_type
 
 class SimulatedDesign(Chip_Design):
     def __init__(self, cell_name):
-        super().__init__()
+        super().__init__(cell_name)
 
         self.SL = SonnetLab() # matlab interface for simulating here
         
@@ -26,29 +26,32 @@ class SimulatedDesign(Chip_Design):
         self.sMatrices = None  # np.array
 
         # fixed parameters definition
-        self.freq_limits = None  # np.linspace(freq_start, freq_end, freqs_N)
+        self.freqs = None  # np.linspace(freq_start, freq_end, freqs_N)
         self.simulated_layer = self.layer_ph
 
         # ports are chamgimg with params
         self.ports = []  # list of SonnetPort class instances
 
-    def place_ports(self):
+    def supply_ports(self, **design_params):
         """
         virtual method
         """
         raise NotImplementedError
 
-    def set_fixed_parameters(self, frequencies, ports,  simulated_layer=None):
-        self.freqs = frequencies
-        if( simulated_layer is not None ):
+    def set_fixed_parameters(self, freqs,  simulated_layer=None):
+        self.freqs = freqs
+        if simulated_layer is not None:
             self.simulated_layer = simulated_layer  # by default it is self.layer_ph
 
     def set_swept_parameters(self, sweep_parameters):
         self._swept_pars = sweep_parameters
 
     def allocate_sMatrices(self):
-        self.sMatrices = np.zeros(tuple(len(swept_par_list) for swept_par_list in self._swept_pars.values())+(freqs_N,ports_N,ports_N),
-                                   dtype=np.complex128)
+        self.sMatrices = np.zeros(tuple(
+            len(swept_par_list) for swept_par_list in self._swept_pars.values()
+        )+(len(self.freqs), len(self.ports), len(self.ports)),
+                                  dtype=np.complex128)
+
     def get_Sij(self, i, j):
         return self.sMatrices[..., i+1, j+1]
 
@@ -56,19 +59,19 @@ class SimulatedDesign(Chip_Design):
         self.allocate_sMatrices()
 
         vals_prod = product(*self._swept_pars.values())
-        _idxs_iterables = [range(len(self._swept_pars.values()[i])) for i in len(self._swept_pars)]
+        vals_length_list = list(map(lambda x: len(x), list(self._swept_pars.values())))
+        _idxs_iterables = [range(vals_length_list[i]) for i in range(len(self._swept_pars))]
         idxs_prod = product(*_idxs_iterables)
 
         for idxs, values in zip(idxs_prod, vals_prod):
-            self.draw()
+            self.draw( OrderedDict([(key, val) for key, val in zip(self._swept_pars.keys(), values)]) )
             self.sMatrices[idxs] = self.simulate_design()
-
 
     def simulate_design(self):
         self.SL.clear()
         self.SL.set_boxProps(self.box_Props)
-        self.SL.set_ABS_sweep(self.freqs[0]/1e9, self.freqs[-1])
-
+        # self.SL.set_ABS_sweep(self.freqs[0]/1e9, self.freqs[-1]/1e9)
+        self.SL.set_linspace_sweep(self.freqs[0]/1e9, self.freqs[-1]/1e9, len(self.freqs))
         pts = []
         port_types = []
         for pt, port_type in self.ports:
@@ -80,3 +83,12 @@ class SimulatedDesign(Chip_Design):
         self.SL.start_simulation(wait=True)
         self.SL.release()
         return self.SL.get_s_params()
+
+    def save_result(self, path=None):
+        import os
+        import pickle as pkl
+        if path is None:
+            path = os.path.abspath(__file__)
+        dirname = os.path.dirname(path)
+        with open(os.join(dirname, "sim_res.pkl"), "wb") as o_file:
+            pkl.dump(self, o_file)

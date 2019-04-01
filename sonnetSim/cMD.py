@@ -9,3 +9,4 @@ class CMD:
     SET_ABS = (7).to_bytes(2,byteorder="big")
     SIMULATE = (8).to_bytes(2,byteorder="big")
     VISUALIZE = (9).to_bytes(2,byteorder="big")
+    SET_LINSPACE_SWEEP = (10).to_bytes(2,byteorder="big")

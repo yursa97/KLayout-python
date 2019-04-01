@@ -13,4 +13,4 @@ from .pORT_TYPES import PORT_TYPES
 
 from . import simulatedDesign
 reload(simulatedDesign)
-from .simulatedDesign import Simulator
+from .simulatedDesign import SimulatedDesign, SonnetPort

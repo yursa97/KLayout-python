@@ -69,6 +69,10 @@ while 1
             respond( sock, RESPONSE.OK )
             abs_params = receive_abs_parameters(sock);
             proj.addAbsFrequencySweep(abs_params.start_freq,abs_params.stop_freq);
+        elseif data == CMD.SET_LINSPACE_SWEEP
+            respond( sock, RESPONSE.OK )
+            pars = receive_abs_parameters_step(sock);
+            proj.addFrequencySweep("LSWEEP", pars.start_freq, pars.stop_freq, pars.points_n)
         elseif data == CMD.SIMULATE
             respond( sock, RESPONSE.OK )
             
@@ -170,4 +174,11 @@ function absParams=receive_abs_parameters(sock)
     absParams = ABSparams();
     absParams.start_freq = receive_float64_x1(sock);
     absParams.stop_freq = receive_float64_x1(sock);
+end
+
+function abs_params_step=receive_abs_parameters_step(sock)
+    abs_params_step = ABSparams();
+    abs_params_step.start_freq = receive_float64_x1(sock);
+    abs_params_step.stop_freq = receive_float64_x1(sock);
+    abs_params_step.points_n = receive_uint32_x1(sock);
 end
