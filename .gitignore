@@ -121,7 +121,6 @@ venv.bak/
 .vscode/
 .vscode/*
 
-sonnetSim/
 matlab_project/
 'SonnetLab Matlab server/'*
 
