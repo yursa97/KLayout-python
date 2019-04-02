@@ -12,6 +12,9 @@ class SonnetPort:
         self.point = point
         self.port_type = port_type
 
+    def __deepcopy__(self, memodict={}):
+        return SonnetPort(self.point, self.port_type) # due to the bug in copying Point(), DPoint() and other objects
+
 class SimulationBox:
     def __init__(self, dim_X_nm=None, dim_Y_nm=None, cells_X_num=None, cells_Y_num=None):
         self.x = dim_X_nm
@@ -26,8 +29,7 @@ class SonnetLab( MatlabClient ):
 
         # file that stores results of the last successful simulation
         self.sim_res_file = None
-        self.ports = None
-        self.ports_types = None # ports types array of PORT_TYPES class instances
+        self.ports = None  # list of SonnetPort() instances
         self.freqs = None
         self.sMatrices = None
     
@@ -52,6 +54,8 @@ class SonnetLab( MatlabClient ):
             print(port.point)
         self.ports = deepcopy(ports)
         for port in self.ports:
+            print(port.point)
+        for port in ports:
             print(port.point)
 
         
