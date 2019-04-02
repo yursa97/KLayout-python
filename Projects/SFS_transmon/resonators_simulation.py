@@ -100,7 +100,7 @@ class ResonatorSimulator(Chip_Design):
                         self.ncells_x, self.ncells_y)
         SL.set_ABS_sweep(7.2, 7.22)
         SL.set_ports(self.cpw.connections, [0, 0])
-        SL.send_cell_layer(self.cell, self.layer_ph)
+        SL.send_polygons(self.cell, self.layer_ph)
         SL.start_simulation(wait=True)
         SL.visualize_sever()
         SL.release()

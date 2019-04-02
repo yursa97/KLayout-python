@@ -2,7 +2,7 @@ classdef ABSparams
     properties
         start_freq
         stop_freq
-        step_freq
+        points_n
     end
 end
 

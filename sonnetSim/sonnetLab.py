@@ -7,9 +7,21 @@ from .matlabClient import MatlabClient
 
 import numpy as np
 
+class SonnetPort:
+    def __init__(self, point=None, port_type=None):
+        self.point = point
+        self.port_type = port_type
+
+class SimulationBox:
+    def __init__(self, dim_X_nm=None, dim_Y_nm=None, cells_X_num=None, cells_Y_num=None):
+        self.x = dim_X_nm
+        self.y = dim_Y_nm
+        self.x_n = cells_X_num
+        self.y_n = cells_Y_num
+
 class SonnetLab( MatlabClient ):        
-    def __init__(self, host="localhost", port=MatlabClient.MATLAB_PORT ):
-        super(SonnetLab,self).__init__()
+    def __init__(self, host="localhost", port=MatlabClient.MATLAB_PORT):
+        super(SonnetLab,self).__init__(host, port)
         self.state = self.STATE.READY
 
         # file that stores results of the last successful simulation
@@ -19,11 +31,14 @@ class SonnetLab( MatlabClient ):
         self.freqs = None
         self.sMatrices = None
     
-    def clear( self ):    
+    def clear(self):
         self._clear()
         
-    def set_boxProps( self, dim_X_nm, dim_Y_nm, cells_X_num, cells_Y_num ):
-        self._set_boxProps( dim_X_nm/1e3, dim_Y_nm/1e3, cells_X_num, cells_Y_num )
+    def set_boxProps(self, simBox):
+        self._set_boxProps(simBox.x/1e3,
+                           simBox.y/1e3,
+                           simBox.x_n,
+                           simBox.y_n)
         
     def set_ABS_sweep(self, start_f_GHz, stop_f_GHz):
         self._set_ABS_sweep(start_f_GHz, stop_f_GHz)
@@ -31,13 +46,18 @@ class SonnetLab( MatlabClient ):
     def set_linspace_sweep(self, start_f_GHz, stop_f_GHz, points_n):
         self._set_linspace_sweep(start_f_GHz, stop_f_GHz, points_n)
 
-    def set_ports(self, dpoint_array, ports_types):
-        self.ports = dpoint_array
-        self.ports_types = ports_types
+    def set_ports(self, ports):
+        from copy import deepcopy
+        for port in ports:
+            print(port.point)
+        self.ports = deepcopy(ports)
+        for port in self.ports:
+            print(port.point)
+
         
-    def send_polygon( self, polygon, port_edges_indexes=None, port_edges_types=None ):
-        pts_x = np.zeros(polygon.num_points(), dtype=np.float64 )
-        pts_y = np.zeros(polygon.num_points(), dtype=np.float64 )
+    def send_polygon(self, polygon, port_edges_indexes=None, port_edges_types=None):
+        pts_x = np.zeros(polygon.num_points(), dtype=np.float64)
+        pts_y = np.zeros(polygon.num_points(), dtype=np.float64)
         # print( "Sending polygon, edges: ", polygon.num_points_hull() )
         if port_edges_indexes is not None :
             print( "port edges indexes passing is not implemented yet." )
@@ -50,19 +70,25 @@ class SonnetLab( MatlabClient ):
                 pts_x[i] = edge.p1.x/1.0e3
                 pts_y[i] = edge.p1.y/1.0e3
 
-                for port_i, conn_pt in enumerate(self.ports):
+                for port in self.ports:
                     r_middle = (edge.p1 + edge.p2)*0.5
-                    R = conn_pt.distance( r_middle )
-                    if R < 10 : # distance from connection point to the middle of the edge <10 nm
-                        port_edges_indexes.append(i+1) # matlab polygon edge indexing starts from 1
-                        port_edges_types.append(self.ports_types[port_i]) # choosing appropriate port type
+                    R = port.point.distance(r_middle)
+                    # print(r_middle, port.point)
+                    if R < 10:  # distance from connection point to the middle of the edge <10 nm
+                        port_edges_indexes.append(i+1)  # matlab polygon edge indexing starts from 1
+                        port_edges_types.append(port.port_type)  # choosing appropriate port type
                         break
 
         self._send_polygon(pts_x, pts_y, port_edges_indexes, port_edges_types)
         
-    def send_cell_layer(self, cell, layer_i):
-        r_cell = Region(cell.begin_shapes_rec(layer_i))
+    def send_polygons(self, cell, layer_i=-1):
+        if( layer_i == -1 ): # cell is a Region()
+            r_cell = cell
+        else:
+            r_cell = Region(cell.begin_shapes_rec(layer_i))
+
         for poly in r_cell:
+            print("sending polygon")
             self.send_polygon(poly.resolved_holes())
     
     def start_simulation(self, wait=True):
@@ -206,7 +232,7 @@ if __name__ == "__main__":
     ml_terminal.clear()
     ml_terminal.set_boxProps( X_SIZE,Y_SIZE, 300,300 )
     print( "sending cell and layer" )
-    ml_terminal.send_cell_layer( cell, layer_ph, ports )
+    ml_terminal.send_polygons(cell, layer_ph, ports)
     ml_terminal.set_ABS_sweep( 1, 10 )
     print( "simulating..." )
     ml_terminal.start_simulation( wait=True )

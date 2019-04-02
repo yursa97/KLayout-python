@@ -36,10 +36,10 @@ class Chip_Design:
         else:
             self.cell = layout.create_cell(cell_name)
         
-        info = pya.LayerInfo(1,0)
-        info2 = pya.LayerInfo(2,0)
-        self.layer_ph = layout.layer(info) # photoresist layer
-        self.layer_el = layout.layer(info2) # e-beam lithography layer
+        info = pya.LayerInfo(1, 0)
+        info2 = pya.LayerInfo(2, 0)
+        self.layer_ph = layout.layer(info)  # photoresist layer
+        self.layer_el = layout.layer(info2)  # e-beam lithography layer
 
         # clear this cell and layer
         self.cell.clear()
@@ -48,16 +48,23 @@ class Chip_Design:
         self.lv.select_cell(self.cell.cell_index(), 0)
         self.lv.add_missing_layers()
 
-        # current design parameters instance
-        self.design_pars = OrderedDict()  # nested structure that contains device parameters for drawing
+        # design parameters that were passed to the last
+        # self.draw(...) call are stored here as ordered dict
+        self.design_pars = OrderedDict()
     
     # Call other methods drawing parts of the design from here
-    def draw(self, **design_params):
+    def draw(self, design_params=None):
         '''
         @brief: Purely virtual base-class method that is ought to be
                 implemented in child classes.
                 Responsible for calling functions that draw separate
                 objects.
+
+                Must be started with self.deisgn_pars = design_params
+        @params:
+                design_params - OrderedDict()
+                    dictionary that contains design parameters and
+                    used by other drawing routines
         '''
         raise NotImplementedError
     
@@ -72,8 +79,11 @@ class Chip_Design:
         self.lv.zoom_fit()
 
     # Call this m
-    def show(self, **design_params):
-        self.draw(**design_params)
+    def show(self, design_params=None):
+        if design_params is None:
+            design_params = self.design_pars
+
+        self.draw(design_params)
         self.__end_drawing()
     
     # Erases everything outside the box

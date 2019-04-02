@@ -97,7 +97,7 @@ class MatlabClient():
 
     def _send_polygon( self, array_x, array_y, port_edges_numbers_list=None, port_edges_types=None ):
         self._send(CMD.POLYGON)
-
+        # print(port_edges_numbers_list, port_edges_types)
         if (port_edges_numbers_list is None) or (len(port_edges_numbers_list)==0):
             self._send(FLAG.FALSE)
         else:

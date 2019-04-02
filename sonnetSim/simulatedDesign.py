@@ -4,12 +4,7 @@ from itertools import product
 import numpy as np
 
 from ClassLib.ChipDesign import Chip_Design
-from .sonnetLab import SonnetLab
-
-class SonnetPort:
-    def __init__(self, point=None, port_type=None):
-        self.point = point
-        self.port_type = port_type
+from .sonnetLab import SonnetLab, SimulationBox
 
 class SimulatedDesign(Chip_Design):
     def __init__(self, cell_name):
@@ -29,16 +24,30 @@ class SimulatedDesign(Chip_Design):
         self.freqs = None  # np.linspace(freq_start, freq_end, freqs_N)
         self.simulated_layer = self.layer_ph
 
-        # ports are chamgimg with params
+        # fixed or variable parameters definition
+        # can be provided in set_fixed_params as well as
+        # key: values_array pair in set_swept_params
+        self.simBox = SimulationBox()  # box size and grid resolution
+
+        # variable that depend on swept_pars
         self.ports = []  # list of SonnetPort class instances
 
-    def supply_ports(self, **design_params):
+    def supply_ports(self, design_params):
         """
         virtual method
         """
         raise NotImplementedError
 
-    def set_fixed_parameters(self, freqs,  simulated_layer=None):
+    def _reg_from_layer(self, layer):
+        if( layer == self.layer_el ):
+            return self.region_el
+        elif( layer == self.layer_ph ):
+            return self.region_ph
+        else:
+            return None
+
+    def set_fixed_parameters(self, freqs, simBox=None,  simulated_layer=None):
+        self.simBox = simBox
         self.freqs = freqs
         if simulated_layer is not None:
             self.simulated_layer = simulated_layer  # by default it is self.layer_ph
@@ -64,31 +73,56 @@ class SimulatedDesign(Chip_Design):
         idxs_prod = product(*_idxs_iterables)
 
         for idxs, values in zip(idxs_prod, vals_prod):
-            self.draw( OrderedDict([(key, val) for key, val in zip(self._swept_pars.keys(), values)]) )
-            self.sMatrices[idxs] = self.simulate_design()
+            iter_params_dict = OrderedDict([(key, val) for key, val in zip(self._swept_pars.keys(), values)])
+            self.draw(iter_params_dict)
+            self.sMatrices[idxs] = self.simulate_design(iter_params_dict)
 
-    def simulate_design(self):
+    def simulate_design(self, iter_params_dict):
+        if "boxProps" in iter_params_dict:
+            self.simBox = iter_params_dict["simBox"]
+        elif self.simBox is None:
+            print("simulate_design has no boxProps property")
+
         self.SL.clear()
-        self.SL.set_boxProps(self.box_Props)
-        # self.SL.set_ABS_sweep(self.freqs[0]/1e9, self.freqs[-1]/1e9)
+        self.SL.set_boxProps(self.simBox)
+        # self.SL.set_ABS_sweep(self.freqs[0]/1e9, self.freqs[-1]/1e9)  # ABS sweep params
         self.SL.set_linspace_sweep(self.freqs[0]/1e9, self.freqs[-1]/1e9, len(self.freqs))
-        pts = []
-        port_types = []
-        for pt, port_type in self.ports:
-            pts.append(pt)
-            port_types.append(port_type)
-        self.SL.set_ports(pts, port_types)
-
-        self.SL.send_cell_layer(self.cell, self.simulated_layer)  # only 1 cell is supported
+        self.SL.set_ports(self.ports)
+        reg2sim = self._reg_from_layer(self.simulated_layer)
+        self.SL.send_polygons(reg2sim)  # only 1 cell is supported
+        print("starting simulation")
         self.SL.start_simulation(wait=True)
         self.SL.release()
         return self.SL.get_s_params()
 
-    def save_result(self, path=None):
+    def get_save_path(self, path=None):
+        import os
+
+        if not os.path.exists("data"):
+            os.makedirs("data")
+
+        sample_directory = os.path.join('data', self.__class__)
+        if not os.path.exists(sample_directory):
+            os.makedirs(sample_directory)
+
+        date_directory = os.path.join(sample_directory,
+                                      self.get_start_datetime().strftime("%b %d %Y"))
+        if not os.path.exists(date_directory):
+            os.makedirs(date_directory)
+
+        time_directory = os.path.join(date_directory,
+                                      self.get_start_datetime().strftime("%H-%M-%S")
+                                      + " - " + self._name)
+
+        if not os.path.exists(time_directory):
+            os.makedirs(time_directory)
+
+        return time_directory
+
+    @staticmethod
+    def save(self):
         import os
         import pickle as pkl
-        if path is None:
-            path = os.path.abspath(__file__)
-        dirname = os.path.dirname(path)
-        with open(os.join(dirname, "sim_res.pkl"), "wb") as o_file:
-            pkl.dump(self, o_file)
+        with open(os.path.join(self.get_save_path(), self._name + '.pkl'), 'w+b') as f:
+            pkl.dump(self, f)
+

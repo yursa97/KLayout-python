@@ -72,7 +72,7 @@ class Sandbox(Chip_Design):
         self.SL.set_ABS_sweep(1, 5)
 
         self.SL.set_ports(self.cop_waveguide.connections, len(self.cop_waveguide.connections) * [PORT_TYPES.BOX_WALL])
-        self.SL.send_cell_layer(self.cell, self.layer_ph)
+        self.SL.send_polygons(self.cell, self.layer_ph)
 
         self.SL.start_simulation(wait=True)
 
