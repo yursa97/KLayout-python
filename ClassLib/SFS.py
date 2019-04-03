@@ -109,7 +109,7 @@ class SFS_Csh_emb( Complex_Base ):
             squid_trans_in = None
             p_squid = origin - DPoint(self.squid_pos * (self.r_out - 1.8 * self.dr), 0)
         
-        self.squid = Squid( p_squid, self.squid_params, trans_in=squid_trans_in )
+        self.squid = AsymSquid( p_squid, self.squid_params, trans_in=squid_trans_in )
         self.primitives["qubit"] = self.squid
        
         self.connections = [Z1_end, Z2_end]

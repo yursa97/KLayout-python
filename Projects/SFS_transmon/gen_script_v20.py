@@ -7,7 +7,6 @@ from importlib import reload
 import ClassLib
 reload(ClassLib)
 from ClassLib import *
-
 class Test_Squid(Complex_Base):
     """ @brief:     class represents a rectangular capacitor with a dc-SQUID between its plates
         @params:    DPoint origin - position of the center of a structure
@@ -37,7 +36,7 @@ class Test_Squid(Complex_Base):
         self.primitives['bottom_rect'] = Rectangle(origin - DPoint(self.width/2, self.height + self.innergap / 2),
                                     self.width,
                                     self.height)  
-        self.squid = Squid(origin, self.squid_params, side=self.side)
+        self.squid = AsymSquid(origin, self.squid_params, side=self.side)
         self.primitives['qubit'] = self.squid
 
     def place(self, dest, layer_ph=-1, layer_el=-1):
@@ -76,7 +75,7 @@ class My_Design(Chip_Design):
     def draw_chip(self):
         Z_params = [self.Z_narrow] + [self.Z]*7
         self.chip = Chip5x10_with_contactPads(self.origin, Z_params)
-        self.chip.place(self.cell, self.layer_ph)  
+        self.chip.place(self.cell, self.layer_ph)
     
     def draw_mark(self, x, y):
         # Placing the mark
@@ -221,8 +220,9 @@ class My_Design(Chip_Design):
         pars_squid[2] = pars_probe['innergap'] + 3 * pars_squid[0]
         Test_Squid(DPoint(1.5e6, 1e6), pars_probe, pars_squid, side=1).place(self.cell, self.layer_ph, self.layer_el)
         Test_Squid(DPoint(1.5e6, 4e6), pars_probe, pars_squid, side=-1).place(self.cell, self.layer_ph, self.layer_el)
-        Test_Squid(DPoint(4e6, 1e6), pars_probe, pars_squid, side=1).place(self.cell, self.layer_ph, self.layer_el)
-        Test_Squid(DPoint(8.5e6, 3.5e6), pars_probe, pars_squid, side=-1).place(self.cell, self.layer_ph, self.layer_el)
+        Test_Squid(DPoint(4e6, 1e6), pars_probe, pars_squid, side=0).place(self.cell, self.layer_ph, self.layer_el)
+        Test_Squid(DPoint(8.4e6, 3.5e6), pars_probe, pars_squid, side=1).place(self.cell, self.layer_ph, self.layer_el)
+        Test_Squid(DPoint(9.4e6, 3.5e6), pars_probe, pars_squid, side=-1).place(self.cell, self.layer_ph, self.layer_el)
 
     def get_sps_params(self):
         pars = {'r_out'	:	175e3, # Radius of an outer ring including the empty region
@@ -285,7 +285,7 @@ class My_Design(Chip_Design):
         return pars
 
     def get_mixing_qubit_coupling_params(self):
-        pars = {"to_line": 35.1e3,  # length between outer circle and the center of the coplanar
+        pars = {"to_line": 34.4e3,  # length between outer circle and the center of the coplanar
                 "cpw_params": self.Z_res,
                 "width": 10e3,
                 "overlap": 10e3
@@ -300,25 +300,22 @@ class My_Design(Chip_Design):
         p_ext_r = 0.5e3 # The angle radius of the pad extension
         sq_len = 7e3 # The length of the squid, along leads
         sq_area = 15e6 # The total area of the squid
-        j_width = 0.3e3 # The width of the upper small leads (straight) and also a width of the junction
+        j_width = 100 # The width of the upper small leads (straight) and also a width of the junction
         low_lead_w = 0.5e3 # The width of the lower small bended leads before bending
         b_ext = 0.9e3 # The extension of bended leads after bending
-        j_length =  0.2e3 # The length of the jj and the width of bended parts of the lower leads
+        j_length_1 =  114 # The length of the LEFT jj and the width of bended parts of the lower leads
+        j_length_2 = 342 # The length of the RIGHT jj and the width of bended parts of the lower leads
         n = 7 # The number of angle in regular polygon which serves as a large contact pad
         bridge = 0.3e3 # The value of the gap between two parts of junction in the design
         return [pad_side, pad_r, pads_distance, p_ext_width,
                 p_ext_r, sq_len, sq_area, j_width, low_lead_w,
-                b_ext, j_length, n,bridge]
-
-    def cut_a_piece(self, layer, box):
-        r_cell = Region(self.cell.begin_shapes_rec(layer))
-        emptyregion = Region(box)
-        temp_i = self.cell.layout().layer(pya.LayerInfo(PROGRAM.LAYER1_NUM,0) ) 
-        inverse_region = r_cell - emptyregion
-        self.cell.shapes(temp_i).insert(r_cell - inverse_region)
-        self.cell.layout().clear_layer(layer)
-        self.cell.layout().move_layer(temp_i, layer)
-        self.cell.layout().delete_layer(temp_i)
+                b_ext, j_length_1, j_length_2, n,bridge]
+                
+    def cut_a_piece(self):
+        side = 2e6
+        lowerleft = DPoint(self.chip.chip_x/2 - side/2, self.chip.chip_y - side)
+        upperright = DPoint(self.chip.chip_x/2 + side/2, self.chip.chip_y)
+        self.select_box(DBox(lowerleft, upperright))
 
 ### MAIN FUNCTION ###
 if __name__ == "__main__":

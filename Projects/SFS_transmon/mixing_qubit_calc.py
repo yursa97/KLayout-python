@@ -177,7 +177,7 @@ plt.show()
 
 
 #%%
-toline = [25, 30, 35, 40, 45]
+toline = [25, 30, 344, 35, 351, 40, 45]
 eps = (11.45 + 1)/2
 C1c = []
 C2c = []
@@ -247,7 +247,7 @@ plt.ylabel("Г1/(2π), MHz")
 plt.grid(True)
 plt.show()
 print(popt)
-y = 3.191396059815843
+y = 3.2831954039093043
 x = (popt[0] / (y - popt[2]))**(1/popt[1])
 print(x)
 

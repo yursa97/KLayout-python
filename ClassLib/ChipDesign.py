@@ -1,5 +1,6 @@
 import pya
 from pya import Region
+from ClassLib import PROGRAM
 
 class Chip_Design:
     """ @brief:     inherit this class for working on a chip design
@@ -69,6 +70,22 @@ class Chip_Design:
     def show(self):
         self.draw()
         self.__end_drawing()
+    
+    # Erases everything outside the box
+    def select_box(self, box):
+        self.__erase_in_layer(self.layer_ph, box)
+        self.__erase_in_layer(self.layer_el, box)
+    
+    # Erases everything outside the box in a layer
+    def __erase_in_layer(self, layer, box):
+        r_cell = Region(self.cell.begin_shapes_rec(layer))
+        emptyregion = Region(box)
+        temp_i = self.cell.layout().layer(pya.LayerInfo(PROGRAM.LAYER1_NUM,0) ) 
+        inverse_region = r_cell - emptyregion
+        self.cell.shapes(temp_i).insert(r_cell - inverse_region)
+        self.cell.layout().clear_layer(layer)
+        self.cell.layout().move_layer(temp_i, layer)
+        self.cell.layout().delete_layer(temp_i)
     
     # Save your design as GDS-II
     def save_as_gds2(self, filename):
