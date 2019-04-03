@@ -1,12 +1,15 @@
-import pya
-from math import sqrt, cos, sin, tan, atan2, pi, copysign
-from pya import Point, DPoint, Vector, DVector, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
+from pya import DBox, Point, DPoint, Vector, DVector, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from importlib import reload
 import ClassLib
 reload(ClassLib)
 from ClassLib import *
+
+import sonnetSim
+reload(sonnetSim)
+from sonnetSim import SimulatedDesign, PORT_TYPES, SonnetPort, SimulationBox
+
 class Test_Squid(Complex_Base):
     """ @brief:     class represents a rectangular capacitor with a dc-SQUID between its plates
         @params:    DPoint origin - position of the center of a structure
@@ -44,7 +47,7 @@ class Test_Squid(Complex_Base):
             self.primitives[prim_name].place(dest, layer_ph)
         self.squid.place(dest, layer_el)  
 
-class My_Design(Chip_Design):
+class My_Design(simulatedDesign):
 
     origin = DPoint(0, 0)
     Z = CPWParameters(20e3, 10e3) # normal CPW
@@ -54,9 +57,10 @@ class My_Design(Chip_Design):
     chip = None
 
     # Call other methods drawing parts of the design from here
-    def draw(self):
-        self.draw_chip()
+    def draw(self, design_params):
+        self.deisgn_pars = design_params
 
+        self.draw_chip()
         self.draw_mark(500e3, self.chip.chip_y - 500e3)
         self.draw_mark(self.chip.chip_x/2 - 1e6, self.chip.chip_y/2)
         self.draw_mark(500e3, 500e3)
@@ -319,4 +323,4 @@ class My_Design(Chip_Design):
 if __name__ == "__main__":
     my_design = My_Design('testScript')
     my_design.show()
-    # my_design.save_as_gds2(r'C:\Users\andre\Documents\chip_designs\mixingqubit_onrealchip_2000_2000_toline_45.gds')
+

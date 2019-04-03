@@ -37,9 +37,8 @@ class Sandbox(SimulatedDesign):
         self.draw_sim_box(design_params)
         self.draw_waveguide(design_params)
         self.draw_square(design_params)
-        self.supply_ports(design_params)
 
-    def supply_ports(self, design_params):
+    def calculate_ports(self, design_params):
         port1 = SonnetPort(self.cop_waveguide.connections[0], PORT_TYPES.BOX_WALL)
         port2 = SonnetPort(self.cop_waveguide.connections[1], PORT_TYPES.BOX_WALL)
         self.ports = [port1, port2]
@@ -73,5 +72,6 @@ if __name__ == "__main__":
     my_design.set_swept_parameters(swept_params)
     my_design.simulate_sweep()
     my_design.save_result()
+
 
 

@@ -68,7 +68,7 @@ class Chip_Design:
         '''
         raise NotImplementedError
     
-    def __end_drawing(self):
+    def __transfer_reg2cell(self):
         # this too methods assumes that all previous drawing
         # functions are placing their object on regions
         # in order to avoid extensive copying of the polygons
@@ -83,8 +83,7 @@ class Chip_Design:
         if design_params is None:
             design_params = self.design_pars
 
-        self.draw(design_params)
-        self.__end_drawing()
+        self.__transfer_reg2cell()
     
     # Erases everything outside the box
     def select_box(self, box):

@@ -10,8 +10,8 @@ class SimulatedDesign(Chip_Design):
     def __init__(self, cell_name):
         super().__init__(cell_name)
 
-        self.SL = SonnetLab() # matlab interface for simulating here
-        
+        self.SL = None # matlab interface for simulating here
+
         # structure is {"sweep_par_name":sweep_par_values_list}
         # simulation is intended to happen across tensor product
         # of all parameters
@@ -23,6 +23,7 @@ class SimulatedDesign(Chip_Design):
         # fixed parameters definition
         self.freqs = None  # np.linspace(freq_start, freq_end, freqs_N)
         self.simulated_layer = self.layer_ph
+        self.simulation_type = None
 
         # fixed or variable parameters definition
         # can be provided in set_fixed_params as well as
@@ -32,10 +33,19 @@ class SimulatedDesign(Chip_Design):
         # variable that depend on swept_pars
         self.ports = []  # list of SonnetPort class instances
 
-    def supply_ports(self, design_params):
+    def _define_socket(self):
+        if self.SL is None:
+            self.SL = SonnetLab() # matlab interface for simulating here
+        else:
+            pass
+
+    def calculate_ports(self, design_params):
         """
         virtual method
         """
+        raise NotImplementedError
+
+    def draw_simulation(selfs, iter_params_dict):
         raise NotImplementedError
 
     def _reg_from_layer(self, layer):
@@ -55,38 +65,54 @@ class SimulatedDesign(Chip_Design):
     def set_swept_parameters(self, sweep_parameters):
         self._swept_pars = sweep_parameters
 
-    def allocate_sMatrices(self):
+    def allocate_sMatrices(self, freqs_n):
+        self.post_freqs = np.zeros(tuple(
+            len(swept_par_list) for swept_par_list in self._swept_pars.values()
+        )+(freqs_n, ), dtype=np.complex128)
         self.sMatrices = np.zeros(tuple(
             len(swept_par_list) for swept_par_list in self._swept_pars.values()
-        )+(len(self.freqs), len(self.ports), len(self.ports)),
+        )+(freqs_n, len(self.ports), len(self.ports)),
                                   dtype=np.complex128)
 
     def get_Sij(self, i, j):
         return self.sMatrices[..., i+1, j+1]
 
     def simulate_sweep(self):
-        self.allocate_sMatrices()
-
         vals_prod = product(*self._swept_pars.values())
         vals_length_list = list(map(lambda x: len(x), list(self._swept_pars.values())))
         _idxs_iterables = [range(vals_length_list[i]) for i in range(len(self._swept_pars))]
         idxs_prod = product(*_idxs_iterables)
 
+        iter_i = 0
         for idxs, values in zip(idxs_prod, vals_prod):
             iter_params_dict = OrderedDict([(key, val) for key, val in zip(self._swept_pars.keys(), values)])
-            self.draw(iter_params_dict)
-            self.sMatrices[idxs] = self.simulate_design(iter_params_dict)
+            self.draw_simulation(iter_params_dict)
+            if( iter_i == 0 ):
+                freqs, sMatrices = self.simulate_design(iter_params_dict)
+                self.allocate_sMatrices(len(freqs))
+            else:
+                freqs, sMatrices = self.simulate_design(iter_params_dict)
+
+            self.post_freqs[idxs] = freqs
+            self.sMatrices[idxs] = sMatrices
 
     def simulate_design(self, iter_params_dict):
-        if "boxProps" in iter_params_dict:
+        self._define_socket()
+        if "simBox" in iter_params_dict:
             self.simBox = iter_params_dict["simBox"]
         elif self.simBox is None:
             print("simulate_design has no boxProps property")
 
         self.SL.clear()
         self.SL.set_boxProps(self.simBox)
-        # self.SL.set_ABS_sweep(self.freqs[0]/1e9, self.freqs[-1]/1e9)  # ABS sweep params
-        self.SL.set_linspace_sweep(self.freqs[0]/1e9, self.freqs[-1]/1e9, len(self.freqs))
+        if self.simulation_type is "LINEAR":
+            self.SL.set_linspace_sweep(self.freqs[0]/1e9, self.freqs[-1]/1e9, len(self.freqs))
+        elif self.simulation_type is "ABS":
+            self.SL.set_ABS_sweep(self.freqs[0]/1e9, self.freqs[-1]/1e9)
+        else:
+            self.SL.set_ABS_sweep(self.freqs[0]/1e9, self.freqs[-1]/1e9)
+
+        self.calculate_ports(self.design_pars)
         self.SL.set_ports(self.ports)
         reg2sim = self._reg_from_layer(self.simulated_layer)
         self.SL.send_polygons(reg2sim)  # only 1 cell is supported

@@ -50,14 +50,7 @@ class SonnetLab( MatlabClient ):
 
     def set_ports(self, ports):
         from copy import deepcopy
-        for port in ports:
-            print(port.point)
         self.ports = deepcopy(ports)
-        for port in self.ports:
-            print(port.point)
-        for port in ports:
-            print(port.point)
-
         
     def send_polygon(self, polygon, port_edges_indexes=None, port_edges_types=None):
         pts_x = np.zeros(polygon.num_points(), dtype=np.float64)
@@ -167,7 +160,7 @@ class SonnetLab( MatlabClient ):
                     [Sn1, Sn2, ..., Snn] ]
         '''
         sMatrices = s_data.reshape((len(freqs), file_ports_N, file_ports_N)).transpose(0, 2, 1)
-        return sMatrices
+        return freqs, sMatrices
 
     def visualize_sever( self ):
         self._visualize_sever()
