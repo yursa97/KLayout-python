@@ -85,7 +85,7 @@ class SonnetLab( MatlabClient ):
             r_cell = Region(cell.begin_shapes_rec(layer_i))
 
         for poly in r_cell:
-            print("sending polygon")
+            # print("sending polygon")
             self.send_polygon(poly.resolved_holes())
     
     def start_simulation(self, wait=True):

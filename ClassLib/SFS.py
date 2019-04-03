@@ -116,6 +116,13 @@ class SFS_Csh_emb( Complex_Base ):
         self.angle_connections = [pi/2, 3/2*pi]
         
     def place( self, dest, layer_ph=-1, layer_el=-1 ):
-        for prim_name in list(self.primitives.keys())[:-1]:
-            self.primitives[prim_name].place( dest, layer_ph )
-        self.squid.place( dest, layer_el )
+        if layer_el != -1:
+            for prim_name in list(self.primitives.keys())[:-1]:
+                self.primitives[prim_name].place( dest, layer_ph )
+            self.squid.place( dest, layer_el )
+        else: # dest is region_ph and layer_ph is actually region_el
+            reg_ph = dest
+            reg_el = layer_ph  # this is redefinition of the input parameter
+            for prim_name in list(self.primitives.keys())[:-1]:
+                self.primitives[prim_name].place( reg_ph )
+            self.squid.place( reg_el )

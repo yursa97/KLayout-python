@@ -122,7 +122,7 @@ class My_Design(SimulatedDesign):
             pars_squid = self.get_dc_squid_params()
 
             self.sfs = SFS_Csh_emb(center, pars, pars_squid)
-            self.sfs.place(self.cell, self.layer_ph, self.layer_el)
+            self.sfs.place(self.region_ph, self.region_el)
 
     def draw_mixing_qubit(self):
         # Ports to which a maxing qubit is connected
@@ -363,11 +363,12 @@ if __name__ == "__main__":
     p1 = my_design.sfs.connections[0]
     p2 = my_design.sfs.connections[1]
 
-    # CPW(start=p1, end=p1 + DPoint(0, b - p1.y), cpw_params=My_Design.Z_narrow).place(my_design.region_ph)
-    # CPW(start=p2, end=p2 + DPoint(0, -p2.y), cpw_params=My_Design.Z).place(my_design.region_ph)
+    CPW(start=p1, end=p1 + DPoint(0, b - p1.y), cpw_params=My_Design.Z_narrow).place(my_design.region_ph)
+    CPW(start=p2, end=p2 + DPoint(0, -p2.y), cpw_params=My_Design.Z).place(my_design.region_ph)
     my_design.show()
     
-    # freqs = np.linspace(1e9, 5e9, 300)
-    # my_design.set_fixed_parameters(freqs)
-    # my_design.set_swept_parameters( {"simBox": [SimulationBox(a, b, 100+20*i, 100+20*i) for i in range(6)]} )
-    # my_design.simulate_sweep()
+    freqs = np.linspace(1e9, 5e9, 300)
+    my_design.set_fixed_parameters(freqs)
+    my_design.set_swept_parameters( {"simBox": [SimulationBox(a, b, 100+20*i, 100+20*i) for i in range(11)]} )
+    my_design.simulate_sweep()
+    my_design.save()

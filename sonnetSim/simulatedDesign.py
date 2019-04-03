@@ -33,11 +33,9 @@ class SimulatedDesign(Chip_Design):
         # variable that depend on swept_pars
         self.ports = []  # list of SonnetPort class instances
 
-    def _define_socket(self):
-        if self.SL is None:
-            self.SL = SonnetLab() # matlab interface for simulating here
-        else:
-            pass
+    def __reopen_socket(self):
+        del self.SL
+        self.SL = SonnetLab()  # new socket for every iteration possible memory leakage
 
     def calculate_ports(self, design_params):
         """
@@ -56,7 +54,9 @@ class SimulatedDesign(Chip_Design):
         else:
             return None
 
-    def set_fixed_parameters(self, freqs, simBox=None,  simulated_layer=None):
+    def set_fixed_parameters(self, freqs, simBox=None,  simulated_layer=None,
+                             simulation_type="ABS"):
+        self.simulation_type = simulation_type
         self.simBox = simBox
         self.freqs = freqs
         if simulated_layer is not None:
@@ -97,7 +97,7 @@ class SimulatedDesign(Chip_Design):
             self.sMatrices[idxs] = sMatrices
 
     def simulate_design(self, iter_params_dict):
-        self._define_socket()
+        self.__reopen_socket()
         if "simBox" in iter_params_dict:
             self.simBox = iter_params_dict["simBox"]
         elif self.simBox is None:
@@ -116,7 +116,7 @@ class SimulatedDesign(Chip_Design):
         self.SL.set_ports(self.ports)
         reg2sim = self._reg_from_layer(self.simulated_layer)
         self.SL.send_polygons(reg2sim)  # only 1 cell is supported
-        print("starting simulation")
+        # print("starting simulation")
         self.SL.start_simulation(wait=True)
         self.SL.release()
         return self.SL.get_s_params()
@@ -127,7 +127,7 @@ class SimulatedDesign(Chip_Design):
         if not os.path.exists("data"):
             os.makedirs("data")
 
-        sample_directory = os.path.join('data', self.__class__)
+        sample_directory = os.path.join('data', self.__class__.__name__)  # both for python 2.x and 3.x
         if not os.path.exists(sample_directory):
             os.makedirs(sample_directory)
 
@@ -145,7 +145,6 @@ class SimulatedDesign(Chip_Design):
 
         return time_directory
 
-    @staticmethod
     def save(self):
         import os
         import pickle as pkl
