@@ -67,7 +67,11 @@ class Chip_Design:
                     used by other drawing routines
         '''
         raise NotImplementedError
-    
+
+    # Call this m
+    def show(self, design_params=None):
+        self.__transfer_reg2cell()
+
     def __transfer_reg2cell(self):
         # this too methods assumes that all previous drawing
         # functions are placing their object on regions
@@ -77,30 +81,31 @@ class Chip_Design:
         self.cell.shapes(self.layer_ph).insert(self.region_ph)
         self.cell.shapes(self.layer_el).insert(self.region_el)
         self.lv.zoom_fit()
-
-    # Call this m
-    def show(self, design_params=None):
-        if design_params is None:
-            design_params = self.design_pars
-
-        self.__transfer_reg2cell()
     
     # Erases everything outside the box
-    def select_box(self, box):
-        self.__erase_in_layer(self.layer_ph, box)
-        self.__erase_in_layer(self.layer_el, box)
-    
+    def crop(self, box, layer=None):
+        if layer is None:
+            self.__erase_in_layer(self.layer_ph, box)
+            self.__erase_in_layer(self.layer_el, box)
+        else:
+            self.__erase_in_layer(layer, box)
+
     # Erases everything outside the box in a layer
     def __erase_in_layer(self, layer, box):
-        r_cell = Region(self.cell.begin_shapes_rec(layer))
-        emptyregion = Region(box)
-        temp_i = self.cell.layout().layer(pya.LayerInfo(PROGRAM.LAYER1_NUM,0) ) 
-        inverse_region = r_cell - emptyregion
-        self.cell.shapes(temp_i).insert(r_cell - inverse_region)
-        self.cell.layout().clear_layer(layer)
-        self.cell.layout().move_layer(temp_i, layer)
-        self.cell.layout().delete_layer(temp_i)
-    
+        reg_l = self._reg_from_layer(layer)
+        box_reg = Region(box)
+        reg_l &= box_reg
+
+        # r_cell = r_cell - inverse_region
+
+    def _reg_from_layer(self, layer):
+        if layer == self.layer_el:
+            return self.region_el
+        elif layer == self.layer_ph:
+            return self.region_ph
+        else:
+            return None
+
     # Save your design as GDS-II
     def save_as_gds2(self, filename):
         slo = pya.SaveLayoutOptions()

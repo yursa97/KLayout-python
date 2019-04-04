@@ -2,6 +2,7 @@ from collections import OrderedDict
 from itertools import product
 
 import numpy as np
+from datetime import datetime
 
 from ClassLib.ChipDesign import Chip_Design
 from .sonnetLab import SonnetLab, SimulationBox
@@ -33,6 +34,12 @@ class SimulatedDesign(Chip_Design):
         # variable that depend on swept_pars
         self.ports = []  # list of SonnetPort class instances
 
+        # additional control and visualizing variables
+        self._start_time = None
+
+        # provided by programmer (OPTIONAL)
+        self._name = "default"  # here is optional measurement is stored
+
     def __reopen_socket(self):
         del self.SL
         self.SL = SonnetLab()  # new socket for every iteration possible memory leakage
@@ -46,14 +53,6 @@ class SimulatedDesign(Chip_Design):
     def draw_simulation(selfs, iter_params_dict):
         raise NotImplementedError
 
-    def _reg_from_layer(self, layer):
-        if( layer == self.layer_el ):
-            return self.region_el
-        elif( layer == self.layer_ph ):
-            return self.region_ph
-        else:
-            return None
-
     def set_fixed_parameters(self, freqs, simBox=None,  simulated_layer=None,
                              simulation_type="ABS"):
         self.simulation_type = simulation_type
@@ -63,6 +62,10 @@ class SimulatedDesign(Chip_Design):
             self.simulated_layer = simulated_layer  # by default it is self.layer_ph
 
     def set_swept_parameters(self, sweep_parameters):
+        """
+        e.g. "simBox": list of SimulationBox() instances \n
+        with, maybe, different amount of cells
+        """
         self._swept_pars = sweep_parameters
 
     def allocate_sMatrices(self, freqs_n):
@@ -77,7 +80,12 @@ class SimulatedDesign(Chip_Design):
     def get_Sij(self, i, j):
         return self.sMatrices[..., i+1, j+1]
 
+    def set_measurement_name(self, name):
+        self._name = name
+
     def simulate_sweep(self):
+        self._start_time = datetime.now()
+
         vals_prod = product(*self._swept_pars.values())
         vals_length_list = list(map(lambda x: len(x), list(self._swept_pars.values())))
         _idxs_iterables = [range(vals_length_list[i]) for i in range(len(self._swept_pars))]
@@ -98,10 +106,13 @@ class SimulatedDesign(Chip_Design):
 
     def simulate_design(self, iter_params_dict):
         self.__reopen_socket()
+
+        ### parameters that can be both fixed or swept START ###
         if "simBox" in iter_params_dict:
             self.simBox = iter_params_dict["simBox"]
         elif self.simBox is None:
             print("simulate_design has no boxProps property")
+        ### parameters that can be both fixed or swept END ###
 
         self.SL.clear()
         self.SL.set_boxProps(self.simBox)
@@ -132,12 +143,12 @@ class SimulatedDesign(Chip_Design):
             os.makedirs(sample_directory)
 
         date_directory = os.path.join(sample_directory,
-                                      self.get_start_datetime().strftime("%b %d %Y"))
+                                      self._start_time.strftime("%b %d %Y"))
         if not os.path.exists(date_directory):
             os.makedirs(date_directory)
 
         time_directory = os.path.join(date_directory,
-                                      self.get_start_datetime().strftime("%H-%M-%S")
+                                      self._start_time.strftime("%H-%M-%S")
                                       + " - " + self._name)
 
         if not os.path.exists(time_directory):

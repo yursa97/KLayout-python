@@ -49,10 +49,17 @@ class Test_Squid(Complex_Base):
         self.squid = Squid(origin, self.squid_params, side=self.side)
         self.primitives['qubit'] = self.squid
 
-    def place(self, dest, layer_ph=-1, layer_el=-1):
-        for prim_name in list(self.primitives.keys())[:-1]:
-            self.primitives[prim_name].place(dest, layer_ph)
-        self.squid.place(dest, layer_el)
+    def place( self, dest, layer_ph=-1, layer_el=-1 ):
+        if layer_el != -1:
+            for prim_name in list(self.primitives.keys())[:-1]:
+                self.primitives[prim_name].place( dest, layer_ph )
+            self.squid.place( dest, layer_el )
+        else: # dest is region_ph and layer_ph is actually region_el
+            reg_ph = dest
+            reg_el = layer_ph  # this is redefinition of the input parameter
+            for prim_name in list(self.primitives.keys())[:-1]:
+                self.primitives[prim_name].place( reg_ph )
+            self.squid.place( reg_el )
 
 
 class My_Design(SimulatedDesign):
@@ -62,6 +69,11 @@ class My_Design(SimulatedDesign):
     Z_narrow = CPWParameters(10e3, 7e3)  # narrow CPW
     cpw_curve = 200e3  # Curvature of CPW angles
     chip = None
+
+    def __init__(self, cell_name):
+        super().__init__(cell_name)
+        self.sfs_center = None  # DPoint that is the center of the single photon source
+        self.mixing_center = None  # DPoint that is the center of the mixing qubit
 
     # Call other methods drawing parts of the design from here
     def draw(self, design_params=None):
@@ -78,20 +90,16 @@ class My_Design(SimulatedDesign):
         self.draw_mixing_qubit()
         self.draw_resonators_with_qubits()
         self.draw_test_squids()
-        side = 2e6
-        lowerleft = DPoint((self.chip.chip_x - side) / 2, self.chip.chip_y - side)
-        # self.cut_a_piece(self.layer_ph, DBox(lowerleft, lowerleft + DVector(side, side)))
-        # self.cut_a_piece(self.layer_el, DBox(lowerleft, lowerleft + DVector(side, side)))
 
     def draw_chip(self):
         Z_params = [self.Z_narrow] + [self.Z] * 7
         self.chip = Chip5x10_with_contactPads(self.origin, Z_params)
-        self.chip.place(self.cell, self.layer_ph)
+        self.chip.place(self.region_ph)
 
     def draw_mark(self, x, y):
         # Placing the mark
         mark = Mark2(DPoint(x, y))
-        mark.place(self.cell, self.layer_ph)
+        mark.place(self.region_ph)
 
     def draw_single_photon_source(self, center=None):
         if center is None:
@@ -105,18 +113,20 @@ class My_Design(SimulatedDesign):
 
             # Drawing a qubit
             p = p1 + DPoint((p2 - p1).x, (p2 - p1).y / 2)  # position of a qubit
-            sfs = SFS_Csh_emb(p, pars, pars_squid)
-            sfs.place(self.cell, self.layer_ph, self.layer_el)
+            self.sfs_center = p
+            self.sfs = SFS_Csh_emb(p, pars, pars_squid)
+            self.sfs.place(self.region_ph, self.region_el)
 
             # Input line
             sfs_line_in = CPW_RL_Path(p1, "LRL", pars['Z1'], self.cpw_curve,
                                       [(p2 - p1).x, -(p2 - p1).y / 2 - pars['r_out']], -pi / 2)
-            sfs_line_in.place(self.cell, self.layer_ph)
+            sfs_line_in.place(self.region_ph)
 
             # Output line
-            sfs_line_out = CPW(pars['Z2'].width, pars['Z2'].gap, sfs.connections[1], p2)
-            sfs_line_out.place(self.cell, self.layer_ph)
+            sfs_line_out = CPW(pars['Z2'].width, pars['Z2'].gap, self.sfs.connections[1], p2)
+            sfs_line_out.place(self.region_ph)
         else:
+            self.sfs_center = center
             # Single photon source and dc-SQUID parameters
             pars = self.get_sps_params()
             pars_squid = self.get_dc_squid_params()
@@ -138,14 +148,15 @@ class My_Design(SimulatedDesign):
         v = self.chip.chip_y / 7  # vertical size of the probe line
         h = (p2 - p1).x  # horizontal size of the probe line
         probe_line = CPW_RL_Path(p1, "LRLRL", self.Z, self.cpw_curve, [v, h, v], [pi / 2, pi / 2], trans_in=Trans.R270)
-        probe_line.place(self.cell, self.layer_ph)
+        probe_line.place(self.region_ph)
 
         # Drawing the qubit near the probe line
         p = DPoint((p2.x + p1.x) / 2 + 1.1 * pars['r_out'],
                    p1.y - v + pars_coupling['to_line'] + pars['r_out'])  # Position of the qubit
         # mq1 = SFS_Csh_par(p, pars, pars_squid, pars_coupling)
+        self.mixing_center = p
         mq1 = SFS_Csh_emb(p, pars, pars_squid, squid_pos=1)
-        mq1.place(self.cell, self.layer_ph, self.layer_el)
+        mq1.place(self.region_ph, self.region_el)
 
         # Drawing a flux bias line
         p3 = self.chip.connections[3]  # port connected to the flux bias line
@@ -155,11 +166,11 @@ class My_Design(SimulatedDesign):
         fl2_start = fl1_end - DPoint(0, conn_len)
         fl2_end = fl2_start - DPoint(0, 2 * pars['r_out'])
         fl1 = CPW(self.Z.width, self.Z.gap, p3, fl1_end)
-        fl1.place(self.cell, self.layer_ph)
+        fl1.place(self.region_ph)
         fl_conn = CPW2CPW(self.Z, Z_end, fl1_end, fl2_start)
-        fl_conn.place(self.cell, self.layer_ph)
+        fl_conn.place(self.region_ph)
         fl2 = CPW(Z_end.width, Z_end.gap, fl2_start, fl2_end)
-        fl2.place(self.cell, self.layer_ph)
+        fl2.place(self.region_ph)
 
     def draw_resonators_with_qubits(self):
         # drawing the line
@@ -167,7 +178,7 @@ class My_Design(SimulatedDesign):
         p2 = self.chip.connections[6]
         probe_line = CPW_RL_Path(p1, "LRL", self.Z, self.cpw_curve, [(p1 - p2).x, (p1 - p2).y], pi / 2,
                                  trans_in=Trans.R180)
-        probe_line.place(self.cell, self.layer_ph)
+        probe_line.place(self.region_ph)
 
         # drawing resonators with qubits
         pars = self.get_resonator_qubit_params()
@@ -182,7 +193,7 @@ class My_Design(SimulatedDesign):
                                         trans_in=Trans.R180)
         q_pos = worm1.end + DPoint(0, pars['r_out'] - worm1.Z.b)  # qubit position
         mq1 = SFS_Csh_emb(q_pos, pars, pars_squid)
-        mq1.place(self.cell, self.layer_ph, self.layer_el)
+        mq1.place(self.region_ph, self.region_el)
 
         # Top right resonator + qubit
         # frequency from Sonnet = 7.0251 GHz
@@ -194,7 +205,7 @@ class My_Design(SimulatedDesign):
                                         trans_in=Trans.R180)
         q_pos = worm2.end + DPoint(0, pars['r_out'] - worm2.Z.b)  # qubit position
         mq2 = SFS_Csh_emb(q_pos, pars, pars_squid, squid_pos=1)
-        mq2.place(self.cell, self.layer_ph, self.layer_el)
+        mq2.place(self.region_ph, self.region_el)
 
         # Flux line to the top right qubit with a resonator
         p3 = self.chip.connections[7]
@@ -205,14 +216,14 @@ class My_Design(SimulatedDesign):
         Z_end = CPWParameters(5e3, 5e3)  # parameters of a CPW at the end of the line
         fl1 = CPW_RL_Path(p3, "LRLRL", self.Z, self.cpw_curve, [ylen1, xlen, ylen2], [-pi / 2, pi / 2],
                           trans_in=Trans.R90)
-        fl1.place(self.cell, self.layer_ph)
+        fl1.place(self.region_ph)
         fl1_end = fl1.connections[1]
         fl2_start = fl1_end + DPoint(0, conn_len)
         fl2_end = fl2_start + DPoint(0, 2 * pars['r_out'])
         fl_conn = CPW2CPW(self.Z, Z_end, fl1_end, fl2_start)
-        fl_conn.place(self.cell, self.layer_ph)
+        fl_conn.place(self.region_ph)
         fl2 = CPW(Z_end.width, Z_end.gap, fl2_start, fl2_end)
-        fl2.place(self.cell, self.layer_ph)
+        fl2.place(self.region_ph)
 
         # Bottom left resonator + qubit
         # frequency from Sonnet = 7.2103 GHz
@@ -226,7 +237,7 @@ class My_Design(SimulatedDesign):
         pars['width1'], pars['width2'] = pars['width2'], pars['width1']
         pars['gap1'], pars['gap2'] = pars['gap2'], pars['gap1']
         mq3 = SFS_Csh_emb(q_pos, pars, pars_squid)
-        mq3.place(self.cell, self.layer_ph, self.layer_el)
+        mq3.place(self.region_ph, self.region_el)
 
     def draw_one_resonator(self, pos, freq, coupling_length, no_neck=False, extra_neck_length=0, trans_in=None):
         turn_radius = 50e3
@@ -237,17 +248,17 @@ class My_Design(SimulatedDesign):
         worm = CPWResonator2(pos, self.Z, turn_radius, freq, eps, wavelength_fraction, coupling_length, meander_periods,
                              neck_length,
                              no_neck=no_neck, extra_neck_length=extra_neck_length, trans_in=trans_in)
-        worm.place(self.cell, self.layer_ph)
+        worm.place(self.region_ph)
         return worm
 
     def draw_test_squids(self):
         pars_probe = {'width': 300e3, 'height': 200e3, 'innergap': 30e3, 'outergap': 30e3}
         pars_squid = self.get_dc_squid_params()
         pars_squid[2] = pars_probe['innergap'] + 3 * pars_squid[0]
-        Test_Squid(DPoint(1.5e6, 1e6), pars_probe, pars_squid, side=1).place(self.cell, self.layer_ph, self.layer_el)
-        Test_Squid(DPoint(1.5e6, 4e6), pars_probe, pars_squid, side=-1).place(self.cell, self.layer_ph, self.layer_el)
-        Test_Squid(DPoint(4e6, 1e6), pars_probe, pars_squid, side=1).place(self.cell, self.layer_ph, self.layer_el)
-        Test_Squid(DPoint(8.5e6, 3.5e6), pars_probe, pars_squid, side=-1).place(self.cell, self.layer_ph, self.layer_el)
+        Test_Squid(DPoint(1.5e6, 1e6), pars_probe, pars_squid, side=1).place(self.region_ph, self.region_el)
+        Test_Squid(DPoint(1.5e6, 4e6), pars_probe, pars_squid, side=-1).place(self.region_ph, self.region_el)
+        Test_Squid(DPoint(4e6, 1e6), pars_probe, pars_squid, side=1).place(self.region_ph, self.region_el)
+        Test_Squid(DPoint(8.5e6, 3.5e6), pars_probe, pars_squid, side=-1).place(self.region_ph, self.region_el)
 
     def get_sps_params(self):
         pars = {'r_out': 175e3,  # Radius of an outer ring including the empty region
@@ -335,15 +346,11 @@ class My_Design(SimulatedDesign):
                 p_ext_r, sq_len, sq_area, j_width, low_lead_w,
                 b_ext, j_length, n, bridge]
 
-    def cut_a_piece(self):
-        side = 2e6
-        lowerleft = DPoint(self.chip.chip_x / 2 - side / 2, self.chip.chip_y - side)
-        upperright = DPoint(self.chip.chip_x / 2 + side / 2, self.chip.chip_y)
-        self.select_box(DBox(lowerleft, upperright))
+    def calculate_ports(self, design_params=None):
+        box = self._reg_from_layer(self.simulated_layer).bbox()
 
-    def calculate_ports(self, design_params):
-        port1 = SonnetPort(DPoint(self.simBox.x/2, 0), PORT_TYPES.BOX_WALL)
-        port2 = SonnetPort(DPoint(self.simBox.x/2, self.simBox.y), PORT_TYPES.BOX_WALL)
+        port1 = SonnetPort(DPoint(box.width()/2, 0), PORT_TYPES.BOX_WALL)
+        port2 = SonnetPort(DPoint(box.width()/2, box.height()), PORT_TYPES.BOX_WALL)
         self.ports = [port1, port2]
 
     def draw_simulation(self, iter_params_dict):
@@ -355,20 +362,42 @@ if __name__ == "__main__":
     my_design = My_Design('testScript')
     origin = DPoint(0, 0)
 
-    a = 1.0e6
-    b = 1.0e6
-    box = Rectangle(origin, a, b)
-    box.place(my_design.region_ph)
-    my_design.draw_single_photon_source(DPoint(a/2, b/2))
-    p1 = my_design.sfs.connections[0]
-    p2 = my_design.sfs.connections[1]
+    # a = 1.0e6
+    # b = 1.0e6
+    # box = Rectangle(origin, a, b)
+    # box.place(my_design.region_ph)
+    # my_design.draw_single_photon_source(DPoint(a/2, b/2))
+    # p1 = my_design.sfs.connections[0]
+    # p2 = my_design.sfs.connections[1]
+    #
+    # CPW(start=p1, end=p1 + DPoint(0, b - p1.y), cpw_params=My_Design.Z_narrow).place(my_design.region_ph)
+    # CPW(start=p2, end=p2 + DPoint(0, -p2.y), cpw_params=My_Design.Z).place(my_design.region_ph)
+    # my_design.show()
+    #
+    # freqs = np.linspace(1e9, 5e9, 300)
+    # my_design.set_fixed_parameters(freqs)
+    # my_design.set_swept_parameters( {"simBox": [SimulationBox(a, b, 100+20*i, 100+20*i) for i in range(11)]} )
+    # my_design.simulate_sweep()
+    # my_design.save()
 
-    CPW(start=p1, end=p1 + DPoint(0, b - p1.y), cpw_params=My_Design.Z_narrow).place(my_design.region_ph)
-    CPW(start=p2, end=p2 + DPoint(0, -p2.y), cpw_params=My_Design.Z).place(my_design.region_ph)
-    my_design.show()
+    my_design.draw()
     
+    alpha = 2.0
+    dr = DVector(my_design.sfs.r_out, my_design.sfs.r_out)
+    p1 = my_design.sfs_center - dr
+    p2 = p1 + dr*alpha
+    box = pya.Box().from_dbox(DBox(p1, p2))
+    my_design.crop( pya.Box().from_dbox(DBox(p1,p2)) )
+    my_design.region_ph.trans
+
     freqs = np.linspace(1e9, 5e9, 300)
     my_design.set_fixed_parameters(freqs)
-    my_design.set_swept_parameters( {"simBox": [SimulationBox(a, b, 100+20*i, 100+20*i) for i in range(11)]} )
+    my_design.set_swept_parameters(
+        {"simBox": [SimulationBox(box.width(),
+                                  box.height(),
+                                  200+2*i,
+                                  100+1*i) for i in range(6)]}
+    )
     my_design.simulate_sweep()
+    my_design.set_measurement_name("helooo")
     my_design.save()
