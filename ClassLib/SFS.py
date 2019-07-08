@@ -2,8 +2,11 @@ import pya
 from math import sqrt, cos, sin, atan2, pi, copysign
 from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
+from collections import namedtuple
 
 from ClassLib import *
+
+SPSparams = namedtuple("SPSparams", "r_out dr n_semiwaves s alpha r_curve n_pts_cwave Z1 d_alpha1 width1 gap1 Z2 d_alpha2 width2 gap2 n_pts_arcs")
 
 class SFS_Csh_emb( Complex_Base ):
     """@brief: class represents a qubit for a single photon source

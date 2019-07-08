@@ -7,6 +7,11 @@ from ClassLib.BaseClasses import Element_Base, Complex_Base
 from ClassLib.Shapes import Circle, Kolbaska
 from ClassLib.Coplanars import CPWParameters, CPW, CPW_RL_Path
 
+from collections import namedtuple
+
+SquidParams = namedtuple("SquidParams", "pad_side pad_r pads_distance p_ext_width p_ext_r sq_len sq_area j_width low_lead_w b_ext j_length n bridge")
+AsymSquidParams = namedtuple("AsymSquidParams", "pad_side pad_r pads_distance p_ext_width p_ext_r sq_len sq_area j_width_1 j_width_2 low_lead_w b_ext j_length n bridge")
+
 class AsymSquid(Complex_Base):
     '''
     Class to draw a symmetrical squid with outer positioning of the junctions.
@@ -48,36 +53,22 @@ class AsymSquid(Complex_Base):
     def __init__(self, origin, params, side=0, trans_in=None):
         # To draw only a half of a squid use 'side'
         # side = -1 is left, 1 is right, 0 is both (default)
-        self.pad_side = params[0]
-        self.pad_r = params[1]
-        self.pads_distance = params[2]
-        self.p_ext_width = params[3]
-        self.p_ext_r = params[4]
-        self.sq_len = params[5]
-        self.sq_area = params[6]
-        self.j_width = params[7]
-        self.low_lead_w = params[8]
-        self.b_ext = params[9]
-        self.j_length_1 = params[10]
-        self.j_length_2 = params[11]
-        self.n = params[12]
-        self.bridge = params[13]
-
+        self.params = params # See description of AsymSquidParams tuple and the comment above
         self.side = side
-
         super().__init__(origin, trans_in)
 
 
     def init_primitives(self):
         origin = DPoint(0,0)
-        self._up_pad_center = origin + DVector(0,self.pads_distance/2)
-        self._down_pad_center = origin + DVector(0,-self.pads_distance/2)
-        self.primitives["pad_down"] = Circle(self._down_pad_center, self.pad_side, n_pts=self.n, offset_angle=pi/2)
-        self.primitives["p_ext_down"] = Kolbaska(self._down_pad_center, origin + DVector(0,-self.sq_len/2),\
-                                                self.p_ext_width,self.p_ext_r)
-        self.primitives["pad_up"] = Circle(self._up_pad_center, self.pad_side, n_pts=self.n, offset_angle=-pi/2)
-        self.primitives["p_ext_up"] = Kolbaska(self._up_pad_center, origin + DVector(0,self.sq_len/2),\
-                                               self.p_ext_width,self.p_ext_r)
+        pars = self.params
+        self._up_pad_center = origin + DVector(0, pars.pads_distance/2)
+        self._down_pad_center = origin + DVector(0, -pars.pads_distance/2)
+        self.primitives["pad_down"] = Circle(self._down_pad_center, pars.pad_side, n_pts=pars.n, offset_angle=pi/2)
+        self.primitives["p_ext_down"] = Kolbaska(self._down_pad_center, origin + DVector(0, -pars.sq_len/2),
+                                                pars.p_ext_width, pars.p_ext_r)
+        self.primitives["pad_up"] = Circle(self._up_pad_center, pars.pad_side, n_pts=pars.n, offset_angle=-pi/2)
+        self.primitives["p_ext_up"] = Kolbaska(self._up_pad_center, origin + DVector(0, pars.sq_len/2),
+                                               pars.p_ext_width, pars.p_ext_r)
         if self.side == 0:
             self.init_half(origin, side=1) # right
             self.init_half(origin, side=-1) # left
@@ -86,31 +77,35 @@ class AsymSquid(Complex_Base):
 
     def init_half(self, origin, side=-1):
         # side = -1 is left, 1 is right
-        j_length = self.j_length_1 if side < 0 else self.j_length_2
-        up_st_gap = self.sq_area / (2*self.sq_len)
-        low_st_gap = up_st_gap + self.low_lead_w * 2.5
+        pars = self.params
+        j_width = pars.j_width_1 if side < 0 else pars.j_width_2
+        up_st_gap = pars.sq_area / (2*pars.sq_len)
+        low_st_gap = up_st_gap + pars.low_lead_w * 2.5
         up_st_start_p = self.primitives["p_ext_up"].connections[1]
         low_st_start_p = self.primitives["p_ext_down"].connections[1]
         
         up_st_start = up_st_start_p + DVector(side * up_st_gap/2, 0)
-        up_st_stop = origin + DVector(side * up_st_gap/2, self.bridge/2)
+        up_st_stop = origin + DVector(side * up_st_gap/2, pars.bridge/2 + j_width/4)
         low_st_start = low_st_start_p + DVector(side * low_st_gap/2, 0)
-        low_st_stop = origin + DVector(side * (low_st_gap/2 - self.b_ext), -self.bridge/2)
-        Z_low = CPWParameters(j_length, 0)
-        Z_low2 = CPWParameters(self.low_lead_w, 0)
+        low_st_stop = origin + DVector(side * (low_st_gap/2 - pars.b_ext), -pars.bridge/2)
+        Z_low = CPWParameters(pars.j_length, 0)
+        Z_low2 = CPWParameters(pars.low_lead_w, 0)
         len_ly = (low_st_stop - low_st_start).y - Z_low2.width/2
         len_lb = side * (low_st_start - low_st_stop).x - Z_low2.width/2
 
         suff = "_left" if side < 0 else "_right"
-        self.primitives["upp_st" + suff] = Kolbaska(up_st_start, up_st_stop, self.j_width, self.j_width/4)
-        self.primitives["upp_st_thick" + suff] = Kolbaska(up_st_start,up_st_stop + DPoint(0, 2*self.bridge+self.low_lead_w/2), self.low_lead_w, self.low_lead_w/2)
-        self.primitives["low_st" + suff] = CPW_RL_Path(low_st_start, 'LR', Z_low2, Z_low2.width/2,\
+        self.primitives["upp_st" + suff] = Kolbaska(up_st_start, up_st_stop, j_width, j_width/4)
+        self.primitives["upp_st_thick" + suff] = Kolbaska(up_st_start,up_st_stop + DPoint(0, 2*pars.bridge+pars.low_lead_w/2 - j_width/4), pars.low_lead_w, pars.low_lead_w/2)
+        self.primitives["low_st" + suff] = CPW_RL_Path(low_st_start, 'LR', Z_low2, Z_low2.width/2,
                                                     [len_ly],[side * pi/2],trans_in = DTrans.R90)
-        self.primitives["low_st_jj" + suff] = CPW(Z_low.width, Z_low.gap, low_st_stop + DPoint(side * (self.b_ext - Z_low2.width/2),\
-                                                 -j_length/2), low_st_stop + DPoint(0, -j_length/2))
+        #self.primitives["low_st_jj" + suff] = CPW(Z_low.width, Z_low.gap, low_st_stop + DPoint(side * (pars.b_ext - Z_low2.width/2),\
+        #                                         -pars.j_length/2), low_st_stop + DPoint(0, -pars.j_length/2))
+        low_st_jj_start = low_st_stop + DPoint(side * (pars.b_ext - Z_low2.width/2), -pars.j_length/2)
+        low_st_jj_stop = low_st_stop + DPoint(0, -pars.j_length/2)
+        self.primitives["low_st_jj" + suff] = Kolbaska(low_st_jj_start, low_st_jj_stop, pars.j_length, pars.j_length/2)
 
 
-class Squid(Complex_Base):
+class Squid(AsymSquid):
     '''
     Class to draw a symmetrical squid with outer positioning of the junctions.
 
@@ -151,64 +146,8 @@ class Squid(Complex_Base):
     def __init__(self, origin, params, side=0, trans_in=None):
         # To draw only a half of a squid use 'side'
         # side = -1 is left, 1 is right, 0 is both (default)
-        self.pad_side = params[0]
-        self.pad_r = params[1]
-        self.pads_distance = params[2]
-        self.p_ext_width = params[3]
-        self.p_ext_r = params[4]
-        self.sq_len = params[5]
-        self.sq_area = params[6]
-        self.j_width = params[7]
-        self.low_lead_w = params[8]
-        self.b_ext = params[9]
-        self.j_length = params[10]
-        self.n = params[11]
-        self.bridge = params[12]
-
-        self.side = side
-
-        super().__init__(origin, trans_in)
-
-
-    def init_primitives(self):
-        origin = DPoint(0,0)
-        self._up_pad_center = origin + DVector(0,self.pads_distance/2)
-        self._down_pad_center = origin + DVector(0,-self.pads_distance/2)
-        self.primitives["pad_down"] = Circle(self._down_pad_center, self.pad_side, n_pts=self.n, offset_angle=pi/2)
-        self.primitives["p_ext_down"] = Kolbaska(self._down_pad_center, origin + DVector(0,-self.sq_len/2),\
-                                                self.p_ext_width,self.p_ext_r)
-        self.primitives["pad_up"] = Circle(self._up_pad_center, self.pad_side, n_pts=self.n, offset_angle=-pi/2)
-        self.primitives["p_ext_up"] = Kolbaska(self._up_pad_center, origin + DVector(0,self.sq_len/2),\
-                                               self.p_ext_width,self.p_ext_r)
-        if self.side == 0:
-            self.init_half(origin, side=1) # right
-            self.init_half(origin, side=-1) # left
-        else:
-            self.init_half(origin, side=self.side)
-
-    def init_half(self, origin, side=-1):
-        # side = -1 is left, 1 is right
-        up_st_gap = self.sq_area / (2*self.sq_len)
-        low_st_gap = up_st_gap + self.low_lead_w * 2.5
-        up_st_start_p = self.primitives["p_ext_up"].connections[1]
-        low_st_start_p = self.primitives["p_ext_down"].connections[1]
-        
-        up_st_start = up_st_start_p + DVector(side * up_st_gap/2, 0)
-        up_st_stop = origin + DVector(side * up_st_gap/2, self.bridge/2)
-        low_st_start = low_st_start_p + DVector(side * low_st_gap/2, 0)
-        low_st_stop = origin + DVector(side * (low_st_gap/2 - self.b_ext), -self.bridge/2)
-        Z_low = CPWParameters(self.j_length, 0)
-        Z_low2 = CPWParameters(self.low_lead_w, 0)
-        len_ly = (low_st_stop - low_st_start).y - Z_low2.width/2
-        len_lb = side * (low_st_start - low_st_stop).x - Z_low2.width/2
-
-        suff = "_left" if side < 0 else "_right"
-        self.primitives["upp_st" + suff] = Kolbaska(up_st_start, up_st_stop, self.j_width, self.j_width/4)
-        self.primitives["upp_st_thick" + suff] = Kolbaska(up_st_start,up_st_stop + DPoint(0, 400), self.low_lead_w, self.low_lead_w/2)
-        self.primitives["low_st" + suff] = CPW_RL_Path(low_st_start, 'LR', Z_low2, Z_low2.width/2,\
-                                                    [len_ly],[side * pi/2],trans_in = DTrans.R90)
-        self.primitives["low_st_jj" + suff] = CPW(Z_low.width, Z_low.gap, low_st_stop + DPoint(side * (self.b_ext - Z_low2.width/2),\
-                                                 -self.j_length/2), low_st_stop + DPoint(0, -self.j_length/2))
+        asymparams = AsymSquidParams(*params[:-3], *params[-2:])
+        super().__init__(self, origin, asymparams, side, trans_in)
 
 class Line_N_JJCross(Element_Base):
     def __init__( self, origin, params, trans_in=None  ):
