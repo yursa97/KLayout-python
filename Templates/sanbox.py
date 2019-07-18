@@ -1,56 +1,77 @@
-import pya
-from math import sqrt, cos, sin, atan2, pi, copysign
-from pya import Point, DPoint, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
+from pya import Point, DPoint, Vector, DVector, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region, Box, DBox
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from ClassLib import * 
+from importlib import reload
 
-### START classes to be delegated to different file ###
+import ClassLib
+reload(ClassLib)
+from ClassLib import *
 
-# END classes to be delegated to different file ###
+import sonnetSim
+reload(sonnetSim)
+from sonnetSim import SimulatedDesign, SonnetPort, PORT_TYPES, SimulationBox
 
-# Enter your Python code here
+
+class Sandbox(SimulatedDesign):
+    def __init__(self, cell_name):
+        super().__init__(cell_name)
+
+        self.origin = DPoint(0, 0)
+        self.Z = CPWParameters(20e3, 10e3)  # normal CPW
+        self.Z_narrow = CPWParameters(10e3, 7e3)  # narrow CPW
+
+        self.cop_waveguide = None
+
+        ## SIMULATION PARAMETERS SECTION START ##
+        self.sim_X = 0.5e6
+        self.sim_Y = 0.2e6
+
+        self.sim_X_N = 200
+        self.sim_Y_N = 200
+        ## SIMULATION PARAMETERS SECTION END ##
+
+    # Call other methods drawing parts of the design from here
+    def draw(self, design_params):
+        self._design_params = design_params
+        self.cell.clear()
+        self.draw_sim_box(design_params)
+        self.draw_waveguide(design_params)
+        self.draw_square(design_params)
+
+    def calculate_ports(self, design_params):
+        port1 = SonnetPort(self.cop_waveguide.connections[0], PORT_TYPES.BOX_WALL)
+        port2 = SonnetPort(self.cop_waveguide.connections[1], PORT_TYPES.BOX_WALL)
+        self.ports = [port1, port2]
+
+    def draw_sim_box(self, design_params):
+        sim_box = Box(self.origin,
+                      self.origin + DPoint(self.sim_X, self.sim_Y))
+        self.region_ph.insert(sim_box)
+
+    def draw_waveguide(self, design_params):
+        self.cop_waveguide = CPW(cpw_params=self.Z,
+                                 start=DPoint(0, self.sim_Y/2),
+                                 end=DPoint(self.sim_X, self.sim_Y/2))
+        self.cop_waveguide.place(self.region_ph)
+
+    def draw_square(self, design_params):
+        dx = design_params["square_dx"]
+        p1 = DPoint(self.sim_X / 2 + dx, self.sim_Y / 2 - self.Z.width / 2 - self.Z.gap * 2 / 3)
+        square = DBox(p1, p1 + DPoint(self.Z.b, self.Z.gap / 3))
+        self.region_ph.insert(Box().from_dbox(square))
+
+import numpy as np
 ### MAIN FUNCTION ###
 if __name__ == "__main__":
-# getting main references of the application
-    app = pya.Application.instance()
-    mw = app.main_window()
-    lv = mw.current_view()
-    cv = None
-    
-    #this insures that lv and cv are valid objects
-    if( lv == None ):
-        cv = mw.create_layout(1)
-        lv = mw.current_view()
-    else:
-        cv = lv.active_cellview()
+    my_design = Sandbox('testScript')
+    freqs = np.linspace(1e9, 5e9, 300)
+    sim_box = SimulationBox(0.5e6, 0.2e6, 200, 200)
+    my_design.set_fixed_parameters(freqs, simBox=sim_box)
 
-# find or create the desired by programmer cell and layer
-    layout = cv.layout()
-    layout.dbu = 0.001
-    if( layout.has_cell( "testScript") ):
-        pass
-    else:
-        cell = layout.create_cell( "testScript" )
-    
-    info = pya.LayerInfo(1,0)
-    info2 = pya.LayerInfo(2,0)
-    layer_ph = layout.layer( info )
-    layer_el = layout.layer( info2 )
+    swept_params = {"square_dx": np.arange(-my_design.sim_X/3,my_design.sim_X/3,my_design.sim_X/20)}
+    my_design.set_swept_parameters(swept_params)
+    my_design.simulate_sweep()
+    my_design.save_result()
 
-    # clear this cell and layer
-    cell.clear()
 
-    # setting layout view  
-    lv.select_cell(cell.cell_index(), 0)
-    lv.add_missing_layers()
 
-    ### DRAW SECTION START ###
-    origin = DPoint(0,0)
-    chip = pya.DBox( origin, DPoint( CHIP.dx, CHIP.dy ) )
-    cell.shapes( layer_ph ).insert( pya.Box().from_dbox(chip) )
-    
-    
-    ### DRAW SECTION END ###
-    
-    lv.zoom_fit()

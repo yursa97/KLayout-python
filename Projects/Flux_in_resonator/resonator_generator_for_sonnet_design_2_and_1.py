@@ -105,7 +105,7 @@ if ( __name__ ==  "__main__" ):
     width_res = 9.6e3
     gap_res = 5.2e3
     Z_res = CPW( width_res, gap_res, origin, origin )
-    to_line = Z_res.gap + Z0.gap
+    to_line = 20e3
     worm = EMResonator_TL2Qbit_worm( Z_res, DPoint(x, y - Z0.width/2 - Z_res.width/2 - to_line) , L_coupling, L1_list[0], r, L2, N )
     worm.place( cell, layer_photo )
     

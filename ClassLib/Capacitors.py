@@ -9,21 +9,30 @@ from ClassLib.Shapes import *
 class CWave2CPW( Element_Base ):
     '''
     Draws a semi-circle coupler from coplanar waveguide to jelly capacitance plates.
-
-
     '''
     def __init__( self, c_wave_cap, params, n_pts=50, trans_in=None ):
         self.c_wave_ref = c_wave_cap
-        self.Z1 = params[0]
-        self.d_alpha1 = params[1]
-        self.width1 = params[2]
-        self.gap1 = params[3]
-        self.Z2 = params[4]
-        self.d_alpha2 = params[5]
-        self.width2 = params[6]
-        self.gap2 = params[7]
+        if isinstance(params, dict):
+            self.Z1 = params['Z1']
+            self.d_alpha1 = params['d_alpha1']
+            self.width1 = params['width1']
+            self.gap1 = params['gap1']
+            self.Z2 = params['Z2']
+            self.d_alpha2 = params['d_alpha2']
+            self.width2 = params['width2']
+            self.gap2 = params['gap2']
+        else:
+            # not recommended
+            self.Z1 = params[0]
+            self.d_alpha1 = params[1]
+            self.width1 = params[2]
+            self.gap1 = params[3]
+            self.Z2 = params[4]
+            self.d_alpha2 = params[5]
+            self.width2 = params[6]
+            self.gap2 = params[7]
         self.n_pts = n_pts
-        super().__init__( self.c_wave_ref.origin, trans_in )
+        super().__init__(self.c_wave_ref.origin, trans_in)
 
     def _get_solid_arc( self, center, R, width, alpha_start, alpha_end, n_inner, n_outer ):
         pts = []
@@ -62,9 +71,12 @@ class CWave2CPW( Element_Base ):
 
 class CWave( Complex_Base ):
     '''
-    Draws a condensator from a circle cutting it into 2 pieces.
+    Draws a condensator from a circle cutted into 2 pieces.
+    '''
 
-    Parameters:
+    def __init__(self, center, r_out, dr, n_segments, s, alpha, r_curve, delta=40e3, n_pts=50, solid=True, trans_in=None ):
+        '''
+        Parameters:
         center: DPoint
             A center of circle.
         r_out: float
@@ -79,42 +91,37 @@ class CWave( Complex_Base ):
             The angle of single arc of slice.
         r_curve: float
             The radius of single arc.
-        L0: float
-            The length of the initial and final "RLR" sections of the slice.
+        delta: float
+            length of the horizontal lines on the ends of the cut
         n_pts: int
             The number of points on the perimeter of the circle.
         solid: ???
         trans_in: Bool
             Initial transformation
-
-    '''
-
-    def __init__(self, center, r_out, dr, n_segments, s, alpha, r_curve, L0=0, n_pts=50, solid=True, trans_in=None ):
+        '''
         self.r_out = r_out
         self.dr = dr
+        self.r_in = self.r_out - self.dr
         self.n_segments = n_segments
         self.s = s
         self.alpha = alpha
         self.r_curve = r_curve
         self.n_pts = n_pts
-        self.delta = 40e3
-        self.L_full = 2*self.r_out - 2*self.delta
+        self.delta = delta
+        self.L_full = 2*(self.r_out - self.dr) - 2*self.delta
         # calculating parameters of the CPW_RL_Path #
-        r = self.r_curve
-        n = self.n_segments
         L_full = self.L_full
         alpha = self.alpha
         if abs(self.alpha) != pi:
-            self.L1 = L_full/((n_segments+1)*cos(alpha))
+            self.L1 = L_full/((self.n_segments+1)*cos(alpha))
             self.L0 = self.L1/2
-            r = self.r_curve
         else:
             raise ValueError("180 degrees turns in CWave are not supported.")
 
-        if( self.L0 < 0 or self.L1 < 0 ):
-            print( "CPW_RL_Path: impossible parameters combination" )
+        if( self.L0 < 0 ):
+            print("CPW_RL_Path: impossible parameters combination")
 
-        super(). __init__( center,trans_in )
+        super(). __init__(center,trans_in)
 
     def init_primitives(self):
         origin = DPoint(0,0)
@@ -124,8 +131,8 @@ class CWave( Complex_Base ):
         angles = []
         lengths = []
         # placing circle r_out with dr clearance from ground polygon
-        self.empt_circle = Circle( origin,self.r_out + self.dr, n_pts=self.n_pts, solid=False )
-        self.in_circle = Circle( origin, self.r_out, n_pts=self.n_pts, solid=True )
+        self.empt_circle = Circle( origin,self.r_out, n_pts=self.n_pts, solid=False )
+        self.in_circle = Circle( origin, self.r_out - self.dr, n_pts=self.n_pts, solid=True )
         self.empt_circle.empty_region -= self.in_circle.metal_region
         self.primitives["empt_circle"] = self.empt_circle
         self.primitives["in_circle"] = self.in_circle
@@ -157,7 +164,6 @@ class CWave( Complex_Base ):
         shapes += 'RLRL'
         angles.extend([2*m_x*self.alpha,-m_x*self.alpha])
         lengths.extend([self.L0, self.delta])
-
         cut = CPW_RL_Path(self.RL_start,shapes,Z,self.r_curve,lengths,angles)
         # prev_path = list(self.primitives.values())[-1]
         # rl_path_end = CPW_RL_Path( prev_path.end, "RLRL", Z, self.r_curve, [self.L0, self.delta], [m_x*self.alpha,-m_x*self.alpha])
