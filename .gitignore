@@ -72,4 +72,10 @@ venv.bak/
 
 
 # matlab project settings
-SonnetLab Matlab server/resources
+SonnetLab_Matlab_server/resources
+SonnetLab_Matlab_server/SonnetLab Toolbox v7.4/Tutorials
+
+# sonnet projects
+SonnetLab_Matlab_server/sondata
+SonnetLab_Matlab_server/Sonnet_projects
+

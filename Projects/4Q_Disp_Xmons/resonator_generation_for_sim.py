@@ -3,7 +3,8 @@ import pya
 from math import cos, sin, atan2, pi
 from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
-from ClassLib import *
+from ClassLib.Coplanars import CPW, CPW_arc
+from ClassLib.Resonators import Coil_type_1
 
 from sonnetSim.sonnetLab import SonnetLab, SonnetPort, SimulationBox
 
@@ -17,8 +18,7 @@ class EMResonator_TL2Qbit_worm2(Complex_Base):
         self.L2 = L2
 
         self.N = N
-        self.primitives_gnd = {}
-        super(EMResonator_TL2Qbit_worm2, self).__init__(start, trans_in)
+        super().__init__(start, trans_in)
 
         self.start = self.connections[0]
         self.end = self.connections[-1]
@@ -27,6 +27,10 @@ class EMResonator_TL2Qbit_worm2(Complex_Base):
         self.alpha_end = self.angle_connections[1]
 
     def init_primitives(self):
+        self.arc1 = CPW_arc(self.Z0, DPoint(0, 0), -self.r, pi / 2)
+        self.primitives["arc1"] = self.arc1
+
+        # making coil
         name = "coil0"
         setattr(self, name, Coil_type_1(self.Z0, DPoint(0, 0), self.L_coupling, self.r, self.L1))
         self.primitives[name] = getattr(self, name)
@@ -41,6 +45,8 @@ class EMResonator_TL2Qbit_worm2(Complex_Base):
         # draw the "tail"
         self.arc_tail = CPW_arc(self.Z0, self.primitives["coil" + str(self.N)].end, -self.L1 / 2, -pi / 2)
         self.cop_tail = CPW(self.Z0.width, self.Z0.gap, self.arc_tail.end, self.arc_tail.end - DPoint(0, self.L2))
+
+        # tail face is separated from ground by `b = width + 2*gap`
         self.cop_open_end = CPW(0, self.Z0.b / 2, self.cop_tail.end, self.cop_tail.end - DPoint(0, self.Z0.b))
         self.primitives["arc_tail"] = self.arc_tail
         self.primitives["cop_tail"] = self.cop_tail
@@ -50,17 +56,16 @@ class EMResonator_TL2Qbit_worm2(Complex_Base):
         self.angle_connections = [0, self.cop_tail.alpha_end]
 
 
-class EMResonator_TL2Qbit_worm2(Complex_Base):
-    def __init__(self, Z0, start, L_coupling, L1, r, L2, N, trans_in=None):
-        self.Z0 = Z0
-        self.L_coupling = L_coupling
-        self.L1 = L1
-        self.r = r
-        self.L2 = L2
+class EMResonator_TL2Qbit_worm2_XmonFork(EMResonator_TL2Qbit_worm2):
+    def __init__(self, Z0, start, L_coupling, L1, r, L2, N,
+                 fork_x_span, fork_y_span, fork_metal_width, fork_gnd_gap,
+                 trans_in=None):
+        self.fork_x_span = fork_x_span
+        self.fork_y_span = fork_y_span
+        self.fork_metal_width = fork_metal_width
+        self.fork_gnd_gap = fork_gnd_gap
 
-        self.N = N
-        self.primitives_gnd = {}
-        super(EMResonator_TL2Qbit_worm2, self).__init__(start, trans_in)
+        super().__init__(Z0, start, L_coupling, L1, r, L2, N, trans_in)
 
         self.start = self.connections[0]
         self.end = self.connections[-1]
@@ -69,52 +74,55 @@ class EMResonator_TL2Qbit_worm2(Complex_Base):
         self.alpha_end = self.angle_connections[1]
 
     def init_primitives(self):
-        name = "coil0"
-        setattr(self, name, Coil_type_1(self.Z0, DPoint(0, 0), self.L_coupling, self.r, self.L1))
-        self.primitives[name] = getattr(self, name)
-        # coils filling
-        for i in range(self.N):
-            name = "coil" + str(i + 1)
-            setattr(self, name,
-                    Coil_type_1(self.Z0, DPoint(-self.L1 + self.L_coupling, -(i + 1) * (4 * self.r)), self.L1, self.r,
-                                self.L1))
-            self.primitives[name] = getattr(self, name)
+        super().init_primitives()
 
-        # draw the "tail"
-        self.arc_tail = CPW_arc(self.Z0, self.primitives["coil" + str(self.N)].end, -self.L1 / 2, -pi / 2)
-        self.cop_tail = CPW(self.Z0.width, self.Z0.gap, self.arc_tail.end, self.arc_tail.end - DPoint(0, self.L2))
-        self.cop_open_end = CPW(0, self.Z0.b / 2, self.cop_tail.end, self.cop_tail.end - DPoint(0, self.Z0.b))
-        self.primitives["arc_tail"] = self.arc_tail
-        self.primitives["cop_tail"] = self.cop_tail
-        self.primitives["cop_open_end"] = self.cop_open_end
+        """ add fork to the end of the resonator """
+        # remove open end from the resonator
+        del self.primitives["cop_open_end"]
+        del self.cop_open_end
 
-        self.connections = [DPoint(0, 0), self.cop_tail.end]
-        self.angle_connections = [0, self.cop_tail.alpha_end]
+        # adding fork horizontal part
+        self.draw_fork_along_x()
+        self.draw_fork_along_y()
 
+    def draw_fork_along_x(self):
+        forkZ = CPW(self.fork_metal_width, self.fork_gnd_gap)
+        p1 = self.cop_tail.end + DPoint(-self.fork_x_span/2, - forkZ.b/2)
+        p2 = p1 + DPoint(self.fork_x_span, 0)
+        self.fork_x_cpw = CPW(forkZ.width, forkZ.gap, p1, p2)
+        self.primitives["fork_x_cpw"] = self.fork_x_cpw
 
-class Coil_type_1(Complex_Base):
-    def __init__(self, Z0, start, L1, r, L2, trans_in=None):
-        self.Z0 = Z0
-        self.L1 = L1
-        self.r = r
-        self.L2 = L2
-        super(Coil_type_1, self).__init__(start, trans_in)
-        self.start = self.connections[0]
-        self.end = self.connections[-1]
-        self.dr = self.end - self.start
-        self.alpha_start = self.angle_connections[0]
-        self.alpha_end = self.angle_connections[1]
+        # return waveguide that was erased during ground drawing
+        p3 = self.cop_tail.end + DPoint(0, -forkZ.gap)
+        erased_cpw = CPW(self.Z0.width, self.Z0.gap, self.cop_tail.end, p3)
+        self.primitives["erased_cpw"] = erased_cpw
 
-    def init_primitives(self):
-        self.cop1 = CPW(self.Z0.width, self.Z0.gap, DPoint(0, 0), DPoint(self.L1, 0))
-        self.arc1 = CPW_arc(self.Z0, self.cop1.end, -self.r, -pi)
-        self.cop2 = CPW(self.Z0.width, self.Z0.gap, self.arc1.end, self.arc1.end - DPoint(self.L2, 0))
-        self.arc2 = CPW_arc(self.Z0, self.cop2.end, -self.r, pi)
+        # erase additional spaces at the ends of fork_x_cpw
+        p1 = self.fork_x_cpw.start + DPoint(-forkZ.gap, 0)
+        self.primitives["erased_fork_left"] = CPW(0, forkZ.b/2, self.fork_x_cpw.start, p1)
+        p1 = self.fork_x_cpw.end + DPoint(forkZ.gap, 0)
+        self.primitives["erased_fork_right"] = CPW(0, forkZ.b/2, self.fork_x_cpw.end, p1)
 
-        self.connections = [self.cop1.start, self.arc2.end]
-        self.angle_connections = [self.cop1.alpha_start, self.arc2.alpha_end]
-        self.primitives = {"cop1": self.cop1, "arc1": self.arc1, "cop2": self.cop2, "arc2": self.arc2}
+    def draw_fork_along_y(self):
+        forkZ = CPW(self.fork_metal_width, self.fork_gnd_gap)
 
+        # draw left part
+        p1 = self.fork_x_cpw.start + DPoint(forkZ.width/2, -forkZ.width/2)
+        p2 = p1 + DPoint(0, -self.fork_y_span)
+        self.fork_y_cpw1 = CPW(forkZ.width, forkZ.gap, p1, p2)
+        self.primitives["fork_y_cpw1"] = self.fork_y_cpw1
+
+        # draw right part
+        p1 = self.fork_x_cpw.end + DPoint(-forkZ.width/2, -forkZ.width / 2)
+        p2 = p1 + DPoint(0, -self.fork_y_span)
+        self.fork_y_cpw2 = CPW(forkZ.width, forkZ.gap, p1, p2)
+        self.primitives["fork_y_cpw2"] = self.fork_y_cpw2
+
+        # erase gap at the ends of `y` fork parts
+        p1 = self.fork_y_cpw1.end + DPoint(0, -forkZ.gap)
+        self.primitives["erased_fork_left_cpw_end"] = CPW(0, forkZ.b / 2, self.fork_y_cpw1.end, p1)
+        p1 = self.fork_y_cpw2.end + DPoint(0, -forkZ.gap)
+        self.primitives["erased_fork_right_cpw_end"] = CPW(0, forkZ.b / 2, self.fork_y_cpw2.end, p1)
 
 class CHIP:
     dx = 0.6e6
@@ -193,10 +201,19 @@ if __name__ ==  "__main__":
     N = 4
     width_res = 9.6e3
     gap_res = 5.2e3
-    to_line = 25e3
+    to_line = 45e3
     Z_res = CPW(width_res, gap_res, origin, origin)
-    worm = EMResonator_TL2Qbit_worm2( Z_res, DPoint(x, y - to_line) , L_coupling, L1_list[0], r, L2, N )
-    worm.place( cell, layer_photo)
+
+    # fork at the end of resonator parameters
+    fork_x_span = 80e3
+    fork_y_span = 25e3
+    fork_metal_width = 15e3
+    fork_gnd_gap = 10e3
+    worm = EMResonator_TL2Qbit_worm2_XmonFork(
+        Z_res, DPoint(x, y - to_line) , L_coupling, L1_list[0], r, L2, N,
+        fork_x_span, fork_x_span, fork_metal_width, fork_gnd_gap
+    )
+    worm.place(cell, layer_photo)
     
     # placing holes around the resonator
     '''
@@ -223,25 +240,25 @@ if __name__ ==  "__main__":
 
 
     ### MATLAB COMMANDER SECTION START ###
-    ml_terminal = SonnetLab()
-    print("starting connection...")
-    from sonnetSim.cMD import CMD
-    ml_terminal._send(CMD.SAY_HELLO)
-    ml_terminal.clear()
-    simBox = SimulationBox(CHIP.dx, CHIP.dy, 300, 300)
-    ml_terminal.set_boxProps(simBox)
-    print("sending cell and layer")
-    from sonnetSim.pORT_TYPES import PORT_TYPES
-    ports = [SonnetPort(point, PORT_TYPES.BOX_WALL) for point in [Z0.start, Z0.end] ]
-    ml_terminal.set_ports(ports)
-    
-    ml_terminal.send_polygons(cell, layer_photo)
-    ml_terminal.set_ABS_sweep(1, 10)
-    print("simulating...")
-    result_path = ml_terminal.start_simulation(wait=True)
-    print("visualizing...")
-    ml_terminal.visualize_sever()
-    ml_terminal.release()
-
-    with open(result_path, "r") as csv_file:
-        rows = np.array(list(csv.reader(csv_file))[8:], dtype=np.float64)
+    # ml_terminal = SonnetLab()
+    # print("starting connection...")
+    # from sonnetSim.cMD import CMD
+    # ml_terminal._send(CMD.SAY_HELLO)
+    # ml_terminal.clear()
+    # simBox = SimulationBox(CHIP.dx, CHIP.dy, 300, 900)
+    # ml_terminal.set_boxProps(simBox)
+    # print("sending cell and layer")
+    # from sonnetSim.pORT_TYPES import PORT_TYPES
+    # ports = [SonnetPort(point, PORT_TYPES.BOX_WALL) for point in [Z0.start, Z0.end] ]
+    # ml_terminal.set_ports(ports)
+    #
+    # ml_terminal.send_polygons(cell, layer_photo)
+    # ml_terminal.set_ABS_sweep(1, 10)
+    # print("simulating...")
+    # result_path = ml_terminal.start_simulation(wait=True)
+    # print("visualizing...")
+    # ml_terminal.visualize_sever()
+    # ml_terminal.release()
+    #
+    # with open(result_path, "r") as csv_file:
+    #     rows = np.array(list(csv.reader(csv_file))[8:], dtype=np.float64)
