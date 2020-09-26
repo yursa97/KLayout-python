@@ -3,9 +3,11 @@ import csv
 import pya
 from pya import Point, DPoint, Vector, DVector, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
 from ClassLib import *
-from .matlabClient import MatlabClient
+from sonnetSim.matlabClient import MatlabClient
+from sonnetSim.pORT_TYPES import PORT_TYPES
 
 import numpy as np
+
 
 class SonnetPort:
     def __init__(self, point=None, port_type=None):
@@ -15,12 +17,14 @@ class SonnetPort:
     def __deepcopy__(self, memodict={}):
         return SonnetPort(self.point, self.port_type) # due to the bug in copying Point(), DPoint() and other objects
 
+
 class SimulationBox:
     def __init__(self, dim_X_nm=None, dim_Y_nm=None, cells_X_num=None, cells_Y_num=None):
         self.x = dim_X_nm
         self.y = dim_Y_nm
         self.x_n = cells_X_num
         self.y_n = cells_Y_num
+
 
 class SonnetLab( MatlabClient ):        
     def __init__(self, host="localhost", port=MatlabClient.MATLAB_PORT):
@@ -110,7 +114,8 @@ class SonnetLab( MatlabClient ):
             while( self.state == self.STATE.BUSY_SIMULATING ):
                 self.get_simulation_status() # updates self.state
 
-        self.sim_res_file = self.read_line()
+        self.sim_res_file_path = self.read_line()
+        return self.sim_res_file_path
             
     def get_simulation_status( self ):
         self._get_simulation_status()
@@ -215,30 +220,31 @@ if __name__ == "__main__":
     box = pya.Box( 0,0, X_SIZE,Y_SIZE )
     cell.shapes( layer_ph ).insert( box )
     
-    cop = CPW_RL_Path( DPoint(0,Y_SIZE/2), "LRL", cpw_pars, 10e3, [X_SIZE/2,Y_SIZE/2], np.pi/2 )
-    cop.place( cell, layer_ph )
-    ports = [cop.start, cop.end]
+    cpw = CPW_RL_Path( DPoint(0,Y_SIZE/2), "LRL", cpw_pars, 10e3, [X_SIZE/2,Y_SIZE/2], np.pi/2 )
+    cpw.place( cell, layer_ph )
+    ports = [SonnetPort(point, PORT_TYPES.BOX_WALL) for point in [cpw.start, cpw.end]]
     ### DRAW SECTION END ###
     
     lv.zoom_fit()
-    from sonnetLab.cMD import CMD
+    from sonnetSim.cMD import CMD
     ### MATLAB COMMANDER SECTION START ###
     ml_terminal = SonnetLab()
     print("starting connection...")
-    ml_terminal._send( CMD.SAY_HELLO )
+    ml_terminal._send(CMD.SAY_HELLO)
     ml_terminal.clear()
-    ml_terminal.set_boxProps( X_SIZE,Y_SIZE, 300,300 )
+    simBox = SimulationBox(X_SIZE, Y_SIZE, 300, 300)
+    ml_terminal.set_boxProps(simBox)
     print( "sending cell and layer" )
-    ml_terminal.send_polygons(cell, layer_ph, ports)
-    ml_terminal.set_ABS_sweep( 1, 10 )
-    print( "simulating..." )
-    ml_terminal.start_simulation( wait=True )
+    ml_terminal.set_ports(ports)
+    ml_terminal.send_polygons(cell, layer_ph)
+    ml_terminal.set_ABS_sweep(1, 10)
+    print( "simulating...")
+    result_path = ml_terminal.start_simulation(wait=True)
     print("visualizing...")
     ml_terminal.visualize_sever()
-    file_name = ml_terminal.read_line()#.decode("ASCII")
     ml_terminal.release()
 
-    with open(file_name,"r") as csv_file:
-        rows = np.array( list(csv.reader(csv_file))[8:], dtype=np.float64 )
+    with open(result_path, "r") as csv_file:
+        rows = np.array(list(csv.reader(csv_file))[8:], dtype=np.float64)
         
     ### MATLAB COMMANDER SECTION END ###

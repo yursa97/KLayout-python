@@ -3,33 +3,19 @@ __pycache__/
 *.py[cod]
 *.pkl
 *$py.class
+# pycharm project settings
 .idea/
 .idea/*
 
 # Graphics design files
 *.cdr
+*.gds
 
 # C extensions
 *.so
 
 # Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -38,36 +24,12 @@ MANIFEST
 *.spec
 
 # Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+
 
 # Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-.pytest_cache/
 
 # Translations
-*.mo
-*.pot
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
 
 # Sphinx documentation
 docs/_build/
@@ -96,20 +58,6 @@ ENV/
 env.bak/
 venv.bak/
 
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-
-
 # Sonnet temporary files and tables like .xls/xlsx/csv
 *.xls
 *.xlsx
@@ -118,11 +66,10 @@ venv.bak/
 *.sid
 /Sonnet projects
 
+# VSCode project settings
 .vscode/
 .vscode/*
 
-matlab_project/
-'SonnetLab Matlab server/'*
 
-Projects/SFS_transmon/Simulations/
-Projects/SFS_transmon/Simulations_new/
+# matlab project settings
+SonnetLab Matlab server/resources
