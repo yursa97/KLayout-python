@@ -3,9 +3,10 @@ import pya
 from math import cos, sin, atan2, pi
 from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
+
+from ClassLib.BaseClasses import Complex_Base
 from ClassLib.Coplanars import CPW, CPW_arc
 from ClassLib.Resonators import Coil_type_1
-from ClassLib.BaseClasses import Complex_Base
 
 from sonnetSim.sonnetLab import SonnetLab, SonnetPort, SimulationBox
 
@@ -166,9 +167,6 @@ if __name__ ==  "__main__":
     layer_photo = layout.layer( layer_info_photo )
     layer_el = layout.layer( layer_info_el )
 
-    # clear this cell and layer
-    cell.clear()
-
     # setting layout view  
     lv.select_cell(cell.cell_index(), 0)
     lv.add_missing_layers()
@@ -176,7 +174,6 @@ if __name__ ==  "__main__":
     
     ## DRAWING SECTION START ##
     chip_box = pya.Box(Point(0, 0), Point(CHIP.dx, CHIP.dy))
-    cell.shapes(layer_photo).insert(chip_box)
     origin = DPoint(0, 0)
     
     contact_L = 1e6
@@ -189,7 +186,6 @@ if __name__ ==  "__main__":
     p1 = DPoint(0, y)
     p2 = DPoint(CHIP.dx, y)
     Z0 = CPW(width, gap, p1, p2)
-    Z0.place(cell, layer_photo)
 
     
     # resonator
@@ -202,7 +198,7 @@ if __name__ ==  "__main__":
     N = 4
     width_res = 9.6e3
     gap_res = 5.2e3
-    to_line = 45e3
+    to_line = 35e3
     Z_res = CPW(width_res, gap_res, origin, origin)
 
     # fork at the end of resonator parameters
@@ -210,56 +206,69 @@ if __name__ ==  "__main__":
     fork_y_span = 25e3
     fork_metal_width = 15e3
     fork_gnd_gap = 10e3
-    worm = EMResonator_TL2Qbit_worm2_XmonFork(
-        Z_res, DPoint(x, y - to_line) , L_coupling, L1_list[0], r, L2, N,
-        fork_x_span, fork_x_span, fork_metal_width, fork_gnd_gap
-    )
-    worm.place(cell, layer_photo)
-    
-    # placing holes around the resonator
-    '''
-    reg = worm.gnd_reg
-    new_reg = Region()
-  #  reg.merged_semantics=False
-    r_cell = Region( cell.begin_shapes_rec( layer_photo ) )    
-    reg = reg & r_cell
-    for poly in reg:
-        poly_temp = fill_holes( poly )
-        new_reg.insert( poly_temp )
-        
-#    r_cell.merged_semantics=False   
-    r_cell = r_cell - reg
-    r_cell = r_cell + new_reg
-    temp_i = cell.layout().layer( pya.LayerInfo(PROGRAM.LAYER1_NUM,0) ) 
-    cell.shapes( temp_i ).insert( r_cell )
-    cell.layout().clear_layer( layer_photo )
-    cell.layout().move_layer( temp_i, layer_photo )
-    cell.layout().delete_layer( temp_i )
-    '''
-    ## DRAWING SECTION END ##
-    lv.zoom_fit()
+
+    import time
+    t0 = time.time()
+    for L1 in [L1_list[0]]:
+        # clear this cell and layer
+        cell.clear()
+        # draw chip box
+        cell.shapes(layer_photo).insert(chip_box)
+        # draw S21 line
+        Z0.place(cell, layer_photo)
+        worm = EMResonator_TL2Qbit_worm2_XmonFork(
+            Z_res, DPoint(x, y - to_line) , L_coupling, L1, r, L2, N,
+            fork_x_span, fork_x_span, fork_metal_width, fork_gnd_gap
+        )
+        worm.place(cell, layer_photo)
+
+        # placing holes around the resonator
+        '''
+        reg = worm.gnd_reg
+        new_reg = Region()
+      #  reg.merged_semantics=False
+        r_cell = Region( cell.begin_shapes_rec( layer_photo ) )    
+        reg = reg & r_cell
+        for poly in reg:
+            poly_temp = fill_holes( poly )
+            new_reg.insert( poly_temp )
+            
+    #    r_cell.merged_semantics=False   
+        r_cell = r_cell - reg
+        r_cell = r_cell + new_reg
+        temp_i = cell.layout().layer( pya.LayerInfo(PROGRAM.LAYER1_NUM,0) ) 
+        cell.shapes( temp_i ).insert( r_cell )
+        cell.layout().clear_layer( layer_photo )
+        cell.layout().move_layer( temp_i, layer_photo )
+        cell.layout().delete_layer( temp_i )
+        '''
+        ## DRAWING SECTION END ##
+        lv.zoom_fit()
 
 
-    ### MATLAB COMMANDER SECTION START ###
-    # ml_terminal = SonnetLab()
-    # print("starting connection...")
-    # from sonnetSim.cMD import CMD
-    # ml_terminal._send(CMD.SAY_HELLO)
-    # ml_terminal.clear()
-    # simBox = SimulationBox(CHIP.dx, CHIP.dy, 300, 900)
-    # ml_terminal.set_boxProps(simBox)
-    # print("sending cell and layer")
-    # from sonnetSim.pORT_TYPES import PORT_TYPES
-    # ports = [SonnetPort(point, PORT_TYPES.BOX_WALL) for point in [Z0.start, Z0.end] ]
-    # ml_terminal.set_ports(ports)
-    #
-    # ml_terminal.send_polygons(cell, layer_photo)
-    # ml_terminal.set_ABS_sweep(1, 10)
-    # print("simulating...")
-    # result_path = ml_terminal.start_simulation(wait=True)
-    # print("visualizing...")
-    # ml_terminal.visualize_sever()
-    # ml_terminal.release()
-    #
-    # with open(result_path, "r") as csv_file:
-    #     rows = np.array(list(csv.reader(csv_file))[8:], dtype=np.float64)
+        ### MATLAB COMMANDER SECTION START ###
+        ml_terminal = SonnetLab()
+        print("starting connection...")
+        from sonnetSim.cMD import CMD
+        ml_terminal._send(CMD.SAY_HELLO)
+        ml_terminal.clear()
+        simBox = SimulationBox(CHIP.dx, CHIP.dy, 100, 100)
+        ml_terminal.set_boxProps(simBox)
+        print("sending cell and layer")
+        from sonnetSim.pORT_TYPES import PORT_TYPES
+        ports = [SonnetPort(point, PORT_TYPES.BOX_WALL) for point in [Z0.start, Z0.end] ]
+        ml_terminal.set_ports(ports)
+
+        ml_terminal.send_polygons(cell, layer_photo)
+        ml_terminal.set_ABS_sweep(4, 8)
+        print("simulating...")
+        result_path = ml_terminal.start_simulation(wait=True)
+        print("visualizing...")
+        ml_terminal.visualize_sever()
+        ml_terminal.release()
+        #
+        import shutil
+        import os
+        project_dir = os.path.dirname(__file__)
+        shutil.copy(result_path.decode("ascii"),  os.path.join(project_dir, "result_L1_"+str(L1)+".csv"))
+    print("dt = ", time.time() - t0)
