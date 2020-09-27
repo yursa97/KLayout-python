@@ -20,7 +20,7 @@ class CPW( Element_Base ):
                         DPoint end - center aligned point, determines the end point of the coplanar segment
     """
     def __init__(self, width=None, gap=None, start=DPoint(0,0), end=DPoint(0,0), gndWidth=-1, trans_in=None, cpw_params=None ):
-        if( cpw_params  is None ):
+        if( cpw_params is None ):
             self.width = width
             self.gap = gap
             self.b = 2*gap + width
@@ -59,6 +59,14 @@ class CPW( Element_Base ):
             self.empty_region.insert( pya.Box( Point().from_dpoint(DPoint(0,-self.width/2-self.gap)), Point().from_dpoint(DPoint( self.dr.abs(), -self.width/2 )) ) )
         self.metal_region.transform( alpha_trans )
         self.empty_region.transform( alpha_trans )
+        
+    def _refresh_named_connections(self):
+        self.end = self.connections[1]
+        self.start = self.connections[0]
+        
+    def _refresh_named_angles(self):
+        self.alpha_start = self.angle_connections[0]
+        self.alpha_end = self.angle_connections[1]
 
 
 class CPW_arc( Element_Base ):
@@ -244,14 +252,14 @@ class Coil_type_1( Complex_Base ):
         self.alpha_end = self.angle_connections[1]
         
     def init_primitives( self ):
-            self.cop1 = CPW( self.Z0.width, self.Z0.gap, DPoint(0,0), DPoint( self.L1,0 ) )
-            self.arc1 = CPW_arc( self.Z0, self.cop1.end, -self.r, -pi )
-            self.cop2 = CPW( self.Z0.width, self.Z0.gap, self.arc1.end, self.arc1.end - DPoint( self.L2,0 ) )
-            self.arc2 = CPW_arc( self.Z0, self.cop2.end, -self.r, pi )
-            
-            self.connections = [self.cop1.start,self.arc2.end]
-            self.angle_connections = [self.cop1.alpha_start,self.arc2.alpha_end]
-            self.primitives = {"cop1":self.cop1,"arc1":self.arc1,"cop2":self.cop2,"arc2":self.arc2}
+        self.cop1 = CPW( self.Z0.width, self.Z0.gap, DPoint(0,0), DPoint( self.L1,0 ) )
+        self.arc1 = CPW_arc( self.Z0, self.cop1.end, -self.r, -pi )
+        self.cop2 = CPW( self.Z0.width, self.Z0.gap, self.arc1.end, self.arc1.end - DPoint( self.L2,0 ) )
+        self.arc2 = CPW_arc( self.Z0, self.cop2.end, -self.r, pi )
+
+        self.connections = [self.cop1.start,self.arc2.end]
+        self.angle_connections = [self.cop1.alpha_start,self.arc2.alpha_end]
+        self.primitives = {"cop1":self.cop1,"arc1":self.arc1,"cop2":self.cop2,"arc2":self.arc2}
             
             
 from collections import Counter

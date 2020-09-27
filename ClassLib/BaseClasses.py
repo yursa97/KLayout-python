@@ -106,6 +106,21 @@ class Element_Base():
                 poly_temp = DSimplePolygon( [pt] )
                 poly_temp.transform( dCplxTrans )
                 self.connections[i] = poly_temp.point( 0 )
+        self._refresh_named_connections()
+
+
+    def _refresh_named_connections(self):
+        """
+            if there is connections in `self.connections` that
+        have specific class attribute e.g. `self.end` is assumed
+        to coincide with `self.connections[1]`, then this function
+        is used to update this correspondance after connections
+        are changed due to call of `self.make_trans`.
+            See ClassLib.Coplanars.CPW class for example.
+        """
+        # can be implemented in child class
+        # see ClassLib.Coplanars.CPW for example
+        pass
     
     def _update_alpha( self, dCplxTrans ):
         if( dCplxTrans is not None ):
@@ -117,6 +132,18 @@ class Element_Base():
                 poly_temp.transform( dCplxTrans_temp )
                 pt = poly_temp.point( 0 )
                 self.angle_connections[i] = atan2( pt.y, pt.x )
+            self._refresh_named_angles()
+
+    def _refresh_named_angles(self):
+        """
+            If there is angles in `self.angle_connections` that
+        have specific class attribute e.g. `self.end_angle` is assumed
+        to coincide with `self.angle_connections[1]`, then this function
+        is used to update this correspondance after connections
+        are changed due to call of `self.make_trans`.
+            See ClassLib.Coplanars.CPW class for example.
+        """
+        pass
     
     def _update_origin( self, dCplxTrans ):
         if( dCplxTrans is not None ):     
@@ -174,7 +201,8 @@ class Element_Base():
 class Complex_Base( Element_Base ):
     def __init__( self, origin, trans_in=None ):
         super().__init__( origin,trans_in )
-        self.primitives = OrderedDict() # ensures order of placing and erasing of primitives is preserved
+        # ensures sequential order of drawing primitives
+        self.primitives = OrderedDict()
         self._init_primitives_trans()
     
     def _init_regions_trans( self ):

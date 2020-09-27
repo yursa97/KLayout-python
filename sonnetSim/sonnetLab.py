@@ -71,10 +71,11 @@ class SonnetLab( MatlabClient ):
                 pts_x[i] = edge.p1.x/1.0e3
                 pts_y[i] = edge.p1.y/1.0e3
 
+                # adding port to the current edge
                 for port in self.ports:
                     r_middle = (edge.p1 + edge.p2)*0.5
                     R = port.point.distance(r_middle)
-                    # print(r_middle, port.point)
+                    # print(r_middle, port.point, R)
                     if R < 10:  # distance from connection point to the middle of the edge <10 nm
                         port_edges_indexes.append(i+1)  # matlab polygon edge indexing starts from 1
                         port_edges_types.append(port.port_type)  # choosing appropriate port type
@@ -90,6 +91,11 @@ class SonnetLab( MatlabClient ):
 
         for poly in r_cell:
             # print("sending polygon")
+
+            # No internal holes are allowed. This is
+            # only KLayout specific internal representation.
+            # So there is cuts in the polygon with internal
+            # holes introduced by `resolved_holes()`.
             self.send_polygon(poly.resolved_holes())
     
     def start_simulation(self, wait=True):

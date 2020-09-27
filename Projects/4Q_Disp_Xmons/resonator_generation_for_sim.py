@@ -5,6 +5,7 @@ from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  R
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 from ClassLib.Coplanars import CPW, CPW_arc
 from ClassLib.Resonators import Coil_type_1
+from ClassLib.BaseClasses import Complex_Base
 
 from sonnetSim.sonnetLab import SonnetLab, SonnetPort, SimulationBox
 
