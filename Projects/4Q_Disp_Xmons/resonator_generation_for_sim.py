@@ -252,7 +252,7 @@ if __name__ ==  "__main__":
         from sonnetSim.cMD import CMD
         ml_terminal._send(CMD.SAY_HELLO)
         ml_terminal.clear()
-        simBox = SimulationBox(CHIP.dx, CHIP.dy, 100, 100)
+        simBox = SimulationBox(CHIP.dx, CHIP.dy, 300, 900)
         ml_terminal.set_boxProps(simBox)
         print("sending cell and layer")
         from sonnetSim.pORT_TYPES import PORT_TYPES
@@ -260,7 +260,7 @@ if __name__ ==  "__main__":
         ml_terminal.set_ports(ports)
 
         ml_terminal.send_polygons(cell, layer_photo)
-        ml_terminal.set_ABS_sweep(4, 8)
+        ml_terminal.set_ABS_sweep(5, 7)
         print("simulating...")
         result_path = ml_terminal.start_simulation(wait=True)
         print("visualizing...")
