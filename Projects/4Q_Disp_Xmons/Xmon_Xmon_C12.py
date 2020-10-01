@@ -120,18 +120,20 @@ if __name__ ==  "__main__":
     ## DRAWING SECTION START ##
     origin = DPoint(0, 0)
 
-    cross_width = 20e3
-    cross_len = 40e3
-    cross_gnd_gap = 5e3
-    xmon_dX = cross_len + cross_width/2 + cross_gnd_gap
-    
-    xmon_distances = [20e3 + 2*xmon_dX, 50e3 + 2*xmon_dX]
-    for xmon_distance in xmon_distances:
+    cross_widths = [60e3]
+    cross_lens = [125e3]
+    cross_gnd_gaps = [20e3]
+    xmon_dX = 2 * cross_lens[0] + cross_widths[0] + 2 * cross_gnd_gaps[0]
+    xmon_distances = [1e3 * x for x in range(330, 340, 10)]
+    from itertools import product
+
+    pars = product(cross_widths, cross_lens, cross_gnd_gaps, xmon_distances)
+    for cross_width, cross_len, cross_gnd_gap, xmon_distance in pars:
         # clear this cell and layer
         cell.clear()
-
+        xmon_dX = 2 * cross_len + cross_width + 2 * cross_gnd_gap
         CHIP.dx = 5*xmon_dX + xmon_distance
-        CHIP.dy = 3*xmon_dX + xmon_distance
+        CHIP.dy = 5*xmon_dX + xmon_distance
         CHIP.center = DPoint(CHIP.dx/2, CHIP.dy/2)
 
         chip_box = pya.Box(Point(0, 0), Point(CHIP.dx, CHIP.dy))
@@ -159,7 +161,7 @@ if __name__ ==  "__main__":
         from sonnetSim.cMD import CMD
         ml_terminal._send(CMD.SAY_HELLO)
         ml_terminal.clear()
-        simBox = SimulationBox(CHIP.dx, CHIP.dy, 200, 200)
+        simBox = SimulationBox(CHIP.dx, CHIP.dy, 600, 600)
         ml_terminal.set_boxProps(simBox)
         print("sending cell and layer")
         from sonnetSim.pORT_TYPES import PORT_TYPES
@@ -176,3 +178,43 @@ if __name__ ==  "__main__":
         # print("visualizing...")
         # ml_terminal.visualize_sever()
         ml_terminal.release()
+
+        # get the .csv result file and exctract capcity of island in fF
+        import shutil
+        import os
+        import csv
+
+        project_dir = os.path.dirname(__file__)
+
+        C1 = None
+        with open(result_path.decode("ascii"), "r") as csv_file:
+            data_rows = list(csv.reader(csv_file))
+            ports_imps_row = data_rows[6]
+            R = float(ports_imps_row[0].split(' ')[1])
+            data_row = data_rows[8]
+            freq0 = float(data_row[0])
+            re_s11 = float(data_row[1])
+            im_s11 = float(data_row[2])
+            import math
+
+            s11 = complex(re_s11, im_s11)
+            y11 = 1 / R * (1 - s11) / (1 + s11)
+            C1 = -1e15 / (2 * math.pi * freq0 * 1e9 * (1 / y11).imag)
+
+        print(C1)
+
+        output_filepath = os.path.join(project_dir, "Xmon_C1.csv")
+        if os.path.exists(output_filepath):
+            # append data to file
+            with open(output_filepath, "a") as csv_file:
+                writer = csv.writer(csv_file)
+                writer.writerow([cross_width / 1e3, cross_len / 1e3, cross_gnd_gap / 1e3, C1])
+        else:
+            # create file, add header, append data
+            with open(output_filepath, "w") as csv_file:
+                writer = csv.writer(csv_file)
+                # create header of the file
+                writer.writerow(["cross_width, um", "cross_len, um", "cross_gnd_gap, um", "C12, fF"])
+                writer.writerow([cross_width / 1e3, cross_len / 1e3, cross_gnd_gap / 1e3, C1])
+
+
