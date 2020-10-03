@@ -4,7 +4,9 @@ from pya import Point,DPoint,DSimplePolygon,SimplePolygon,DPolygon,Polygon, Regi
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from ClassLib._PROG_SETTINGS import *
-from ClassLib.BaseClasses import Element_Base
+from ClassLib.BaseClasses import Element_Base, Complex_Base
+from ClassLib.Coplanars import CPW
+
 
 class Rectangle( Element_Base ):
     def __init__( self, origin, a,b, trans_in=None, inverse=False ):
@@ -22,6 +24,7 @@ class Rectangle( Element_Base ):
             self.empty_region.insert(SimplePolygon().from_dpoly(DSimplePolygon(pts_arr)))
         else:
             self.metal_region.insert(SimplePolygon().from_dpoly(DSimplePolygon(pts_arr)))
+
 
 class Cross( Element_Base ):
     def __init__( self, origin, inner_square_a, outer_square_a, trans_in=None ):
@@ -56,6 +59,64 @@ class Cross( Element_Base ):
         self.empty_region = tmp_reg
         self.connections = [self.center]
 
+
+class XmonCross(Complex_Base):
+    def __init__(self, origin, cross_width, side_length, gnd_gap, trans_in=None):
+        self.cross_width = cross_width
+        self.side_length = side_length
+        self.gnd_gap = gnd_gap
+        self.center = origin
+        super().__init__(origin, trans_in)
+        self.center = self.connections[0]
+
+    def init_primitives(self):
+        origin = DPoint(0, 0)
+
+        # draw central square
+        from ClassLib.Shapes import Rectangle
+        lb_corner = DPoint(-self.cross_width / 2, -self.cross_width / 2)
+        center_square = Rectangle(lb_corner, self.cross_width, self.cross_width)
+        self.primitives["center_square"] = center_square
+
+        """ left part of Xmon cross """
+        p1 = origin + DPoint(-self.cross_width / 2, 0)
+        p2 = p1 + DPoint(-self.side_length, 0)
+        self.cpw_l = CPW(self.cross_width, self.gnd_gap, p1, p2)
+        self.primitives["cpw_l"] = self.cpw_l
+        p3 = p2 + DPoint(-self.gnd_gap, 0)
+        self.cpw_lempt = CPW(0, self.cpw_l.b / 2, p2, p3)
+        self.primitives["cpw_lempt"] = self.cpw_lempt
+
+        """ right part of Xmon cross """
+        p1 = origin + DPoint(self.cross_width / 2, 0)
+        p2 = p1 + DPoint(self.side_length, 0)
+        self.cpw_r = CPW(self.cross_width, self.gnd_gap, p1, p2)
+        self.primitives["cpw_r"] = self.cpw_r
+        p3 = p2 + DPoint(self.gnd_gap, 0)
+        self.cpw_rempt = CPW(0, self.cpw_r.b / 2, p2, p3)
+        self.primitives["cpw_rempt"] = self.cpw_rempt
+
+        """ top part of Xmon cross """
+        p1 = origin + DPoint(0, self.cross_width / 2)
+        p2 = p1 + DPoint(0, self.side_length)
+        self.cpw_t = CPW(self.cross_width, self.gnd_gap, p1, p2)
+        self.primitives["cpw_t"] = self.cpw_t
+        p3 = p2 + DPoint(0, self.gnd_gap)
+        self.cpw_tempt = CPW(0, self.cpw_t.b / 2, p2, p3)
+        self.primitives["cpw_tempt"] = self.cpw_tempt
+
+        """ bottom part of Xmon cross """
+        p1 = origin + DPoint(0, -self.cross_width / 2)
+        p2 = p1 + DPoint(0, -self.side_length)
+        self.cpw_b = CPW(self.cross_width, self.gnd_gap, p1, p2)
+        self.primitives["cpw_b"] = self.cpw_b
+        p3 = p2 + DPoint(0, -self.gnd_gap)
+        self.cpw_bempt = CPW(0, self.cpw_l.b / 2, p2, p3)
+        self.primitives["cpw_bempt"] = self.cpw_bempt
+
+        self.connections = [origin]
+
+
 class Circle( Element_Base ):
     def __init__(self,center,r,trans_in=None,n_pts=50,solid=True, offset_angle=0):
         self.center = center
@@ -73,6 +134,7 @@ class Circle( Element_Base ):
             self.empty_region.insert( SimplePolygon().from_dpoly( DSimplePolygon(dpts_arr) ) )
         self.connections.extend([self.center, self.center + DVector(0,-self.r)])
         self.angle_connections.extend([0, 0])
+
 
 class Kolbaska(Element_Base):
     def __init__(self, origin, stop, width, r, trans_in=None):

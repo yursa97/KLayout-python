@@ -126,6 +126,7 @@ class EMResonator_TL2Qbit_worm2_XmonFork(EMResonator_TL2Qbit_worm2):
         p1 = self.fork_y_cpw2.end + DPoint(0, -forkZ.gap)
         self.primitives["erased_fork_right_cpw_end"] = CPW(0, forkZ.b / 2, self.fork_y_cpw2.end, p1)
 
+
 class CHIP:
     dx = 0.6e6
     dy = 1.8e6
