@@ -65,8 +65,13 @@ class XmonCross(Complex_Base):
         self.cross_width = cross_width
         self.side_length = side_length
         self.gnd_gap = gnd_gap
+        # for saving
+
         self.center = origin
         super().__init__(origin, trans_in)
+        self._geometry_parameters["cross_width, um"] = cross_width/1e3
+        self._geometry_parameters["side_length, um"] = cross_width/1e3
+        self._geometry_parameters["gnd_gap, um"] = cross_width/1e3
         self.center = self.connections[0]
 
     def init_primitives(self):

@@ -28,6 +28,10 @@ class CPW(Element_Base):
             self.width = width
             self.gap = gap
             self.b = 2 * gap + width
+            self._geometry_parameters = {
+                "width": width,
+                "gap": gap
+            }
         else:
             self.width = cpw_params.width
             self.gap = cpw_params.gap

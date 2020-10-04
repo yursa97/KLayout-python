@@ -58,8 +58,31 @@ class Element_Base():
             elif (isinstance(trans_in, Trans)):
                 self.DCplxTrans_init = DCplxTrans(DTrans().from_itrans(trans_in), 1)
                 self.ICplxTrans_init = ICplxTrans(trans_in, 1)
-
+        self._geometry_parameters = OrderedDict()
         self._init_regions_trans()
+
+    def get_geometry_params_dict(self, prefix="", postfix=""):
+        """
+        Function return geometry parameters in format:
+        dict[prefix + key + postfix, value]
+
+        Parameters
+        ----------
+        prefix : str
+        postfix : str
+
+        Returns
+        -------
+        dict
+        """
+        if hasattr(self, "_geometry_parameters"):
+            tmp_dict = {}
+            for key, item in self._geometry_parameters.items():
+                tmp_dict[prefix + key + postfix] = item
+            return tmp_dict
+        else:
+            print("Geometry parameters for ", self.__class__ , " does not implemented")
+            return None
 
     def init_regions(self):
         raise NotImplementedError

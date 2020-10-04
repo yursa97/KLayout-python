@@ -212,20 +212,19 @@ if __name__ == "__main__":
     cross_gnd_gap = 20e3
 
     # fork at the end of resonator parameters
-    fork_metal_width = 25e3
+    fork_metal_width = 20e3
     fork_gnd_gap = 20e3
     xmon_fork_gnd_gap = 20e3
     fork_x_span = cross_width + 2*(xmon_fork_gnd_gap + fork_metal_width)
     fork_y_span = None
     # Xmon-fork parameters
-    xmon_fork_penetrations = [1e3*x for x in range(20, 41, 5)]
-
+    xmon_fork_penetrations = [1e3*x for x in [-10]]
     for xmon_fork_penetration in xmon_fork_penetrations:
         # clear this cell and layer
         cell.clear()
         fork_y_span = xmon_fork_penetration + xmon_fork_gnd_gap
         worm = EMResonator_TL2Qbit_worm2_XmonFork(
-            Z_res, DPoint(x, y - to_line), L_coupling, L1, r, L2, N,
+            Z_res, origin, L_coupling, L1, r, L2, N,
             fork_x_span, fork_y_span, fork_metal_width, fork_gnd_gap
         )
         xmon_center = (worm.fork_y_cpw1.end + worm.fork_y_cpw2.end)/2
@@ -246,8 +245,8 @@ if __name__ == "__main__":
         bbox = tmp_reg.bbox()
 
         # calculate simulation box dimensions
-        CHIP.dx = 4*bbox.width()
-        CHIP.dy = 3*bbox.height()
+        CHIP.dx = 3*bbox.width()
+        CHIP.dy = 2*bbox.height()
         chip_p1 = DPoint(bbox.center()) + DPoint(-0.5*CHIP.dx, -0.5*CHIP.dy)
         chip_p2 = DPoint(bbox.center()) + DPoint(0.5*CHIP.dx, 0.5*CHIP.dy)
         chip_box = pya.Box(DPoint(0, 0), DPoint(CHIP.dx, CHIP.dy))
@@ -287,7 +286,7 @@ if __name__ == "__main__":
 
         ml_terminal._send(CMD.SAY_HELLO)
         ml_terminal.clear()
-        simBox = SimulationBox(CHIP.dx, CHIP.dy, 300, 900)
+        simBox = SimulationBox(CHIP.dx, CHIP.dy, 900, 1200)
         ml_terminal.set_boxProps(simBox)
         print("sending cell and layer")
         from sonnetSim.pORT_TYPES import PORT_TYPES
@@ -325,9 +324,9 @@ if __name__ == "__main__":
                     s[i][j] = complex(float(data_row[1 + 2 * (i * 2 + j)]), float(data_row[1 + 2 * (i * 2 + j) + 1]))
             import math
 
-            # formula to transform S-params to Y-params is taken from 
+            # formula to transform S-params to Y-params is taken from
             # https://en.wikipedia.org/wiki/Admittance_parameters#Two_port
-            
+
             # calculations for C1 and C12 are taken from Sonnet equation plotting
             delta = (1 + s[0][0]) * (1 + s[1][1]) - s[0][1] * s[1][0]
             y21 = -2 * s[1][0] / delta * 1 / R
