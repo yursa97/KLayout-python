@@ -218,7 +218,7 @@ if __name__ == "__main__":
     fork_x_span = cross_width + 2*(xmon_fork_gnd_gap + fork_metal_width)
     fork_y_span = None
     # Xmon-fork parameters
-    xmon_fork_penetrations = [1e3*x for x in [-10]]
+    xmon_fork_penetrations = [1e3*x for x in [-10, -20]]
     for xmon_fork_penetration in xmon_fork_penetrations:
         # clear this cell and layer
         cell.clear()

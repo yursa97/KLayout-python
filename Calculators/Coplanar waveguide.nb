@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[    145860,       2720]
-NotebookOptionsPosition[    143443,       2656]
-NotebookOutlinePosition[    143787,       2671]
-CellTagsIndexPosition[    143744,       2668]
+NotebookDataLength[    118839,       2085]
+NotebookOptionsPosition[    117747,       2053]
+NotebookOutlinePosition[    118090,       2068]
+CellTagsIndexPosition[    118047,       2065]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -23,9 +23,10 @@ Cell[BoxData[
 
 Cell[CellGroupData[{
 
-Cell["Classic Coplanar waveguide", "Title",
- CellChangeTimes->{{3.8107995040606737`*^9, 
-  3.8107995102841263`*^9}},ExpressionUUID->"89a0d928-0546-4c29-9ac6-\
+Cell["Classic Coplanar waveguide calculator", "Title",
+ CellChangeTimes->{{3.8107995040606737`*^9, 3.8107995102841263`*^9}, {
+  3.810824221452077*^9, 
+  3.810824224324625*^9}},ExpressionUUID->"89a0d928-0546-4c29-9ac6-\
 034251971e99"],
 
 Cell[TextData[{
@@ -1962,16 +1963,17 @@ Cell[BoxData[
   3.8108009116119957`*^9, 3.8108009215923624`*^9}, {3.8108009858826437`*^9, 
   3.8108011605524583`*^9}, {3.8108011961866865`*^9, 3.8108013457746143`*^9}, {
   3.8108014245605893`*^9, 3.8108014804081697`*^9}, {3.810801772149994*^9, 
-  3.810801939707266*^9}, {3.810801970097044*^9, 
-  3.8108019716159735`*^9}},ExpressionUUID->"ca009c96-7ec1-4889-9dc9-\
+  3.810801939707266*^9}, {3.810801970097044*^9, 3.8108019716159735`*^9}, {
+  3.810824376406255*^9, 
+  3.8108243770440145`*^9}},ExpressionUUID->"ca009c96-7ec1-4889-9dc9-\
 6aed98126261"],
 
 Cell[BoxData[
  TagBox[
   StyleBox[
-   DynamicModuleBox[{$CellContext`Er$$ = 11.6, $CellContext`gap$$ = 
-    5.2, $CellContext`H$$ = 500, $CellContext`T$$ = 
-    0.01, $CellContext`width$$ = 9.6, Typeset`show$$ = True, 
+   DynamicModuleBox[{$CellContext`Er$$ = 11.45, $CellContext`gap$$ = 
+    10, $CellContext`H$$ = 500, $CellContext`T$$ = 
+    0.01, $CellContext`width$$ = 10, Typeset`show$$ = True, 
     Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
     Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
     "\"untitled\"", Typeset`specs$$ = {{{
@@ -1980,7 +1982,7 @@ Cell[BoxData[
        Hold[$CellContext`gap$$], 5.2}, 1, 40}, {{
        Hold[$CellContext`H$$], 500}, 100, 1000}, {{
        Hold[$CellContext`T$$], 0.01}, 0.005, 20}}, Typeset`size$$ = {
-    114., {17.5, 23.5}}, Typeset`update$$ = 0, Typeset`initDone$$, 
+    101., {17.5, 23.5}}, Typeset`update$$ = 0, Typeset`initDone$$, 
     Typeset`skipInitDone$$ = True, $CellContext`Er$9231$$ = 
     0, $CellContext`width$9232$$ = 0, $CellContext`gap$9233$$ = 
     0, $CellContext`H$9234$$ = 0, $CellContext`T$9235$$ = 0}, 
@@ -2047,615 +2049,10 @@ Cell[TextData[{
  CellChangeTimes->{{3.8108018613800983`*^9, 
   3.810801872329107*^9}},ExpressionUUID->"d3742ad3-8e54-473b-8830-\
 a6d2b1322bfa"]
-}, Closed]],
-
-Cell[CellGroupData[{
-
-Cell["EMResonator_TL2Qbit_worm2 resonance calculation", "Title",
- CellChangeTimes->{{3.810802456646266*^9, 3.8108024637503223`*^9}, {
-  3.810806055975246*^9, 
-  3.8108060560540285`*^9}},ExpressionUUID->"546bd4d1-f107-4146-8805-\
-0193cf04512e"],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[{
- RowBox[{
-  RowBox[{"c", "=", 
-   RowBox[{"3.0", "*", 
-    SuperscriptBox["10", "8"]}]}], ";"}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"v", " ", "=", " ", 
-   FractionBox["c", 
-    SqrtBox["\[Epsilon]Efft"]]}], ";"}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"L", "=", 
-   RowBox[{
-    FractionBox["v", "\[Nu]"], 
-    FractionBox["1", "4"]}]}], ";", " ", 
-  RowBox[{"(*", " ", 
-   RowBox[{
-    RowBox[{"\[Lambda]", "/", "4"}], " ", "resonator"}], " ", "*)"}], 
-  "\[IndentingNewLine]", 
-  RowBox[{"Manipulate", "[", "\[IndentingNewLine]", 
-   RowBox[{
-    RowBox[{
-     RowBox[{"subs", "=", 
-      RowBox[{"{", "\[IndentingNewLine]", 
-       RowBox[{
-        RowBox[{"\[Epsilon]r", "\[Rule]", "Er"}], ",", "\[IndentingNewLine]", 
-        RowBox[{"a", "\[Rule]", "width"}], ",", "\[IndentingNewLine]", 
-        RowBox[{"b", "\[Rule]", 
-         RowBox[{"width", "+", 
-          RowBox[{"2", " ", "gap"}]}]}], ",", "\[IndentingNewLine]", 
-        RowBox[{"h", "\[Rule]", "H"}], ",", "\[IndentingNewLine]", 
-        RowBox[{"t", "\[Rule]", "T"}]}], "\[IndentingNewLine]", "}"}]}], ";", 
-     "\[IndentingNewLine]", "\[IndentingNewLine]", " ", 
-     RowBox[{"Grid", "[", "\[IndentingNewLine]", 
-      RowBox[{
-       RowBox[{"{", "\[IndentingNewLine]", 
-        RowBox[{
-         RowBox[{"{", 
-          RowBox[{"\"\<L, \[Mu]m\>\"", ",", 
-           RowBox[{
-            RowBox[{"L", "*", 
-             SuperscriptBox["10", "6"]}], "/.", "subs"}]}], "}"}], ",", 
-         "\[IndentingNewLine]", 
-         RowBox[{"{", 
-          RowBox[{
-          "\"\<\!\(\*SubscriptBox[\(\[Epsilon]\), \(eff, t\)]\)\>\"", ",", 
-           " ", 
-           RowBox[{"\[Epsilon]Efft", "/.", "subs"}]}], "}"}]}], 
-        "\[IndentingNewLine]", "}"}], ",", "\[IndentingNewLine]", 
-       RowBox[{"Frame", "\[Rule]", "All"}]}], "\[IndentingNewLine]", "]"}]}], 
-    ",", "\[IndentingNewLine]", 
-    RowBox[{"{", 
-     RowBox[{
-      RowBox[{"{", 
-       RowBox[{"Er", ",", "11.6"}], "}"}], ",", "10", ",", "12"}], "}"}], ",", 
-    RowBox[{"{", 
-     RowBox[{
-      RowBox[{"{", 
-       RowBox[{"width", ",", "9.6"}], "}"}], ",", "1", ",", "50"}], "}"}], 
-    ",", 
-    RowBox[{"{", 
-     RowBox[{
-      RowBox[{"{", 
-       RowBox[{"gap", ",", "5.2"}], "}"}], ",", "1", ",", "40"}], "}"}], ",", 
-    RowBox[{"{", 
-     RowBox[{
-      RowBox[{"{", 
-       RowBox[{"H", ",", "500"}], "}"}], ",", "100", ",", "1000"}], "}"}], 
-    ",", "\[IndentingNewLine]", 
-    RowBox[{"{", 
-     RowBox[{
-      RowBox[{"{", 
-       RowBox[{"T", ",", "0.01"}], "}"}], ",", "0.005", ",", "20"}], "}"}], 
-    ",", 
-    RowBox[{"{", 
-     RowBox[{
-      RowBox[{"{", 
-       RowBox[{"freq", ",", "5.0"}], "}"}], ",", "5", ",", "6"}], "}"}]}], 
-   " ", 
-   RowBox[{"(*", " ", 
-    RowBox[{"t", " ", "\[TildeEqual]", " ", 
-     RowBox[{"0.1", " ", "\[Mu]m"}]}], " ", "*)"}], "\[IndentingNewLine]", 
-   "]"}]}]}], "Input",
- CellChangeTimes->{{3.810802441464508*^9, 3.8108027489820056`*^9}, {
-  3.810806071966372*^9, 
-  3.810806099718377*^9}},ExpressionUUID->"b20e6116-163f-42d6-9a64-\
-ab184b551891"],
-
-Cell[BoxData[
- TagBox[
-  StyleBox[
-   DynamicModuleBox[{$CellContext`Er$$ = 11.6, $CellContext`freq$$ = 
-    5., $CellContext`gap$$ = 5.2, $CellContext`H$$ = 500, $CellContext`T$$ = 
-    0.01, $CellContext`width$$ = 9.6, Typeset`show$$ = True, 
-    Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
-    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
-    "\"untitled\"", Typeset`specs$$ = {{{
-       Hold[$CellContext`Er$$], 11.6}, 10, 12}, {{
-       Hold[$CellContext`width$$], 9.6}, 1, 50}, {{
-       Hold[$CellContext`gap$$], 5.2}, 1, 40}, {{
-       Hold[$CellContext`H$$], 500}, 100, 1000}, {{
-       Hold[$CellContext`T$$], 0.01}, 0.005, 20}, {{
-       Hold[$CellContext`freq$$], 5.}, 5, 6}}, Typeset`size$$ = {
-    108., {17.5, 23.5}}, Typeset`update$$ = 0, Typeset`initDone$$, 
-    Typeset`skipInitDone$$ = True, $CellContext`Er$12764$$ = 
-    0, $CellContext`width$12765$$ = 0, $CellContext`gap$12766$$ = 
-    0, $CellContext`H$12767$$ = 0, $CellContext`T$12768$$ = 
-    0, $CellContext`freq$12769$$ = 0}, 
-    DynamicBox[Manipulate`ManipulateBoxes[
-     1, StandardForm, 
-      "Variables" :> {$CellContext`Er$$ = 11.6, $CellContext`freq$$ = 
-        5., $CellContext`gap$$ = 5.2, $CellContext`H$$ = 
-        500, $CellContext`T$$ = 0.01, $CellContext`width$$ = 9.6}, 
-      "ControllerVariables" :> {
-        Hold[$CellContext`Er$$, $CellContext`Er$12764$$, 0], 
-        Hold[$CellContext`width$$, $CellContext`width$12765$$, 0], 
-        Hold[$CellContext`gap$$, $CellContext`gap$12766$$, 0], 
-        Hold[$CellContext`H$$, $CellContext`H$12767$$, 0], 
-        Hold[$CellContext`T$$, $CellContext`T$12768$$, 0], 
-        Hold[$CellContext`freq$$, $CellContext`freq$12769$$, 0]}, 
-      "OtherVariables" :> {
-       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
-        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
-        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
-         Typeset`skipInitDone$$}, 
-      "Body" :> ($CellContext`subs = {$CellContext`\[Epsilon]r -> \
-$CellContext`Er$$, $CellContext`a -> $CellContext`width$$, $CellContext`b -> \
-$CellContext`width$$ + 
-           2 $CellContext`gap$$, $CellContext`h -> $CellContext`H$$, \
-$CellContext`t -> $CellContext`T$$, $CellContext`\[Nu] -> \
-$CellContext`freq$$}; Grid[{{"L, \[Mu]m", 
-           ReplaceAll[$CellContext`L 10^6, $CellContext`subs]}, {
-          "\!\(\*SubscriptBox[\(\[Epsilon]\), \(eff, t\)]\)", 
-           ReplaceAll[$CellContext`\[Epsilon]Efft, $CellContext`subs]}}, 
-         Frame -> All]), 
-      "Specifications" :> {{{$CellContext`Er$$, 11.6}, 10, 
-         12}, {{$CellContext`width$$, 9.6}, 1, 
-         50}, {{$CellContext`gap$$, 5.2}, 1, 40}, {{$CellContext`H$$, 500}, 
-         100, 1000}, {{$CellContext`T$$, 0.01}, 0.005, 
-         20}, {{$CellContext`freq$$, 5.}, 5, 6}}, "Options" :> {}, 
-      "DefaultOptions" :> {}],
-     ImageSizeCache->{281., {135., 141.}},
-     SingleEvaluation->True],
-    Deinitialization:>None,
-    DynamicModuleValues:>{},
-    SynchronousInitialization->True,
-    UndoTrackedVariables:>{Typeset`show$$, Typeset`bookmarkMode$$},
-    UnsavedVariables:>{Typeset`initDone$$},
-    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
-   Deployed->True,
-   StripOnInput->False],
-  Manipulate`InterpretManipulate[1]]], "Output",
- CellChangeTimes->{
-  3.810802749958955*^9},ExpressionUUID->"34bc6be9-552f-4726-acbf-\
-9de2484ff365"]
-}, Open  ]],
-
-Cell["\<\
-n - number of coils
-r - curvature radius
-Lc - coupling length
-L1 - horizontal CPW length
-L2 - tail length\
-\>", "Text",
- CellChangeTimes->{{3.810802830320175*^9, 
-  3.8108028562323136`*^9}},ExpressionUUID->"c5786eac-5d19-46ac-8368-\
-35a4ebd9b9e7"],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[{
- RowBox[{
-  RowBox[{"Lp2", "=", 
-   RowBox[{
-    RowBox[{
-     FractionBox["\[Pi]", "4.0"], "R"}], "+", "Lc", "+", " ", 
-    RowBox[{"nCoils", "*", 
-     RowBox[{"(", 
-      RowBox[{
-       RowBox[{"2", " ", "l1"}], " ", "+", " ", 
-       RowBox[{"2", "\[Pi]", " ", "R"}]}], ")"}]}], "+", 
-    RowBox[{
-     FractionBox["\[Pi]", "4"], "l2"}], " ", "+", " ", "l2"}]}], 
-  ";"}], "\[IndentingNewLine]", 
- RowBox[{"Manipulate", "[", "\[IndentingNewLine]", 
-  RowBox[{
-   RowBox[{
-    RowBox[{"subs", "=", "\[IndentingNewLine]", 
-     RowBox[{"{", "\[IndentingNewLine]", 
-      RowBox[{
-       RowBox[{"R", "\[Rule]", "r"}], ",", "\[IndentingNewLine]", 
-       RowBox[{"Lc", "\[Rule]", "Lcoupling"}], ",", "\[IndentingNewLine]", 
-       RowBox[{"nCoils", "\[Rule]", "n"}], ",", "\[IndentingNewLine]", 
-       RowBox[{"l1", "\[Rule]", "L1"}], ",", "\[IndentingNewLine]", 
-       RowBox[{"l2", "\[Rule]", "L2"}], ",", "\[IndentingNewLine]", 
-       RowBox[{"\[Epsilon]r", "\[Rule]", "Er"}], ",", "\[IndentingNewLine]", 
-       RowBox[{"a", "\[Rule]", "width"}], ",", "\[IndentingNewLine]", 
-       RowBox[{"b", "\[Rule]", 
-        RowBox[{"width", "+", 
-         RowBox[{"2", " ", "gap"}]}]}], ",", "\[IndentingNewLine]", 
-       RowBox[{"h", "\[Rule]", "H"}], ",", "\[IndentingNewLine]", 
-       RowBox[{"t", "\[Rule]", "T"}]}], "\[IndentingNewLine]", "}"}]}], ";", 
-    "\[IndentingNewLine]", " ", 
-    RowBox[{"Grid", "[", "\[IndentingNewLine]", 
-     RowBox[{
-      RowBox[{"{", "\[IndentingNewLine]", 
-       RowBox[{"{", 
-        RowBox[{"\"\<\[Nu], GHz\>\"", ",", 
-         RowBox[{
-          RowBox[{
-           SuperscriptBox["10", 
-            RowBox[{"-", "9"}]], 
-           FractionBox["v", 
-            RowBox[{"4", " ", 
-             RowBox[{"Lp2", "/", 
-              SuperscriptBox["10", "6"]}]}]]}], "/.", "subs"}]}], "}"}], 
-       "\[IndentingNewLine]", "}"}], ",", "\[IndentingNewLine]", 
-      RowBox[{"Frame", "\[Rule]", "All"}]}], "\[IndentingNewLine]", "]"}]}], 
-   ",", "\[IndentingNewLine]", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"r", ",", "50"}], "}"}], ",", "10", ",", "50"}], "}"}], ",", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"L1", ",", "50"}], "}"}], ",", "0.", ",", "500"}], "}"}], ",", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"Lcoupling", ",", "100"}], "}"}], ",", "0", ",", "500"}], "}"}],
-    ",", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"n", ",", "10"}], "}"}], ",", "0", ",", "10", ",", "1"}], "}"}],
-    ",", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"L2", ",", "450"}], "}"}], ",", "20", ",", "1000"}], "}"}], ",",
-    "\[IndentingNewLine]", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"Er", ",", "11.45"}], "}"}], ",", "10", ",", "12"}], "}"}], ",", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"width", ",", "9.6"}], "}"}], ",", "1", ",", "50"}], "}"}], ",", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"gap", ",", "5.2"}], "}"}], ",", "1", ",", "40"}], "}"}], ",", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"H", ",", "500"}], "}"}], ",", "100", ",", "1000"}], "}"}], ",",
-    "\[IndentingNewLine]", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"T", ",", "0.01"}], "}"}], ",", "0.005", ",", "20"}], "}"}]}], 
-  "\[IndentingNewLine]", "]"}]}], "Input",
- CellChangeTimes->{{3.8108027993688297`*^9, 3.8108028256441517`*^9}, {
-  3.8108028633738675`*^9, 3.810803240011615*^9}, {3.810803275574351*^9, 
-  3.810803449868866*^9}, {3.8108034991156955`*^9, 3.810803499276266*^9}, {
-  3.810806295276143*^9, 
-  3.8108063211941824`*^9}},ExpressionUUID->"76259d09-7701-4573-8e26-\
-b7789912ec7b"],
-
-Cell[BoxData[
- TagBox[
-  StyleBox[
-   DynamicModuleBox[{$CellContext`Er$$ = 11.45, $CellContext`gap$$ = 
-    5.2, $CellContext`H$$ = 500, $CellContext`L1$$ = 50, $CellContext`L2$$ = 
-    450, $CellContext`Lcoupling$$ = 100, $CellContext`n$$ = 
-    10, $CellContext`r$$ = 50, $CellContext`T$$ = 0.01, $CellContext`width$$ =
-     9.6, Typeset`show$$ = True, Typeset`bookmarkList$$ = {}, 
-    Typeset`bookmarkMode$$ = "Menu", Typeset`animator$$, Typeset`animvar$$ = 
-    1, Typeset`name$$ = "\"untitled\"", Typeset`specs$$ = {{{
-       Hold[$CellContext`r$$], 50}, 10, 50}, {{
-       Hold[$CellContext`L1$$], 50}, 0., 500}, {{
-       Hold[$CellContext`Lcoupling$$], 100}, 0, 500}, {{
-       Hold[$CellContext`n$$], 10}, 0, 10, 1}, {{
-       Hold[$CellContext`L2$$], 450}, 20, 1000}, {{
-       Hold[$CellContext`Er$$], 11.45}, 10, 12}, {{
-       Hold[$CellContext`width$$], 9.6}, 1, 50}, {{
-       Hold[$CellContext`gap$$], 5.2}, 1, 40}, {{
-       Hold[$CellContext`H$$], 500}, 100, 1000}, {{
-       Hold[$CellContext`T$$], 0.01}, 0.005, 20}}, Typeset`size$$ = {
-    115., {7.5, 13.5}}, Typeset`update$$ = 0, Typeset`initDone$$, 
-    Typeset`skipInitDone$$ = True, $CellContext`r$15152$$ = 
-    0, $CellContext`L1$15153$$ = 0, $CellContext`Lcoupling$15154$$ = 
-    0, $CellContext`n$15155$$ = 0, $CellContext`L2$15156$$ = 
-    0, $CellContext`Er$15157$$ = 0, $CellContext`width$15158$$ = 
-    0, $CellContext`gap$15159$$ = 0, $CellContext`H$15160$$ = 
-    0, $CellContext`T$15161$$ = 0}, 
-    DynamicBox[Manipulate`ManipulateBoxes[
-     1, StandardForm, 
-      "Variables" :> {$CellContext`Er$$ = 11.45, $CellContext`gap$$ = 
-        5.2, $CellContext`H$$ = 500, $CellContext`L1$$ = 
-        50, $CellContext`L2$$ = 450, $CellContext`Lcoupling$$ = 
-        100, $CellContext`n$$ = 10, $CellContext`r$$ = 50, $CellContext`T$$ = 
-        0.01, $CellContext`width$$ = 9.6}, "ControllerVariables" :> {
-        Hold[$CellContext`r$$, $CellContext`r$15152$$, 0], 
-        Hold[$CellContext`L1$$, $CellContext`L1$15153$$, 0], 
-        Hold[$CellContext`Lcoupling$$, $CellContext`Lcoupling$15154$$, 0], 
-        Hold[$CellContext`n$$, $CellContext`n$15155$$, 0], 
-        Hold[$CellContext`L2$$, $CellContext`L2$15156$$, 0], 
-        Hold[$CellContext`Er$$, $CellContext`Er$15157$$, 0], 
-        Hold[$CellContext`width$$, $CellContext`width$15158$$, 0], 
-        Hold[$CellContext`gap$$, $CellContext`gap$15159$$, 0], 
-        Hold[$CellContext`H$$, $CellContext`H$15160$$, 0], 
-        Hold[$CellContext`T$$, $CellContext`T$15161$$, 0]}, 
-      "OtherVariables" :> {
-       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
-        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
-        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
-         Typeset`skipInitDone$$}, 
-      "Body" :> ($CellContext`subs = {$CellContext`R -> $CellContext`r$$, \
-$CellContext`Lc -> $CellContext`Lcoupling$$, $CellContext`nCoils -> \
-$CellContext`n$$, $CellContext`l1 -> $CellContext`L1$$, $CellContext`l2 -> \
-$CellContext`L2$$, $CellContext`\[Epsilon]r -> $CellContext`Er$$, \
-$CellContext`a -> $CellContext`width$$, $CellContext`b -> \
-$CellContext`width$$ + 
-           2 $CellContext`gap$$, $CellContext`h -> $CellContext`H$$, \
-$CellContext`t -> $CellContext`T$$}; Grid[{{"\[Nu], GHz", 
-           ReplaceAll[
-           10^(-9) ($CellContext`v/(
-             4 ($CellContext`Lp2/10^6))), $CellContext`subs]}}, Frame -> 
-         All]), "Specifications" :> {{{$CellContext`r$$, 50}, 10, 
-         50}, {{$CellContext`L1$$, 50}, 0., 
-         500}, {{$CellContext`Lcoupling$$, 100}, 0, 
-         500}, {{$CellContext`n$$, 10}, 0, 10, 1}, {{$CellContext`L2$$, 450}, 
-         20, 1000}, {{$CellContext`Er$$, 11.45}, 10, 
-         12}, {{$CellContext`width$$, 9.6}, 1, 
-         50}, {{$CellContext`gap$$, 5.2}, 1, 40}, {{$CellContext`H$$, 500}, 
-         100, 1000}, {{$CellContext`T$$, 0.01}, 0.005, 20}}, "Options" :> {}, 
-      "DefaultOptions" :> {}],
-     ImageSizeCache->{439., {157., 163.}},
-     SingleEvaluation->True],
-    Deinitialization:>None,
-    DynamicModuleValues:>{},
-    SynchronousInitialization->True,
-    UndoTrackedVariables:>{Typeset`show$$, Typeset`bookmarkMode$$},
-    UnsavedVariables:>{Typeset`initDone$$},
-    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
-   Deployed->True,
-   StripOnInput->False],
-  Manipulate`InterpretManipulate[1]]], "Output",
- CellChangeTimes->{
-  3.8108032008314743`*^9, {3.810803232742875*^9, 3.810803240536214*^9}, 
-   3.810803276491897*^9, {3.8108033264312267`*^9, 3.8108034504662685`*^9}, 
-   3.810803500047281*^9, {3.8108063005686703`*^9, 
-   3.8108063217646713`*^9}},ExpressionUUID->"ab3ad649-7e09-4ab4-a87c-\
-02b51860d251"]
-}, Open  ]]
-}, Open  ]],
-
-Cell[CellGroupData[{
-
-Cell["EMResonator_TL2Qbit_worm3 resonance calculation", "Title",
- CellChangeTimes->{{3.810802456646266*^9, 3.8108024637503223`*^9}, {
-  3.810806055975246*^9, 3.8108060560540285`*^9}, {3.810806115387888*^9, 
-  3.8108061154676456`*^9}},ExpressionUUID->"3541aafe-e717-464f-8e27-\
-b99dd80a6d3d"],
-
-Cell[BoxData[{
- RowBox[{
-  RowBox[{"c", "=", 
-   RowBox[{"3.0", "*", 
-    SuperscriptBox["10", "8"]}]}], ";"}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"v", " ", "=", " ", 
-   FractionBox["c", 
-    SqrtBox["\[Epsilon]Efft"]]}], ";"}], "\[IndentingNewLine]"}], "Input",
- CellChangeTimes->{{3.810802441464508*^9, 3.8108027489820056`*^9}, {
-   3.810806071966372*^9, 3.810806099718377*^9}, 
-   3.8108062203865604`*^9},ExpressionUUID->"e8d3b389-7730-4822-9464-\
-477cfd811e39"],
-
-Cell["\<\
-n - number of coils
-r - curvature radius
-Lc - coupling length
-L0 - vertical grounded end length
-L1 - horizontal CPW length
-L2 - tail length\
-\>", "Text",
- CellChangeTimes->{{3.810802830320175*^9, 3.8108028562323136`*^9}, {
-  3.8108062262447495`*^9, 
-  3.810806248365489*^9}},ExpressionUUID->"bd812a94-dffc-4d52-9343-\
-2f248312a4b8"],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[{
- RowBox[{
-  RowBox[{"Lp3", "=", 
-   RowBox[{
-    RowBox[{
-     FractionBox["\[Pi]", "4.0"], "R"}], "+", "l0", "+", " ", "Lc", "+", " ", 
-    RowBox[{"nCoils", "*", 
-     RowBox[{"(", 
-      RowBox[{
-       RowBox[{"2", " ", "l1"}], " ", "+", " ", 
-       RowBox[{"2", "\[Pi]", " ", "R"}]}], ")"}]}], "+", 
-    RowBox[{
-     FractionBox["\[Pi]", "4"], "l2"}], " ", "+", " ", "l2"}]}], 
-  ";"}], "\[IndentingNewLine]", 
- RowBox[{"Manipulate", "[", "\[IndentingNewLine]", 
-  RowBox[{
-   RowBox[{
-    RowBox[{"subs", "=", "\[IndentingNewLine]", 
-     RowBox[{"{", "\[IndentingNewLine]", 
-      RowBox[{
-       RowBox[{"R", "\[Rule]", "r"}], ",", "\[IndentingNewLine]", 
-       RowBox[{"Lc", "\[Rule]", "Lcoupling"}], ",", "\[IndentingNewLine]", 
-       RowBox[{"nCoils", "\[Rule]", "n"}], ",", "\[IndentingNewLine]", 
-       RowBox[{"l0", "\[Rule]", "L0"}], ",", "\[IndentingNewLine]", 
-       RowBox[{"l1", "\[Rule]", "L1"}], ",", "\[IndentingNewLine]", 
-       RowBox[{"l2", "\[Rule]", "L2"}], ",", "\[IndentingNewLine]", 
-       RowBox[{"\[Epsilon]r", "\[Rule]", "Er"}], ",", "\[IndentingNewLine]", 
-       RowBox[{"a", "\[Rule]", "width"}], ",", "\[IndentingNewLine]", 
-       RowBox[{"b", "\[Rule]", 
-        RowBox[{"width", "+", 
-         RowBox[{"2", " ", "gap"}]}]}], ",", "\[IndentingNewLine]", 
-       RowBox[{"h", "\[Rule]", "H"}], ",", "\[IndentingNewLine]", 
-       RowBox[{"t", "\[Rule]", "T"}]}], "\[IndentingNewLine]", "}"}]}], ";", 
-    "\[IndentingNewLine]", " ", 
-    RowBox[{"Grid", "[", "\[IndentingNewLine]", 
-     RowBox[{
-      RowBox[{"{", "\[IndentingNewLine]", 
-       RowBox[{"{", 
-        RowBox[{"\"\<\[Nu], GHz\>\"", ",", 
-         RowBox[{
-          RowBox[{
-           SuperscriptBox["10", 
-            RowBox[{"-", "9"}]], 
-           FractionBox["v", 
-            RowBox[{"4", " ", 
-             RowBox[{"Lp3", "/", 
-              SuperscriptBox["10", "6"]}]}]]}], "/.", "subs"}]}], "}"}], 
-       "\[IndentingNewLine]", "}"}], ",", "\[IndentingNewLine]", 
-      RowBox[{"Frame", "\[Rule]", "All"}]}], "\[IndentingNewLine]", "]"}]}], 
-   ",", "\[IndentingNewLine]", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"r", ",", "50"}], "}"}], ",", "10", ",", "50"}], "}"}], ",", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"L0", ",", "2000"}], "}"}], ",", "0", ",", "4000"}], "}"}], ",", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"L1", ",", "50"}], "}"}], ",", "0.", ",", "500"}], "}"}], ",", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"Lcoupling", ",", "100"}], "}"}], ",", "0", ",", "500"}], "}"}],
-    ",", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"n", ",", "10"}], "}"}], ",", "0", ",", "10", ",", "1"}], "}"}],
-    ",", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"L2", ",", "270"}], "}"}], ",", "20", ",", "1000"}], "}"}], ",",
-    "\[IndentingNewLine]", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"Er", ",", "11.45"}], "}"}], ",", "10", ",", "12"}], "}"}], ",", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"width", ",", "9.6"}], "}"}], ",", "1", ",", "50"}], "}"}], ",", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"gap", ",", "5.2"}], "}"}], ",", "1", ",", "40"}], "}"}], ",", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"H", ",", "500"}], "}"}], ",", "100", ",", "1000"}], "}"}], ",",
-    "\[IndentingNewLine]", 
-   RowBox[{"{", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"T", ",", "0.01"}], "}"}], ",", "0.005", ",", "20"}], "}"}]}], 
-  "\[IndentingNewLine]", "]"}]}], "Input",
- CellChangeTimes->{{3.8108027993688297`*^9, 3.8108028256441517`*^9}, {
-  3.8108028633738675`*^9, 3.810803240011615*^9}, {3.810803275574351*^9, 
-  3.810803449868866*^9}, {3.8108034991156955`*^9, 3.810803499276266*^9}, {
-  3.810806139632686*^9, 3.8108061824687967`*^9}, {3.8108063388772373`*^9, 
-  3.810806356466053*^9}, {3.8108066045158443`*^9, 
-  3.8108066066047792`*^9}},ExpressionUUID->"68f0d1fe-fcb5-4452-9c7d-\
-335bcc1ebcda"],
-
-Cell[BoxData[
- TagBox[
-  StyleBox[
-   DynamicModuleBox[{$CellContext`Er$$ = 11.45, $CellContext`gap$$ = 
-    5.2, $CellContext`H$$ = 500, $CellContext`L0$$ = 1500, $CellContext`L1$$ =
-     50, $CellContext`L2$$ = 450.00000000000006`, $CellContext`Lcoupling$$ = 
-    150, $CellContext`n$$ = 7, $CellContext`r$$ = 50, $CellContext`T$$ = 
-    0.01, $CellContext`width$$ = 9.6, Typeset`show$$ = True, 
-    Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
-    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
-    "\"untitled\"", Typeset`specs$$ = {{{
-       Hold[$CellContext`r$$], 50}, 10, 50}, {{
-       Hold[$CellContext`L0$$], 2000}, 0, 4000}, {{
-       Hold[$CellContext`L1$$], 50}, 0., 500}, {{
-       Hold[$CellContext`Lcoupling$$], 100}, 0, 500}, {{
-       Hold[$CellContext`n$$], 10}, 0, 10, 1}, {{
-       Hold[$CellContext`L2$$], 270}, 20, 1000}, {{
-       Hold[$CellContext`Er$$], 11.45}, 10, 12}, {{
-       Hold[$CellContext`width$$], 9.6}, 1, 50}, {{
-       Hold[$CellContext`gap$$], 5.2}, 1, 40}, {{
-       Hold[$CellContext`H$$], 500}, 100, 1000}, {{
-       Hold[$CellContext`T$$], 0.01}, 0.005, 20}}, Typeset`size$$ = {
-    108., {7.5, 13.5}}, Typeset`update$$ = 0, Typeset`initDone$$, 
-    Typeset`skipInitDone$$ = True, $CellContext`r$15471$$ = 
-    0, $CellContext`L0$15472$$ = 0, $CellContext`L1$15473$$ = 
-    0, $CellContext`Lcoupling$15474$$ = 0, $CellContext`n$15475$$ = 
-    0, $CellContext`L2$15476$$ = 0, $CellContext`Er$15477$$ = 
-    0, $CellContext`width$15478$$ = 0, $CellContext`gap$15479$$ = 
-    0, $CellContext`H$15480$$ = 0}, 
-    DynamicBox[Manipulate`ManipulateBoxes[
-     1, StandardForm, 
-      "Variables" :> {$CellContext`Er$$ = 11.45, $CellContext`gap$$ = 
-        5.2, $CellContext`H$$ = 500, $CellContext`L0$$ = 
-        2000, $CellContext`L1$$ = 50, $CellContext`L2$$ = 
-        270, $CellContext`Lcoupling$$ = 100, $CellContext`n$$ = 
-        10, $CellContext`r$$ = 50, $CellContext`T$$ = 
-        0.01, $CellContext`width$$ = 9.6}, "ControllerVariables" :> {
-        Hold[$CellContext`r$$, $CellContext`r$15471$$, 0], 
-        Hold[$CellContext`L0$$, $CellContext`L0$15472$$, 0], 
-        Hold[$CellContext`L1$$, $CellContext`L1$15473$$, 0], 
-        Hold[$CellContext`Lcoupling$$, $CellContext`Lcoupling$15474$$, 0], 
-        Hold[$CellContext`n$$, $CellContext`n$15475$$, 0], 
-        Hold[$CellContext`L2$$, $CellContext`L2$15476$$, 0], 
-        Hold[$CellContext`Er$$, $CellContext`Er$15477$$, 0], 
-        Hold[$CellContext`width$$, $CellContext`width$15478$$, 0], 
-        Hold[$CellContext`gap$$, $CellContext`gap$15479$$, 0], 
-        Hold[$CellContext`H$$, $CellContext`H$15480$$, 0]}, 
-      "OtherVariables" :> {
-       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
-        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
-        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
-         Typeset`skipInitDone$$}, 
-      "Body" :> ($CellContext`subs = {$CellContext`R -> $CellContext`r$$, \
-$CellContext`Lc -> $CellContext`Lcoupling$$, $CellContext`nCoils -> \
-$CellContext`n$$, $CellContext`l0 -> $CellContext`L0$$, $CellContext`l1 -> \
-$CellContext`L1$$, $CellContext`l2 -> $CellContext`L2$$, $CellContext`\
-\[Epsilon]r -> $CellContext`Er$$, $CellContext`a -> $CellContext`width$$, \
-$CellContext`b -> $CellContext`width$$ + 
-           2 $CellContext`gap$$, $CellContext`h -> $CellContext`H$$, \
-$CellContext`t -> $CellContext`T$$}; Grid[{{"\[Nu], GHz", 
-           ReplaceAll[
-           10^(-9) ($CellContext`v/(
-             4 ($CellContext`Lp3/10^6))), $CellContext`subs]}}, Frame -> 
-         All]), "Specifications" :> {{{$CellContext`r$$, 50}, 10, 
-         50}, {{$CellContext`L0$$, 2000}, 0, 4000}, {{$CellContext`L1$$, 50}, 
-         0., 500}, {{$CellContext`Lcoupling$$, 100}, 0, 
-         500}, {{$CellContext`n$$, 10}, 0, 10, 1}, {{$CellContext`L2$$, 270}, 
-         20, 1000}, {{$CellContext`Er$$, 11.45}, 10, 
-         12}, {{$CellContext`width$$, 9.6}, 1, 
-         50}, {{$CellContext`gap$$, 5.2}, 1, 40}, {{$CellContext`H$$, 500}, 
-         100, 1000}, {{$CellContext`T$$, 0.01}, 0.005, 20}}, "Options" :> {}, 
-      "DefaultOptions" :> {}],
-     ImageSizeCache->{432., {249., 255.}},
-     SingleEvaluation->True],
-    Deinitialization:>None,
-    DynamicModuleValues:>{},
-    SynchronousInitialization->True,
-    UndoTrackedVariables:>{Typeset`show$$, Typeset`bookmarkMode$$},
-    UnsavedVariables:>{Typeset`initDone$$},
-    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
-   Deployed->True,
-   StripOnInput->False],
-  Manipulate`InterpretManipulate[1]]], "Output",
- CellChangeTimes->{
-  3.8108032008314743`*^9, {3.810803232742875*^9, 3.810803240536214*^9}, 
-   3.810803276491897*^9, {3.8108033264312267`*^9, 3.8108034504662685`*^9}, 
-   3.810803500047281*^9, {3.810806332757167*^9, 3.8108063570290384`*^9}, 
-   3.8108066071563025`*^9},ExpressionUUID->"22bf39b3-b817-47b0-9148-\
-7110a8a70319"]
-}, Open  ]]
 }, Open  ]]
 },
-WindowSize->{1280, 637},
-WindowMargins->{{-8, Automatic}, {Automatic, -8}},
+WindowSize->{1264, 637},
+WindowMargins->{{-8, Automatic}, {Automatic, 0}},
 FrontEndVersion->"11.1 for Microsoft Windows (64-bit) (March 13, 2017)",
 StyleDefinitions->"Default.nb"
 ]
@@ -2673,54 +2070,22 @@ Notebook[{
 Cell[558, 20, 131, 1, 30, "Input", "ExpressionUUID" -> \
 "6b0c5ca5-1ae3-4688-8c28-8520da345edc"],
 Cell[CellGroupData[{
-Cell[714, 25, 173, 3, 101, "Title", "ExpressionUUID" -> \
+Cell[714, 25, 233, 4, 101, "Title", "ExpressionUUID" -> \
 "89a0d928-0546-4c29-9ac6-034251971e99"],
-Cell[890, 30, 552, 14, 84, "Text", "ExpressionUUID" -> \
+Cell[950, 31, 552, 14, 84, "Text", "ExpressionUUID" -> \
 "ea37e2d9-4d7a-409b-a71b-7fc72f2938fa"],
-Cell[1445, 46, 105908, 1741, 290, "Input", "ExpressionUUID" -> \
+Cell[1505, 47, 105908, 1741, 290, "Input", "ExpressionUUID" -> \
 "99039f78-74a2-4c42-a47b-b06cf59b502a"],
-Cell[107356, 1789, 3728, 112, 598, "Input", "ExpressionUUID" -> \
+Cell[107416, 1790, 3728, 112, 598, "Input", "ExpressionUUID" -> \
 "ef5f09cb-9fec-461a-b245-15fae780b634"],
 Cell[CellGroupData[{
-Cell[111109, 1905, 2518, 61, 356, "Input", "ExpressionUUID" -> \
+Cell[111169, 1906, 2569, 62, 356, "Input", "ExpressionUUID" -> \
 "ca009c96-7ec1-4889-9dc9-6aed98126261"],
-Cell[113630, 1968, 3580, 66, 265, "Output", "ExpressionUUID" -> \
+Cell[113741, 1970, 3579, 66, 265, "Output", "ExpressionUUID" -> \
 "173f2c7d-289a-429c-bfe0-4450bcfae23f"]
 }, Open  ]],
-Cell[117225, 2037, 396, 11, 61, "Text", "ExpressionUUID" -> \
+Cell[117335, 2039, 396, 11, 61, "Text", "ExpressionUUID" -> \
 "d3742ad3-8e54-473b-8830-a6d2b1322bfa"]
-}, Closed]],
-Cell[CellGroupData[{
-Cell[117658, 2053, 243, 4, 75, "Title", "ExpressionUUID" -> \
-"546bd4d1-f107-4146-8805-0193cf04512e"],
-Cell[CellGroupData[{
-Cell[117926, 2061, 3076, 85, 523, "Input", "ExpressionUUID" -> \
-"b20e6116-163f-42d6-9a64-ab184b551891"],
-Cell[121005, 2148, 3440, 66, 293, "Output", "ExpressionUUID" -> \
-"34bc6be9-552f-4726-acbf-9de2484ff365"]
-}, Open  ]],
-Cell[124460, 2217, 257, 9, 106, "Text", "ExpressionUUID" -> \
-"c5786eac-5d19-46ac-8368-35a4ebd9b9e7"],
-Cell[CellGroupData[{
-Cell[124742, 2230, 3752, 99, 602, "Input", "ExpressionUUID" -> \
-"76259d09-7701-4573-8e26-b7789912ec7b"],
-Cell[128497, 2331, 4713, 85, 337, "Output", "ExpressionUUID" -> \
-"ab3ad649-7e09-4ab4-a87c-02b51860d251"]
-}, Open  ]]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[133259, 2422, 291, 4, 101, "Title", "ExpressionUUID" -> \
-"3541aafe-e717-464f-8e27-b99dd80a6d3d"],
-Cell[133553, 2428, 475, 12, 103, "Input", "ExpressionUUID" -> \
-"e8d3b389-7730-4822-9464-477cfd811e39"],
-Cell[134031, 2442, 342, 11, 125, "Text", "ExpressionUUID" -> \
-"bd812a94-dffc-4d52-9343-2f248312a4b8"],
-Cell[CellGroupData[{
-Cell[134398, 2457, 4067, 105, 621, "Input", "ExpressionUUID" -> \
-"68f0d1fe-fcb5-4452-9c7d-335bcc1ebcda"],
-Cell[138468, 2564, 4947, 88, 521, "Output", "ExpressionUUID" -> \
-"22bf39b3-b817-47b0-9148-7110a8a70319"]
-}, Open  ]]
 }, Open  ]]
 }
 ]
