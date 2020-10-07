@@ -6,11 +6,12 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 from ClassLib.BaseClasses import *
 
 
-class CPWParameters:
+class CPWParameters(Element_Base):
     def __init__(self, width, gap):
         self.width = width
         self.gap = gap
         self.b = 2 * gap + width
+
 
 
 class CPW(Element_Base):
@@ -28,10 +29,6 @@ class CPW(Element_Base):
             self.width = width
             self.gap = gap
             self.b = 2 * gap + width
-            self._geometry_parameters = {
-                "width": width,
-                "gap": gap
-            }
         else:
             self.width = cpw_params.width
             self.gap = cpw_params.gap
@@ -42,6 +39,18 @@ class CPW(Element_Base):
         self.start = start
         self.dr = end - start
         super().__init__(start, trans_in)
+
+        self._geometry_parameters = OrderedDict(
+            [
+                ("width, um", self.width / 1e3),
+                ("gap, um", self.gap / 1e3),
+                ("start.x, um", self.start.x / 1e3),
+                ("start.y, um", self.start.y / 1e3),
+                ("end.x", self.end.x / 1e3),
+                ("end.y", self.end.y / 1e3)
+            ]
+        )
+
         self.start = self.connections[0]
         self.end = self.connections[1]
         self.dr = self.end - self.start
