@@ -213,21 +213,24 @@ if __name__ == "__main__":
 
     # resonator
     # corresponding to resonanse freq is somewhere near 5 GHz
-    r = 50e3
-    L0 = 1700e3
-    L1 = 125e3
+    # resonator
     L_coupling = 200e3
+    # corresponding to resonanse freq is linspaced in interval [6,9) GHz
+    L0 = 1700e3
+    L1_list = [1e3 * x for x in [79.3927, 75.5225, 71.7273, 68.0048, 64.353]]
+    estimated_res_freqs = [5.0209, 5.0715, 5.1209, 5.1756, 5.2140]  # GHz
+    freqs_span = 0.004  # GHz
+    r = 50e3
+    L2_list = [100e3 + 0.5 * (L1_list[0] - L1) for L1 in L1_list]
     N = 7
-    L2 = 100e3
     width_res = 10e3
     gap_res = 10e3
+    to_line = 45e3
+    Z_res = CPW(width_res, gap_res, origin, origin)
     stab_width = 10e3
     stab_gnd_gap = 10e3
     stab_len = 40e3
     stab_end_gnd_gap = 10e3
-
-    to_line = 50e3
-    Z_res = CPW(width_res, gap_res, origin, origin)
 
     # xmon cross parameters
     cross_width = 60e3
@@ -246,8 +249,12 @@ if __name__ == "__main__":
     xmon_fork_penetration = -20e3
 
     L_coupling = 200e3
-    to_line = 55e3
-    for L0 in [L0]:
+    to_line_list = [46e3]
+    pars = map(
+        lambda x: list(x[0]) + [x[1]],
+        itertools.product(zip(L1_list, L2_list, estimated_res_freqs), to_line_list)
+    )
+    for L1, L2, estimated_freq, to_line in pars:
         # clear this cell and layer
         cell.clear()
         fork_y_span = xmon_fork_penetration + xmon_fork_gnd_gap
@@ -285,30 +292,30 @@ if __name__ == "__main__":
             if shape.is_polygon and shape.polygon.inside(xmon_center):
                 shape.delete()
 
-        lv.zoom_fit()
         ## DRAWING SECTION END ##
+        lv.zoom_fit()
 
-
-        ### MATLAB COMMANDER SECTION START ###
+        # ### MATLAB COMMANDER SECTION START ###
         # ml_terminal = SonnetLab()
         # print("starting connection...")
         # from sonnetSim.cMD import CMD
+        #
         # ml_terminal._send(CMD.SAY_HELLO)
         # ml_terminal.clear()
         # simBox = SimulationBox(CHIP.dx, CHIP.dy, CHIP.nX, CHIP.nY)
         # ml_terminal.set_boxProps(simBox)
         # print("sending cell and layer")
         # from sonnetSim.pORT_TYPES import PORT_TYPES
-        # ports = [SonnetPort(point, PORT_TYPES.BOX_WALL) for point in [Z0.start, Z0.end] ]
+        #
+        # ports = [SonnetPort(point, PORT_TYPES.BOX_WALL) for point in [Z0.start, Z0.end]]
         # ml_terminal.set_ports(ports)
         #
         # ml_terminal.send_polygons(cell, layer_photo)
-        # ml_terminal.set_ABS_sweep(4, 7)
+        # ml_terminal.set_ABS_sweep(estimated_freq - freqs_span / 2, estimated_freq + freqs_span / 2)
         # print("simulating...")
         # result_path = ml_terminal.start_simulation(wait=True)
         # ml_terminal.release()
         # ### MATLAB COMMANDER SECTION END ###
-        #
         #
         # ### RESULT SAVING SECTION START ###
         # import shutil
