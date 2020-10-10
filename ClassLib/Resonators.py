@@ -402,8 +402,57 @@ class EMResonator_TL2Qbit_worm3(Complex_Base):
         self.angle_connections = [0, self.cop_tail.alpha_end]
 
 
-class EMResonator_TL2Qbit_worm3_XmonFork(EMResonator_TL2Qbit_worm3):
+class EMResonator_TL2Qbit_worm4(EMResonator_TL2Qbit_worm3):
     def __init__(self, Z0, start, L_coupling, L0, L1, r, L2, N,
+                 stab_width, stab_gnd_gap, stab_len, stab_end_gnd_gap, trans_in=None):
+        """
+
+        Parameters
+        ----------
+        Z0
+        start
+        L_coupling
+        L0
+        L1
+        r
+        L2
+        N
+        Z_stab : CPWParams
+        trans_in
+        """
+        self.stab_width = stab_width
+        self.stab_gnd_gap = stab_gnd_gap
+        self.stab_len = stab_len
+        self.stab_end_gnd_gap = stab_end_gnd_gap
+
+        # primitives introduced in this class
+        self.Z_stab_cpw: CPW = None
+        self.Z_stab_end_empty: CPW = None
+
+        super().__init__(Z0, start, L_coupling, L0, L1, r, L2, N, trans_in)
+
+        self._geometry_parameters.update(
+            {**self.Z_stab_cpw.get_geometry_params_dict(prefix="resCoupleStab_"),
+             "resCoupleStab_stab_end_gnd_gap, um": self.stab_end_gnd_gap/1e3}
+        )
+
+    def init_primitives(self):
+        super().init_primitives()
+        origin = DPoint(0,0)
+        p1 = origin + DPoint(self.L_coupling/2, self.Z0.width/2)
+        p2 = p1 + DPoint(0, self.stab_len)
+        self.Z_stab_cpw = CPW(self.stab_width, self.stab_gnd_gap, p1, p2)
+        self.primitives["Z_stab_cpw"] = self.Z_stab_cpw
+
+        p1 = self.Z_stab_cpw.end
+        p2 = p1 + DPoint(0, self.stab_end_gnd_gap)
+        self.Z_stab_end_empty = CPW(0, self.Z_stab_cpw.b/2, p1, p2)
+        self.primitives["Z_stab_end_empty"] = self.Z_stab_end_empty
+
+
+class EMResonator_TL2Qbit_worm4_XmonFork(EMResonator_TL2Qbit_worm4):
+    def __init__(self, Z0, start, L_coupling, L0, L1, r, L2, N,
+                 stab_width, stab_gnd_gap, stab_len, stab_end_gnd_gap,
                  fork_x_span, fork_y_span, fork_metal_width, fork_gnd_gap,
                  trans_in=None):
         self.fork_x_span = fork_x_span
@@ -411,17 +460,15 @@ class EMResonator_TL2Qbit_worm3_XmonFork(EMResonator_TL2Qbit_worm3):
         self.fork_metal_width = fork_metal_width
         self.fork_gnd_gap = fork_gnd_gap
 
-        super().__init__(Z0, start, L_coupling, L0, L1, r, L2, N, trans_in)
+        super().__init__(
+            Z0, start, L_coupling, L0, L1, r, L2, N,
+            stab_width, stab_gnd_gap, stab_len, stab_end_gnd_gap, trans_in
+        )
+
         self._geometry_parameters["fork_x_span, um"] = fork_x_span / 1e3
         self._geometry_parameters["fork_y_span, um"] = fork_y_span / 1e3
         self._geometry_parameters["fork_metal_width, um"] = fork_metal_width / 1e3
         self._geometry_parameters["fork_gnd_gap, um"] = fork_gnd_gap / 1e3
-
-        self.start = self.connections[0]
-        self.end = self.connections[-1]
-        self.dr = self.end - self.start
-        self.alpha_start = self.angle_connections[0]
-        self.alpha_end = self.angle_connections[1]
 
     def init_primitives(self):
         super().init_primitives()
@@ -473,3 +520,5 @@ class EMResonator_TL2Qbit_worm3_XmonFork(EMResonator_TL2Qbit_worm3):
         self.primitives["erased_fork_left_cpw_end"] = CPW(0, forkZ.b / 2, self.fork_y_cpw1.end, p1)
         p1 = self.fork_y_cpw2.end + DPoint(0, -forkZ.gap)
         self.primitives["erased_fork_right_cpw_end"] = CPW(0, forkZ.b / 2, self.fork_y_cpw2.end, p1)
+
+

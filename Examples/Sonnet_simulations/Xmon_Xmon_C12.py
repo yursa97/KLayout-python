@@ -4,7 +4,7 @@ from math import cos, sin, atan2, pi
 from pya import Point, DPoint, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 from ClassLib.Coplanars import CPW, CPW_arc
-from ClassLib.Resonators import Coil_type_1
+from ClassLib.Coplanars import Coil_type_1
 from ClassLib.BaseClasses import Complex_Base, Element_Base
 
 from importlib import reload
