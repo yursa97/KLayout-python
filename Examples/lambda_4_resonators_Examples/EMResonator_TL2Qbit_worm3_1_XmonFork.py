@@ -57,7 +57,7 @@ class EMResonator_TL2Qbit_worm3_1(Complex_Base):
             self.cop_end_open.end,
             self.cop_end_open.end - DPoint(0, self.Z0.b)
         )
-        self.primitives["cop_end_open"] = self.cop_end_open
+        self.primitives["cpw_hor_end_open"] = self.cop_end_open
         self.primitives["cop_end_open_gap"] = self.cop_end_open_gap
 
         # making coil
