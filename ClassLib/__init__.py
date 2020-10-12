@@ -39,9 +39,9 @@ from . import Resonators
 reload(Resonators)
 from .Resonators import *
 
-from . import ContactPad
-reload(ContactPad)
-from .ContactPad import *
+from . import contactPads
+reload(contactPads)
+from .contactPads import *
 
 from . import ChipTemplates
 reload(ChipTemplates)

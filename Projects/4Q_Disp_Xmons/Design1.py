@@ -6,11 +6,15 @@ import pya
 from pya import Point, DPoint, DVector, DSimplePolygon, SimplePolygon, DPolygon, Polygon,  Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
+from importlib import reload
+import ClassLib
+reload(ClassLib)
+
 from ClassLib.BaseClasses import Complex_Base
-from ClassLib.Coplanars import CPW, CPW_arc
+from ClassLib.Coplanars import CPW, CPW_arc, CPWParameters, CPW_RL_Path
 from ClassLib.Resonators import Coil_type_1
 from ClassLib.Shapes import XmonCross
-from ClassLib.ContactPad import Contact_Pad
+from ClassLib.contactPads import ContactPad
 
 from sonnetSim.sonnetLab import SonnetLab, SonnetPort, SimulationBox
 
@@ -275,10 +279,64 @@ class CHIP:
     dx = 10e6
     dy = 10e6
 
+    pcb_width = 260e3  # 0.26 mm
+    pcb_gap = 190e3  # (0.64 - 0.26) / 2 = 0.19 mm
+    pcb_feedline_d = 2500e3  # 2.5 mm
+    pcb_Z = CPWParameters(pcb_width, pcb_gap)
+
+    cpw_width = 24.1e3
+    cpw_gap = 12.95e3
+    chip_Z = CPWParameters(cpw_width, cpw_gap)
+
+    @staticmethod
+    def get_contact_pads():
+        dx = CHIP.dx
+        dy = CHIP.dy
+        pcb_feedline_d = CHIP.pcb_feedline_d
+        pcb_Z = CHIP.pcb_Z
+        chip_Z = CHIP.chip_Z
+
+        contact_pads_left = [
+            ContactPad(
+                DPoint(0, dy - pcb_feedline_d * (i + 1)), pcb_Z, chip_Z, back_metal_width=50e3,
+                back_metal_gap=100e3
+            ) for i in range(3)
+        ]
+
+        contact_pads_bottom = [
+            ContactPad(
+                DPoint(pcb_feedline_d * (i + 1), 0), pcb_Z, chip_Z, back_metal_width=50e3,
+                back_metal_gap=100e3,
+                trans_in=Trans.R90
+            ) for i in range(3)
+        ]
+
+        contact_pads_right = [
+            ContactPad(
+                DPoint(dx, pcb_feedline_d*(i+1)), pcb_Z, chip_Z, back_metal_width=50e3,
+                back_metal_gap=100e3,
+                trans_in=Trans.R180
+            ) for i in range(3)
+        ]
+
+        contact_pads_top = [
+            ContactPad(
+                DPoint(dx - pcb_feedline_d * (i + 1), dy), pcb_Z, chip_Z, back_metal_width=50e3,
+                back_metal_gap=100e3,
+                trans_in=Trans.R270
+            ) for i in range(3)
+        ]
+
+        # contact pads are ordered starting with top-left corner in counter-clockwise direction
+        contact_pads = itertools.chain(
+            contact_pads_left, contact_pads_bottom,
+            contact_pads_right, contact_pads_top
+        )
+
+        return list(contact_pads)
+
     origin = DPoint(0, 0)
     box = pya.DBox(origin, origin + DPoint(dx, dy))
-    L1 = 220
-    # only 4 connections programmed by now
 
     @staticmethod
     def get_geometry_params_dict(prefix="", postfix=""):
@@ -333,13 +391,11 @@ if __name__ == "__main__":
     origin = DPoint(0, 0)
     
     # main drive line coplanar
-    width = 24.1e3
-    gap = 12.95e3
     x = None
     y = 0.9 * CHIP.dy
     p1 = DPoint(0, y)
     p2 = DPoint(CHIP.dx, y)
-    Z0 = CPW(width, gap, p1, p2)
+    Z0 = CPW(CHIP.cpw_width, CHIP.cpw_gap, p1, p2)
     
     # resonator
     # corresponding to resonanse freq is somewhere near 5 GHz
@@ -382,6 +438,21 @@ if __name__ == "__main__":
     # place chip metal layer
     chip_box = pya.Box(DPoint(0, 0), DPoint(CHIP.dx, CHIP.dy))
     tmp_reg.insert(chip_box)
+    contact_pads = CHIP.get_contact_pads()
+    for contact_pad in contact_pads:
+        contact_pad.place(tmp_reg)
+
+    # place readout waveguide
+    ro_line_turn_radius = 200e3
+    ro_line_dy = 600e3
+    cpwrl_ro = CPW_RL_Path(
+        contact_pads[-1].end, shape="LRLRL", cpw_parameters=Z0,
+        turn_radiuses=[ro_line_turn_radius]*2,
+        segment_lengths=[ro_line_dy, CHIP.pcb_feedline_d, ro_line_dy],
+        turn_angles=[pi/2, pi/2], trans_in=Trans.R270
+    )
+    cpwrl_ro.place(tmp_reg)
+
     params = zip(L1_list, L2_list, L_coupling_list,xmon_fork_penetrations)
     for res_idx, (L1, L2, L_coupling, xmon_fork_penetration) in enumerate(params):
         fork_y_span = xmon_fork_penetration + xmon_fork_gnd_gap
@@ -391,14 +462,15 @@ if __name__ == "__main__":
         # under condition that Xmon-Xmon distance equals
         # `xmon_x_distance`
         if res_idx == 0:
-            worm_x = 2*L_coupling
+            worm_x = 1.2*CHIP.pcb_feedline_d
         else:
-            worm_x = 2*L_coupling + res_idx * xmon_x_distance - \
+            worm_x = 1.2*CHIP.pcb_feedline_d + res_idx * xmon_x_distance - \
                      (L_coupling_list[res_idx] - L_coupling_list[0]) + \
                      (L1_list[res_idx] - L1_list[0])/2
-            
+        worm_y = contact_pads[-1].end.y - ro_line_dy - to_line
+
         worm = EMResonator_TL2Qbit_worm3_XmonFork(
-            Z_res, DPoint(worm_x, y - to_line), L_coupling, L0, L1, r, L2, N,
+            Z_res, DPoint(worm_x, worm_y), L_coupling, L0, L1, r, L2, N,
             fork_x_span, fork_y_span, fork_metal_width, fork_gnd_gap
         )
 
@@ -412,9 +484,6 @@ if __name__ == "__main__":
 
         xmonCross_corrected = XmonCross(xmon_center, cross_width, cross_len, xmon_fork_gnd_gap)
         xmonCross_corrected.place(tmp_reg)
-
-    # place readout waveguide
-    Z0.place(tmp_reg)
 
     # convert region to cell and display it
     cell.shapes(layer_photo).insert(tmp_reg)

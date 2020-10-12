@@ -3,7 +3,11 @@ from math import sqrt, cos, sin, atan2, pi, copysign, tan
 from pya import Point, DPoint, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from ClassLib.BaseClasses import *
+from typing import Union, List
+from collections import OrderedDict
+
+
+from ClassLib.BaseClasses import Element_Base, Complex_Base
 
 
 class CPWParameters(Element_Base):
@@ -289,36 +293,37 @@ class CPW_RL_Path(Complex_Base):
 
     def __init__(self, origin, shape, cpw_parameters, turn_radiuses,
                  segment_lengths, turn_angles, trans_in=None):
-        '''
+        """
         A piecewise-linear coplanar waveguide with rounded turns.
-        
+
         Segment lengths are treated as the lengths of the segments of
         a line with turn_raduises = 0. Changing turning raduises
         will not alter the position of the end of the line.
-        
+
         TODO: 180 deg turns
-        
-        Parameters:
-            origin: DPoint
-                The point where the line should start 
-            shape: string
-                String in format "RLLRL" where an R means a turn 
-                and an L means a straight part
-            cpw_parameters: CPWParameters or array-like
-                Parameters of the CPW or an array-like with parameters 
-                for each peace (R or L)
-            turn_radiuses: float or array-like
-                Radius of the turns or an array-like with radiuses for 
-                each turn 
-            segment_lengths: array-like
-                Lengths of the straight parts of the equivalent 
-                piecewise-linear line with no corner rounding
-            turn_angles: array-like
-                Angles for each turn of the line
-                !!! 180 turns are not yet supported !!!
-            trans_in: DTrans
-                Transformation of the line as a whole            
-        '''
+
+        Parameters
+        ----------
+        origin : DPoint
+            The point where the line should start
+        shape : str
+            String in format "RLLRL" where an R means a turn
+            and an L means a straight part
+        cpw_parameters : Union[CPWParameters, List[CPWParameters]]
+            Parameters of the CPW or an array-like with parameters
+            for each peace (R or L)
+        turn_radiuses : Union[float, List[float]]
+            Radius of the turns or an array-like with radiuses for
+            each turn
+        segment_lengths: list[float]
+            Lengths of the straight parts of the equivalent
+            piecewise-linear line with no corner rounding
+        turn_angles: list[float]
+            Angles for each turn of the line in radians
+            !!! 180 turns are not yet supported !!!
+        trans_in: DTrans
+            Transformation of the line as a whole
+        """
 
         self._shape_string = shape
         self._N_elements = len(shape)

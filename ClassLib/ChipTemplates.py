@@ -5,7 +5,7 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from ClassLib.BaseClasses import Complex_Base
 from ClassLib.Shapes import Rectangle
-from ClassLib.ContactPad import Contact_Pad
+from ClassLib.contactPads import ContactPad
 
 class Chip5x10_with_contactPads( Complex_Base ):
     '''
