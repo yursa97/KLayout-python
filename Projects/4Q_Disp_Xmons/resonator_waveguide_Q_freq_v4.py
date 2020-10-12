@@ -11,178 +11,7 @@ from ClassLib.Shapes import XmonCross
 from ClassLib.BaseClasses import Complex_Base
 
 from sonnetSim.sonnetLab import SonnetLab, SonnetPort, SimulationBox
-
-
-class EMResonator_TL2Qbit_worm3_2(Complex_Base):
-    """
-    same as `EMResonator_TL2Qbit_worm3` but shorted and open ends are
-    interchanged their places. In addition, a few primitives had been renamed.
-    """
-    def __init__(self, Z0, start, L_coupling, L0, L1, r, L2, N, L3=0, trans_in=None):
-        self.Z0 = Z0
-        self.L_coupling = L_coupling
-        self.L0 = L0
-        self.L1 = L1
-        self.r = r
-        self.L2 = L2
-        self.L3 = 0
-        self.N = N
-
-        super().__init__(start, trans_in)
-
-        self._geometry_parameters["cpw_width, um"] = Z0.width
-        self._geometry_parameters["cpw_gap, um"] = Z0.gap
-        self._geometry_parameters["L_coupling, um"] = L_coupling
-        self._geometry_parameters["L0, um"] = L0
-        self._geometry_parameters["L1, um"] = L1
-        self._geometry_parameters["r, um"] = r
-        self._geometry_parameters["L2, um"] = L2
-        self._geometry_parameters["N"] = N
-
-        self.start = self.connections[0]
-        self.end = self.connections[-1]
-        self.dr = self.end - self.start
-        self.alpha_start = self.angle_connections[0]
-        self.alpha_end = self.angle_connections[1]
-
-    def init_primitives(self):
-        self.arc1 = CPW_arc(self.Z0, DPoint(0, 0), -self.r, pi / 2)
-        self.primitives["arc1"] = self.arc1
-
-        p1 = self.arc1.end
-        p2 = self.arc1.end + DPoint(0, -self.L0)
-        self.cop_vertical = CPW(start=p1, end=p2, cpw_params=self.Z0)
-        # open end tail face is separated from ground by `b = width + 2*gap`
-
-        self.primitives["cop_vertical"] = self.cop_vertical
-
-        # draw the open-circuited "tail"
-        p1 = self.cop_vertical
-        self.arc1_end_open = CPW_arc(
-            self.Z0, self.cop_vertical.end,
-            (self.L_coupling + 2*self.r) / 4, pi / 2,
-            trans_in=DTrans.R270
-        )
-        self.cpw_hor_end_open = CPW(
-            self.Z0.width, self.Z0.gap,
-            self.arc1_end_open.end, self.arc1_end_open.end + DPoint(self.L2, 0)
-        )
-        self.arc2_end_open = CPW_arc(
-            self.Z0, self.cpw_hor_end_open.end,
-            -(self.L_coupling + 2 * self.r) / 4, -pi / 2
-        )
-        self.primitives["arc1_end_open"] = self.arc1_end_open
-        self.primitives["cpw_hor_end_open"] = self.cpw_hor_end_open
-        self.primitives["arc2_end_open"] = self.arc2_end_open
-
-        if self.L3 != 0:
-            self.cpw_vert_end_open = CPW(
-                self.Z0.width, self.Z0.gap,
-                self.arc2_end_open.end, self.arc2_end_open.end + DPoint(0, -self.L3)
-            )
-            self.primitives["cpw_hor_end_open"] = self.cpw_hor_end_open
-            self.cpw_end_open_gap = CPW(
-                0, self.Z0.b / 2,
-                self.cpw_vert_end_open.end,
-                self.cpw_vert_end_open.end - DPoint(0, self.Z0.b)
-            )
-        else:
-            self.cpw_end_open_gap = CPW(
-                0, self.Z0.b / 2,
-                self.arc2_end_open.end,
-                self.arc2_end_open.end - DPoint(0, self.Z0.b)
-            )
-
-        self.primitives["cpw_end_open_gap"] = self.cpw_end_open_gap
-
-        # making coil
-        name = "coil0"
-        setattr(self, name, Coil_type_1(self.Z0, DPoint(0, 0), self.L_coupling, self.r, self.L1))
-        self.primitives[name] = getattr(self, name)
-        # coils filling
-        for i in range(self.N):
-            name = "coil" + str(i + 1)
-            setattr(self, name,
-                    Coil_type_1(self.Z0, DPoint(-self.L1 + self.L_coupling, -(i + 1) * (4 * self.r)), self.L1, self.r,
-                                self.L1))
-            self.primitives[name] = getattr(self, name)
-
-        self.connections = [DPoint(0, 0), self.cpw_hor_end_open.end]
-        self.angle_connections = [0, self.cpw_hor_end_open.alpha_end]
-
-
-class EMResonator_TL2Qbit_worm3_2_XmonFork(EMResonator_TL2Qbit_worm3_2):
-    def __init__(self, Z0, start, L_coupling, L0, L1, r, L2, N,
-                 fork_x_span, fork_y_span, fork_metal_width, fork_gnd_gap,
-                 L3=0, trans_in=None):
-        self.fork_x_span = fork_x_span
-        self.fork_y_span = fork_y_span
-        self.fork_metal_width = fork_metal_width
-        self.fork_gnd_gap = fork_gnd_gap
-
-        super().__init__(Z0, start, L_coupling, L0, L1, r, L2, N, L3=L3, trans_in=trans_in)
-
-        self._geometry_parameters["fork_x_span, um"] = fork_x_span / 1e3
-        self._geometry_parameters["fork_y_span, um"] = fork_y_span / 1e3
-        self._geometry_parameters["fork_metal_width, um"] = fork_metal_width / 1e3
-        self._geometry_parameters["fork_gnd_gap, um"] = fork_gnd_gap / 1e3
-
-    def init_primitives(self):
-        super().init_primitives()
-
-        """ add fork to the end of the resonator """
-        # adding fork horizontal part
-        self.draw_fork_along_x()
-        self.draw_fork_along_y()
-
-        # remove open end from the resonator
-        del self.primitives["cpw_end_open_gap"]
-        del self.cpw_end_open_gap
-
-    def draw_fork_along_x(self):
-        forkZ = CPW(self.fork_metal_width, self.fork_gnd_gap)
-        p1 = self.cpw_end_open_gap.start + DPoint(-self.fork_x_span / 2, -forkZ.b / 2)
-        p2 = p1 + DPoint(self.fork_x_span, 0)
-        self.fork_x_cpw = CPW(forkZ.width, forkZ.gap, p1, p2)
-        self.primitives["fork_x_cpw"] = self.fork_x_cpw
-
-        # draw waveguide that was erased during `fork_x_cpw` ground erasing
-        p1 = self.cpw_end_open_gap.start
-        p2 = self.cpw_end_open_gap.start + DPoint(0, -forkZ.gap)
-        erased_cpw = CPW(self.Z0.width, self.Z0.gap, p1, p2)
-        self.primitives["erased_cpw"] = erased_cpw
-
-        # erase additional spaces at the ends of fork_x_cpw
-        p1 = self.fork_x_cpw.start
-        p2 = self.fork_x_cpw.start + DPoint(-forkZ.gap, 0)
-        self.primitives["erased_fork_left"] = CPW(0, forkZ.b / 2, p1, p2)
-
-        p1 = self.fork_x_cpw.end
-        p2 = self.fork_x_cpw.end + DPoint(forkZ.gap, 0)
-        self.primitives["erased_fork_right"] = CPW(0, forkZ.b / 2, p1, p2)
-
-    def draw_fork_along_y(self):
-        forkZ = CPW(self.fork_metal_width, self.fork_gnd_gap)
-
-        # draw left part
-        p1 = self.fork_x_cpw.start + DPoint(forkZ.width / 2, -forkZ.width / 2)
-        p2 = p1 + DPoint(0, -self.fork_y_span)
-        self.fork_y_cpw1 = CPW(forkZ.width, forkZ.gap, p1, p2)
-        self.primitives["fork_y_cpw1"] = self.fork_y_cpw1
-
-        # draw right part
-        p1 = self.fork_x_cpw.end + DPoint(-forkZ.width / 2, -forkZ.width / 2)
-        p2 = p1 + DPoint(0, -self.fork_y_span)
-        self.fork_y_cpw2 = CPW(forkZ.width, forkZ.gap, p1, p2)
-        self.primitives["fork_y_cpw2"] = self.fork_y_cpw2
-
-        # erase gap at the ends of `y` fork parts
-        p1 = self.fork_y_cpw1.end
-        p2 = self.fork_y_cpw1.end + DPoint(0, -forkZ.gap)
-        self.primitives["erased_fork_left_cpw_end"] = CPW(0, forkZ.b / 2, p1, p2)
-        p1 = self.fork_y_cpw2.end
-        p2 = self.fork_y_cpw2.end + DPoint(0, -forkZ.gap)
-        self.primitives["erased_fork_right_cpw_end"] = CPW(0, forkZ.b / 2, p1, p2)
+from ClassLib.Resonators import EMResonator_TL2Qbit_worm3_2_XmonFork
 
 
 class CHIP:
@@ -259,9 +88,9 @@ if __name__ == "__main__":
     L_coupling_list = [1e3*x for x in [270]]
     # corresponding to resonanse freq is linspaced in interval [6,9) GHz
     L0 = 1600e3
-    L1_list = [1e3 * x for x in [90.706, 84.6453, 78.7702, 73.0723, 67.5437]]
-    estimated_res_freqs_init = [5.1, 5.180, 5.260, 5.340, 5.420]  # GHz
-    freqs_span_corase = 0.400  # GHz
+    L1_list = [1e3 * x for x in [86.3011, 79.9939, 73.8822, 67.9571, 62.2103]]
+    estimated_res_freqs_init = [4.932, 5.0, 5.08, 5.16, 5.24]  # GHz
+    freqs_span_corase = 1.0  # GHz
     freqs_span_fine = 0.005
     r = 50e3
     N = 7
@@ -291,12 +120,15 @@ if __name__ == "__main__":
     to_line_list = [55e3]
     pars = map(
         lambda x: list(x[0]) + list(x[1:]),
-        itertools.product(zip(L1_list, L2_list, estimated_res_freqs_init[:1]), to_line_list, L_coupling_list)
+        itertools.product(zip(L1_list, L2_list, estimated_res_freqs_init), to_line_list, L_coupling_list)
     )
 
     for L1, L2, estimated_freq, to_line, L_coupling in pars:
         # frequency and span approximation cycle in 2 steps
-        for freqs_span in [freqs_span_corase, freqs_span_fine][1:]:
+        # starting with a corase frequency
+        freqs_span = freqs_span_corase
+        fine_resonance_success = False  # Whether or not we found local minima with `freqs_span = freqs_span_fine`
+        while not fine_resonance_success:
             # box parameters calculation
             CHIP.dx = 2 * L_coupling + 2 * r + (cross_len + cross_gnd_gap)
 
@@ -394,24 +226,27 @@ if __name__ == "__main__":
                 derivative = (s12_list[1] - s12_list[0])/df
                 second_derivative = (s12_list[2] - 2*s12_list[1] + s12_list[0])/df**2
                 print('resonance located the left of the current interval')
-                # go to saving the result
-                break  # delete if approximation of fr outside current frequency band is implemented
-            elif min_freq_idx == len(freqs):
+                # try adjacent interval to the left
+                estimated_freq -= freqs_span_corase
+                continue
+            elif min_freq_idx == (len(freqs) - 1):
                 derivative = (s12_list[-1] - s12_list[-2])/df
                 second_derivative = (s12_list[-1] - 2*s12_list[-2] + s12_list[-3])/df**2
                 print('resonance located the right of the current interval')
-                # go to saving the result
-                break  # delete if approximation of fr outside current frequency band is implemented
+                # try adjacent interval to the right
+                estimated_freq += freqs_span_corase
+                continue
             else:
                 # local minimum is found
                 print(f"fr = {min_freq:3.5} GHz,  fr_err = {df:.5}")
                 estimated_freq = min_freq
                 if freqs_span == freqs_span_corase:
                     # go to fine approximation step
+                    freqs_span = freqs_span_fine
                     continue
                 elif freqs_span == freqs_span_fine:
                     # fine approximation ended, go to saving the result
-                    break
+                    fine_resonance_success = True  # breaking frequency locating cycle condition is True
 
             # unreachable code:
             # TODO: add approximation of the resonance if minimum is nonlocal during corase approximation
