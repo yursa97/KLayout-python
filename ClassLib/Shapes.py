@@ -72,7 +72,12 @@ class XmonCross(Complex_Base):
         self._geometry_parameters["cross_width, um"] = cross_width/1e3
         self._geometry_parameters["side_length, um"] = cross_width/1e3
         self._geometry_parameters["gnd_gap, um"] = cross_width/1e3
+
+    def _refresh_named_connections(self):
         self.center = self.connections[0]
+
+    def _refresh_named_angles(self):
+        self.angle = self.angle_connections[0]
 
     def init_primitives(self):
         origin = DPoint(0, 0)
@@ -120,6 +125,7 @@ class XmonCross(Complex_Base):
         self.primitives["cpw_bempt"] = self.cpw_bempt
 
         self.connections = [origin]
+        self.angle_connections = [0]
 
 
 class Circle( Element_Base ):

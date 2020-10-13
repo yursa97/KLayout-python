@@ -361,7 +361,6 @@ class CPW_RL_Path(Complex_Base):
         self.alpha_end = self.angle_connections[1]
 
     def init_primitives(self):
-
         R_index = 0
         L_index = 0
         origin = DPoint(0, 0)
@@ -370,7 +369,6 @@ class CPW_RL_Path(Complex_Base):
         prev_primitive_end_angle = 0
 
         for i, symbol in enumerate(self._shape_string):
-
             if (symbol == 'R'):
                 if (self._turn_angles[R_index] > 0):
                     turn_radius = self._turn_radiuses[R_index]
@@ -413,12 +411,20 @@ class CPW_RL_Path(Complex_Base):
                 self.primitives["cpw_" + str(L_index)] = cpw
                 L_index += 1
 
-            primitive = list(self.primitives.values())[i]
-            prev_primitive_end = primitive.end
-            prev_primitive_end_angle = primitive.alpha_end
+            prev_primitive = list(self.primitives.values())[i]
+            prev_primitive_end = prev_primitive.end
+            prev_primitive_end_angle = prev_primitive.alpha_end
 
         self.connections = [origin, list(self.primitives.values())[-1].end]
         self.angle_connections = [0, list(self.primitives.values())[-1].alpha_end]
+
+    def _refresh_named_connections(self):
+        self.start = self.connections[0]
+        self.end = self.connections[1]
+
+    def _refresh_named_angles(self):
+        self.alpha_start = self.angle_connections[0]
+        self.alpha_end = self.angle_connections[1]
 
     def get_total_length(self):
         return sum(self._segment_lengths) + \
