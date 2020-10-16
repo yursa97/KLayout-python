@@ -236,6 +236,7 @@ if __name__ == "__main__":
             fork_y_span = xmon_fork_penetration + xmon_fork_gnd_gap
             worm_x = 0.8*CHIP.dx + worm_test.coil0.start.x - xmonCross_test.center.x
             worm_y = Z0.start.y - to_line
+            print(r, " ", tail_segment_lengths)
             worm = EMResonatorTL3QbitWormRLTailXmonFork(
                 Z_res, DPoint(worm_x, worm_y), L_coupling, L0, L1, r, N,
                 tail_shape=res_tail_shape, tail_turn_radiuses=r,

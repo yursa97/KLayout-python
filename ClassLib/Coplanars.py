@@ -5,6 +5,7 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from typing import Union, List
 from collections import OrderedDict
+import copy
 
 
 from ClassLib.BaseClasses import Element_Base, Complex_Base
@@ -330,22 +331,28 @@ class CPW_RL_Path(Complex_Base):
         self._shape_string_counter = Counter(shape)
 
         self._N_turns = self._shape_string_counter['R']
+        self._N_straights = self._shape_string_counter['L']
 
         if hasattr(cpw_parameters, "__len__"):
             if len(cpw_parameters) != self._N_elements:
                 raise ValueError("CPW parameters dimension mismatch")
-            self._cpw_parameters = cpw_parameters
+            self._cpw_parameters = copy.deepcopy(cpw_parameters)
         else:
             self._cpw_parameters = [cpw_parameters] * self._N_elements
 
         if hasattr(turn_radiuses, "__len__"):
             if len(turn_radiuses) != self._N_turns:
                 raise ValueError("Turn raduises dimension mismatch")
-            self._turn_radiuses = turn_radiuses
+            self._turn_radiuses = copy.deepcopy(turn_radiuses)
         else:
             self._turn_radiuses = [turn_radiuses] * self._N_turns
 
-        self._segment_lengths = segment_lengths
+        if hasattr(segment_lengths, "__len__"):
+            if len(segment_lengths) != self._N_straights:
+                raise ValueError("Turn raduises dimension mismatch")
+            self._segment_lengths = copy.deepcopy(segment_lengths)
+        else:
+            self._segment_lengths = [segment_lengths] * self._N_turns
 
         if hasattr(turn_angles, "__len__"):
             if len(turn_angles) != self._N_turns:

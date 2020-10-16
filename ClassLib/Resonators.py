@@ -778,7 +778,7 @@ class EMResonatorTL3QbitWormRLTail(Complex_Base):
         self.cpw_end_open_gap = CPW(
             0, self.Z0.b / 2,
             self.cpw_end_open_RLPath.end,
-               self.cpw_end_open_RLPath.end - DPoint(0, self.Z0.b)
+            self.cpw_end_open_RLPath.end - DPoint(0, self.Z0.b)
         )
         self.primitives["cpw_end_open_gap"] = self.cpw_end_open_gap
 
