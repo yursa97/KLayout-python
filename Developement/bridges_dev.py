@@ -6,12 +6,13 @@ from math import atan2, pi
 from importlib import reload
 import itertools
 from collections import OrderedDict
+from typing import Union
 
 import ClassLib
 
 reload(ClassLib)
 from ClassLib.BaseClasses import Element_Base
-from ClassLib.Coplanars import CPWParameters
+from ClassLib.Coplanars import CPWParameters, CPW, CPW_arc
 from ClassLib.contactPads import ContactPad
 
 
@@ -185,6 +186,64 @@ class Bridge1(Element_Base):
     def _refresh_named_angles(self):
         self.angle = self.angle_connections[0]
 
+    @staticmethod
+    def bridgify_CPW(cpw, bridges_step, cell=None, bridge_layer1=-1, bridge_layer2=-1):
+        """
+        Function puts bridge patterns to fabricate bridges on coplanar waveguide
+        `cpw` with bridges having period of `bridges_step` and distributed over
+        coplanar, starting with its center.
+
+        Parameters
+        ----------
+        cpw : Union[CPW, CPW_arc]
+            instance of coplanar class to be bridged during fabrication
+        bridges_step : float
+            distance between centers of bridges in nm
+        cell : pya.Cell
+            cell to place bridge polygons at
+        bridge_layer1 : int
+            index of the layer in the `cell` with ground touching polygons
+        bridge_layer2 : int
+            index of the layer in the `cell` with empty polygons
+
+        Returns
+        -------
+        None
+        """
+        if isinstance(cpw, CPW):
+            cpw_center = cpw.start + cpw.end
+            alpha = atan2(cpw.dr.y, cpw.dr.x)
+            cpw_len = cpw.dr.abs()
+            cpw_dir_unit_vector = cpw.dr/cpw.dr.abs()
+
+            # bridge with some initial dimensions
+            tmp_bridge = Bridge1(DPoint(0, 0))
+            bridge_width = tmp_bridge.gnd_touch_dx + 2*tmp_bridge.surround_gap
+        
+            # number of additional bridges on either side of center
+            additional_bridges_n = int((cpw_len/2 - bridge_width/2) // bridges_step)
+            bridge_centers = []
+            for i in range(-additional_bridges_n, additional_bridges_n + 1):
+                bridge_centers.append(
+                    cpw.start + (cpw_len/2 + i*bridges_step)*cpw_dir_unit_vector
+                )
+
+            bridges = []
+            for center in bridge_centers:
+                bridges.append(
+                    Bridge1(
+                        center,
+                        trans_in=DCplxTrans(1, alpha/pi*180, False, 0, 0)
+                    )
+                )
+
+            for bridge in bridges:
+                bridge.place(dest=cell, layer_i=bridge_layer1, region_name="bridges_1")
+                bridge.place(dest=cell, layer_i=bridge_layer2, region_name="bridges_2")
+        elif isinstance(cpw, CPW_arc):
+            # to be implemented
+            pass
+
 
 if __name__ == "__main__":
     # getting main references of the application
@@ -213,6 +272,8 @@ if __name__ == "__main__":
     layer_photo1_bridges = layout.layer(layer_info_photo1_bridges)
     layer_info_photo2_bridges = pya.LayerInfo(13, 0)
     layer_photo2_bridges = layout.layer(layer_info_photo2_bridges)
+    layer_photo_info = pya.LayerInfo(11, 0)
+    layer_photo = layout.layer(layer_photo_info)
 
     # setting layout view
     lv.select_cell(cell.cell_index(), 0)
@@ -221,11 +282,25 @@ if __name__ == "__main__":
     ### DRAWING SECTION START ###
     # drawing chip
     cell.shapes(layer_photo2_bridges).insert(CHIP.box)
+    cell.shapes(layer_photo).insert(CHIP.box)
 
     origin = DPoint(CHIP.dx / 2, CHIP.dy / 2)
     bridge = Bridge1(origin)
     bridge.place(cell, layer_photo1_bridges, "bridges_1")
     bridge.place(cell, layer_photo2_bridges, "bridges_2")
+
+    p1 = DPoint(1/4*CHIP.dx, CHIP.dy/5)
+    p2 = DPoint(3/4*CHIP.dx, CHIP.dy/4)
+    width = 20e3
+    gap = 10e3
+    cpw = CPW(width, gap, p1, p2)
+    cpw.place(cell, layer_photo)
+    print(cpw.dr)
+    bridges_step = 50e3
+    Bridge1.bridgify_CPW(
+        cpw, bridges_step,
+        cell=cell, bridge_layer1=layer_photo1_bridges, bridge_layer2=layer_photo2_bridges
+    )
 
     lv.zoom_fit()
     ### DRAWING SECTION END ###

@@ -56,12 +56,6 @@ class CPW(Element_Base):
             ]
         )
 
-        self.start = self.connections[0]
-        self.end = self.connections[1]
-        self.dr = self.end - self.start
-        self.alpha_start = self.angle_connections[0]
-        self.alpha_end = self.angle_connections[1]
-
     def init_regions(self):
         self.connections = [DPoint(0, 0), self.dr]
         self.start = DPoint(0, 0)
@@ -87,6 +81,7 @@ class CPW(Element_Base):
     def _refresh_named_connections(self):
         self.end = self.connections[1]
         self.start = self.connections[0]
+        self.dr = self.end - self.start
 
     def _refresh_named_angles(self):
         self.alpha_start = self.angle_connections[0]
