@@ -34,8 +34,8 @@ class Element_Base():
         self.inverse = inverse
         self.metal_region = Region()
         self.empty_region = Region()
-        self.metal_regions = {}
-        self.empty_regions = {}
+        self.metal_regions = OrderedDict()
+        self.empty_regions = OrderedDict()
         self.metal_regions["default"] = self.metal_region
         self.empty_regions["default"] = self.empty_region
 
@@ -113,9 +113,11 @@ class Element_Base():
 
     def make_trans(self, dCplxTrans):
         if (dCplxTrans is not None):
-            iCplxTrans = ICplxTrans().from_dtrans(dCplxTrans)
-            self.metal_region.transform(iCplxTrans)
-            self.empty_region.transform(iCplxTrans)
+            reg_pairs = zip(self.metal_regions.values(), self.empty_regions.values())
+            for metal_region, empty_region in reg_pairs:
+                iCplxTrans = ICplxTrans().from_dtrans(dCplxTrans)
+                metal_region.transform(iCplxTrans)
+                empty_region.transform(iCplxTrans)
             self._update_connections(dCplxTrans)
             self._update_alpha(dCplxTrans)
 
