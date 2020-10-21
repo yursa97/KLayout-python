@@ -13,7 +13,7 @@ class Rectangle( Element_Base ):
         self.a = a
         self.b = b
         super().__init__( origin, trans_in, inverse )
-        
+
     def init_regions( self ):
         origin = DPoint(0,0)
         p1 = origin + DPoint(self.a,0)
@@ -33,11 +33,11 @@ class Cross( Element_Base ):
         self.center = origin + DPoint( self.out_a/2, self.out_a/2 )
         super( Cross, self ).__init__( origin, trans_in )
         self.center = self.connections[0]
-        
+
     def init_regions( self ):
         origin = DPoint(0,0)
         w = self.out_a/2 - self.in_a/2
-        
+
         rec1 = Rectangle( origin, w,w )
         p2 = origin + DPoint(self.in_a + w,0)
         rec2 = Rectangle( p2, w,w )
@@ -45,17 +45,17 @@ class Cross( Element_Base ):
         rec3 = Rectangle( p3, w, w )
         p4 = origin + DPoint( 0, self.in_a + w )
         rec4 = Rectangle( p4, w, w )
-        
+
         tmp_reg = Region()
-        
+
         rec1.place( tmp_reg )
         rec2.place( tmp_reg )
         rec3.place( tmp_reg )
         rec4.place( tmp_reg )
-        
+
         rec = Rectangle( origin, self.out_a, self.out_a )
         rec.place( self.metal_region )
-        
+
         self.empty_region = tmp_reg
         self.connections = [self.center]
 
@@ -128,7 +128,7 @@ class XmonCross(Complex_Base):
         self.angle_connections = [0]
 
 
-class Circle( Element_Base ):
+class Circle( ElementBase ):
     def __init__(self,center,r,trans_in=None,n_pts=50,solid=True, offset_angle=0):
         self.center = center
         self._offset_angle = offset_angle
@@ -200,7 +200,7 @@ class Ring(Element_Base):
         self.t = thickness
         self.n_pts = n_pts
         super().__init__(origin, trans_in, inverse)
-        
+
     def init_regions( self ):
         origin = DPoint(0,0)
         Rin = self.r - self.t
@@ -210,16 +210,16 @@ class Ring(Element_Base):
         outer_circle = Region(SimplePolygon().from_dpoly(DSimplePolygon(dpts_arr_Rout)))
         inner_circle = Region(SimplePolygon().from_dpoly(DSimplePolygon(dpts_arr_Rin)))
         ring = outer_circle - inner_circle
-        #self.metal_region.insert(ring)   
+        #self.metal_region.insert(ring)
         if self.inverse:
             self.empty_region = ring
         else:
             self.metal_region = ring
 
 class IsoTrapezoid(Element_Base):
-    
+
     """@brief: class represents an isosceles trapezoid
-        @params:  DPoint origin - position of the left bottom node 
+        @params:  DPoint origin - position of the left bottom node
                         float height - height of the trapezoid
                         float bottom - length of the bottom side
                         float top - length of the top side
@@ -231,7 +231,7 @@ class IsoTrapezoid(Element_Base):
         self.b = bottom
         self.t = top
         super().__init__(origin, trans_in, inverse)
-        
+
     def init_regions(self):
         origin = DPoint(0, 0)
         dx = (self.b - self.t) / 2
@@ -256,7 +256,7 @@ class Cross2(Element_Base):
         self.l = length
         self.t = thickness
         super().__init__(origin, trans_in, inverse)
-        
+
     def init_regions(self):
         origin = DPoint(0, 0)
         hor_box = DBox(origin - DPoint(self.l/2, self.t/2), DPoint(self.l/2, self.t/2))

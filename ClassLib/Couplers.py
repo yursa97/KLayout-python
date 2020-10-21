@@ -133,7 +133,7 @@ class Coupler_BranchLine( Complex_Base ):
         self.primitives = {"tj_BL":self.tj_BL,"bl_buttom":self.bl_buttom,"tj_BR":self.tj_BR,"bl_left":self.bl_left,
                                 "tj_TL":self.tj_TL,"bl_top":self.bl_top,"tj_TR":self.tj_TR,"bl_right":self.bl_right}
             
-class TJunction_112( Element_Base ):
+class TJunction_112( ElementBase ):
     def __init__( self, Z1, Z2, origin, trans_in=None ):
         self.Z1 = Z1
         self.Z2 = Z2

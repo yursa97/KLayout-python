@@ -4,8 +4,18 @@ from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  R
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 class PROGRAM:
-    LAYER1_NUM = 7
-    LAYER2_NUM = 8  
+    LAYER1_NUM = 70
+    LAYER2_NUM = 80
+
+
+class LAYERS:
+    photo = pya.LayerInfo(0, 0, "photo")
+    ebeam = pya.LayerInfo(2, 0, "ebeam")
+    photo_neg = pya.LayerInfo(9, 0, "photo_neg")
+    crystal = pya.LayerInfo(8, 0, "crystal")
+    bridge_patches = pya.LayerInfo(20, 0, "bridge_patches")
+    bridges = pya.LayerInfo(30, 0, "bridges")
+
   
 class CHIP:
     dx = 10.1e6
