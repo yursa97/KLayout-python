@@ -1,3 +1,5 @@
 *.pyc
 *.gds
-*.doc*
+*.doc
+*iml
+*xml
