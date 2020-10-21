@@ -21,7 +21,7 @@ from ClassLib.Resonators import EMResonatorTL3QbitWormRLTailXmonFork
 class CHIP:
     dx = 0.6e6
     dy = 2.5e6
-    nX = 300  # simulation box cells along X-axis
+    nX = 600  # simulation box cells along X-axis
     nY = 1250  # simulation box cells along Y-axis
 
     # connections of the chip (not used in this file)
@@ -87,15 +87,15 @@ if __name__ == "__main__":
     origin = DPoint(0, 0)
 
     # resonators parameters
-    L_coupling_list = [270e3] * 5
+    L_coupling_list = [1e3*x for x in [255, 250, 250, 240, 230]]
     # corresponding to resonanse freq is linspaced in interval [6,9) GHz
     L0 = 1600e3
-    L1_list = [1e3 * x for x in [13.6136, 35.336, 57.2841, 49.909, 14.278]]
-    estimated_res_freqs_init = [4.932, 5.0, 5.08, 5.16, 5.24]  # GHz
+    L1_list = [1e3 * x for x in [37.7039, 67.6553, 90.925, 81.5881, 39.9021]]
+    estimated_res_freqs_init = [5.0, 5.08, 5.16, 5.24, 5.32]  # GHz
     freqs_span_corase = 1.0  # GHz
     freqs_span_fine = 0.005
     r = 60e3
-    N = 6
+    N = 5
     L2_list = [r] * len(L1_list)
     L3_list = [0e3] * len(L1_list)
     L4_list = [r] * len(L1_list)
@@ -120,7 +120,6 @@ if __name__ == "__main__":
     # -10e3 for Xmons in lower sweet-spot
     xmon_fork_penetration_list = [-20e3, -10e3, -20e3, -10e3, -20e3]
 
-    photo_reg = Region()  # optimal to place everything in one region
     to_line_list = [53e3] * len(L1_list)
 
     ### RESONATORS TAILS CALCULATIONS SECTION START ###
@@ -170,6 +169,7 @@ if __name__ == "__main__":
         Trans.R270
     ]
     ### RESONATORS TAILS CALCULATIONS SECTION END ###
+
     pars = list(
         zip(
             L1_list, estimated_res_freqs_init,
@@ -178,7 +178,7 @@ if __name__ == "__main__":
             tail_segment_lengths_list, tail_turn_angles_list, tail_trans_in_list
         )
     )
-    for params in pars[0:1]:
+    for params in pars[-1:]:
         # parameters exctraction
         L1 = params[0]
         estimated_freq = params[1]
@@ -217,10 +217,24 @@ if __name__ == "__main__":
             xmon_center_test = (worm_test.fork_y_cpw1.end + worm_test.fork_y_cpw2.end) / 2
             xmon_center_test += DPoint(0, -(cross_len + cross_width / 2) + xmon_fork_penetration)
             xmonCross_test = XmonCross(xmon_center_test, cross_width, cross_len, cross_gnd_gap)
+            import math
+            print(math.copysign(1, tail_turn_angles[0]) > 0)
+            if math.copysign(1, tail_turn_angles[0]) > 0:
+                CHIP.dx = (
+                        10*Z_res.b +
+                        max(tail_segment_lengths[1], L_coupling + 2 * r) +
+                        (cross_len + cross_width / 2 + cross_gnd_gap)
+                )
+            else:
+                CHIP.dx = (
+                    10*Z_res.b +
+                    tail_segment_lengths[1] + L_coupling + 2*r +
+                    (cross_len + cross_width/2 + cross_gnd_gap)
+                )
 
-            CHIP.dx = 1.5 * abs(xmonCross_test.center.x - worm_test.coil0.start.x)
             CHIP.dy = 1.2 * (worm_test.coil0.start.y - xmonCross_test.center.y
                              + (cross_width/2 + cross_len + cross_gnd_gap))
+            CHIP.nX = int(CHIP.dx/2.5e3)
 
             # main drive line coplanar
             width = 24.1e3
@@ -233,9 +247,15 @@ if __name__ == "__main__":
             # clear this cell and layer
             cell.clear()
             fork_y_span = xmon_fork_penetration + xmon_fork_gnd_gap
-            worm_x = 0.8*CHIP.dx + worm_test.coil0.start.x - xmonCross_test.center.x
+            import math
+            if math.copysign(1, tail_turn_angles[0]) > 0:
+                worm_x = 5*Z_res.b + Z_res.b/2
+            else:
+                worm_x = CHIP.dx - (5*Z_res.b + L_coupling + r + Z_res.b/2)
+
+
             worm_y = Z0.start.y - to_line
-            print(r, " ", tail_segment_lengths)
+
             worm = EMResonatorTL3QbitWormRLTailXmonFork(
                 Z_res, DPoint(worm_x, worm_y), L_coupling, L0, L1, r, N,
                 tail_shape=res_tail_shape, tail_turn_radiuses=r,
@@ -244,11 +264,14 @@ if __name__ == "__main__":
                 fork_x_span=fork_x_span, fork_y_span=fork_y_span,
                 fork_metal_width=fork_metal_width, fork_gnd_gap=fork_gnd_gap
             )
-            print(worm.cpw_end_open_RLPath.end)
 
             xmon_center = (worm.fork_y_cpw1.end + worm.fork_y_cpw2.end) / 2
             xmon_center += DPoint(0, -(cross_len + cross_width / 2) + xmon_fork_penetration)
             xmonCross = XmonCross(xmon_center, cross_width, cross_len, cross_gnd_gap)
+
+            # optimal to place everything in one region for polygon logic
+            # operations and then transfer it to the cell
+            photo_reg = Region()
 
             # calculate simulation box dimensions
             chip_box = pya.Box(DPoint(0, 0), DPoint(CHIP.dx, CHIP.dy))
@@ -277,161 +300,177 @@ if __name__ == "__main__":
 
             ## DRAWING SECTION END ##
             lv.zoom_fit()
-            fine_resonance_success = True
-            # ### MATLAB COMMANDER SECTION START ###
-            # ml_terminal = SonnetLab()
-            # print("starting connection...")
-            # from sonnetSim.cMD import CMD
-            #
-            # ml_terminal._send(CMD.SAY_HELLO)
-            # ml_terminal.clear()
-            # simBox = SimulationBox(CHIP.dx, CHIP.dy, CHIP.nX, CHIP.nY)
-            # ml_terminal.set_boxProps(simBox)
-            # print("sending cell and layer")
-            # from sonnetSim.pORT_TYPES import PORT_TYPES
-            #
-            # ports = [SonnetPort(point, PORT_TYPES.BOX_WALL) for point in [Z0.start, Z0.end]]
-            # ml_terminal.set_ports(ports)
-            #
-            # ml_terminal.send_polygons(cell, layer_photo)
-            # ml_terminal.set_ABS_sweep(estimated_freq - freqs_span / 2, estimated_freq + freqs_span / 2)
-            # print("simulating...")
-            # result_path = ml_terminal.start_simulation(wait=True)
-            # ml_terminal.release()
-            # ### MATLAB COMMANDER SECTION END ###
-            #
-            # ### RESONANCE FINDING SECTION START ###
-            # """
-            # intended to be working ONLY IF:
-            # s12 is monotonically increasing or decreasing over the chosen frequency band.
-            # That generally holds true for circuits with single resonator.
-            # """
-            # with open(result_path.decode('ascii'), "r", newline='') as file:
-            #     # exctracting s-parameters in csv format
-            #     # though we do not have csv module
-            #     rows = [row.split(',') for row in list(file.readlines())[8:]]
-            #     freqs = [float(row[0]) for row in rows]  # rows in GHz
-            #     df = freqs[1] - freqs[0]  # frequency error
-            #     s12_list = [float(row[3]) + 1j * float(row[4]) for row in rows]
-            #     s12_abs_list = [abs(s12) for s12 in s12_list]
-            #     min_freq_idx, min_s21_abs = min(enumerate(s12_abs_list), key=lambda x: x[1])
-            #     min_freq = freqs[min_freq_idx]
-            #
-            # # processing the results
-            # if min_freq_idx == 0:
-            #     derivative = (s12_list[1] - s12_list[0])/df
-            #     second_derivative = (s12_list[2] - 2*s12_list[1] + s12_list[0])/df**2
-            #     print('resonance located the left of the current interval')
-            #     # try adjacent interval to the left
-            #     estimated_freq -= freqs_span_corase
-            #     continue
-            # elif min_freq_idx == (len(freqs) - 1):
-            #     derivative = (s12_list[-1] - s12_list[-2])/df
-            #     second_derivative = (s12_list[-1] - 2*s12_list[-2] + s12_list[-3])/df**2
-            #     print('resonance located the right of the current interval')
-            #     # try adjacent interval to the right
-            #     estimated_freq += freqs_span_corase
-            #     continue
-            # else:
-            #     # local minimum is found
-            #     print(f"fr = {min_freq:3.5} GHz,  fr_err = {df:.5}")
-            #     estimated_freq = min_freq
-            #     if freqs_span == freqs_span_corase:
-            #         # go to fine approximation step
-            #         freqs_span = freqs_span_fine
-            #         continue
-            #     elif freqs_span == freqs_span_fine:
-            #         # fine approximation ended, go to saving the result
-            #         fine_resonance_success = True  # breaking frequency locating cycle condition is True
-            #
-            # # unreachable code:
-            # # TODO: add approximation of the resonance if minimum is nonlocal during corase approximation
-            # # fr_approx = (2*derivative/second_derivative) + min_freq
-            # # B = -4*derivative**3/second_derivative**2
-            # # A = min_freq - 2*derivative**2/second_derivative
-            # # print(f"fr = {min_freq:3.3} GHz,  fr_err = not implemented(")
-            # ### RESONANCE FINDING SECTION END  ###
+
+            ### MATLAB COMMANDER SECTION START ###
+            ml_terminal = SonnetLab()
+            print("starting connection...")
+            from sonnetSim.cMD import CMD
+
+            # waiting for 20 seconds or less for confirmation of matlab side ready
+            # this demanded for large designs. Reason is to be determined.
+            import time
+            timeout = 20
+            t0 = time.time()
+            while True:
+                try:
+                    ml_terminal._send(CMD.SAY_HELLO)
+                except RuntimeError as e:
+                    if (time.time() - t0) > timeout:
+                        time.sleep(1)
+                        continue
+                    else:
+                        raise e
+                else:
+                    break
+
+            ml_terminal.clear()
+            simBox = SimulationBox(CHIP.dx, CHIP.dy, CHIP.nX, CHIP.nY)
+            ml_terminal.set_boxProps(simBox)
+            print("sending cell and layer")
+            from sonnetSim.pORT_TYPES import PORT_TYPES
+
+            ports = [SonnetPort(point, PORT_TYPES.BOX_WALL) for point in [Z0.start, Z0.end]]
+            ml_terminal.set_ports(ports)
+
+            ml_terminal.send_polygons(cell, layer_photo)
+            ml_terminal.set_ABS_sweep(estimated_freq - freqs_span / 2, estimated_freq + freqs_span / 2)
+            print("simulating...")
+            result_path = ml_terminal.start_simulation(wait=True)
+            ml_terminal.release()
+            ### MATLAB COMMANDER SECTION END ###
+
+            ### RESONANCE FINDING SECTION START ###
+            """
+            intended to be working ONLY IF:
+            s12 is monotonically increasing or decreasing over the chosen frequency band.
+            That generally holds true for circuits with single resonator.
+            """
+            with open(result_path.decode('ascii'), "r", newline='') as file:
+                # exctracting s-parameters in csv format
+                # though we do not have csv module
+                rows = [row.split(',') for row in list(file.readlines())[8:]]
+                freqs = [float(row[0]) for row in rows]  # rows in GHz
+                df = freqs[1] - freqs[0]  # frequency error
+                s12_list = [float(row[3]) + 1j * float(row[4]) for row in rows]
+                s12_abs_list = [abs(s12) for s12 in s12_list]
+                min_freq_idx, min_s21_abs = min(enumerate(s12_abs_list), key=lambda x: x[1])
+                min_freq = freqs[min_freq_idx]
+
+            # processing the results
+            if min_freq_idx == 0:
+                derivative = (s12_list[1] - s12_list[0])/df
+                second_derivative = (s12_list[2] - 2*s12_list[1] + s12_list[0])/df**2
+                print('resonance located the left of the current interval')
+                # try adjacent interval to the left
+                estimated_freq -= freqs_span
+                continue
+            elif min_freq_idx == (len(freqs) - 1):
+                derivative = (s12_list[-1] - s12_list[-2])/df
+                second_derivative = (s12_list[-1] - 2*s12_list[-2] + s12_list[-3])/df**2
+                print('resonance located the right of the current interval')
+                # try adjacent interval to the right
+                estimated_freq += freqs_span
+                continue
+            else:
+                # local minimum is found
+                print(f"fr = {min_freq:3.5} GHz,  fr_err = {df:.5}")
+                estimated_freq = min_freq
+                if freqs_span == freqs_span_corase:
+                    # go to fine approximation step
+                    freqs_span = freqs_span_fine
+                    continue
+                elif freqs_span == freqs_span_fine:
+                    # fine approximation ended, go to saving the result
+                    fine_resonance_success = True  # breaking frequency locating cycle condition is True
+
+            # unreachable code:
+            # TODO: add approximation of the resonance if minimum is nonlocal during corase approximation
+            # fr_approx = (2*derivative/second_derivative) + min_freq
+            # B = -4*derivative**3/second_derivative**2
+            # A = min_freq - 2*derivative**2/second_derivative
+            # print(f"fr = {min_freq:3.3} GHz,  fr_err = not implemented(")
+            ### RESONANCE FINDING SECTION END  ###
 
 
-        # ### RESULT SAVING SECTION START ###
-        # import shutil
-        # import os
-        # import csv
-        #
-        # # geometry parameters gathering
-        # worm_params = worm.get_geometry_params_dict(prefix="worm_")
-        # xmonCross_params = xmonCross.get_geometry_params_dict(prefix="xmonCross_")
-        # Z0_params = Z0.get_geometry_params_dict(prefix="S21Line_")
-        # CHIP_params = CHIP.get_geometry_params_dict(prefix="chip_")
-        #
-        # project_dir = os.path.dirname(__file__)
-        #
-        # # creating directory with simulation results
-        # results_dirname = "resonator_waveguide_Q_freqs_v4_results"
-        # results_dirpath = os.path.join(project_dir, results_dirname)
-        #
-        # output_metaFile_path = os.path.join(
-        #     results_dirpath,
-        #     "resonator_waveguide_Q_freq_meta.csv"
-        # )
-        # try:
-        #     # creating directory
-        #     os.mkdir(results_dirpath)
-        # except FileExistsError:
-        #     # directory already exists
-        #     with open(output_metaFile_path, "r+", newline='') as csv_file:
-        #         reader = csv.reader(csv_file)
-        #         existing_entries_n = len(list(reader))
-        #         Sparams_filename = "result_" + str(existing_entries_n) + ".csv"
-        #
-        #         writer = csv.writer(csv_file)
-        #
-        #         all_params_vals = list(
-        #             itertools.chain(
-        #                 worm_params.values(),
-        #                 xmonCross_params.values(),
-        #                 Z0_params.values(),
-        #                 CHIP_params.values()
-        #             )
-        #         )
-        #         # append new values row to file
-        #         writer.writerow(all_params_vals + [to_line / 1e3] + [Sparams_filename])
-        # else:
-        #     '''
-        #         Directory has not existed and has been created sucessfully.
-        #         So we create fresh meta-file.
-        #         Meta-file contain simulation parameters and corresponding
-        #         S-params filename that is located in this directory
-        #     '''
-        #     with open(output_metaFile_path, "w+", newline='') as csv_file:
-        #         writer = csv.writer(csv_file)
-        #         all_params_keys = list(
-        #             itertools.chain(
-        #                 worm_params.keys(),
-        #                 xmonCross_params.keys(),
-        #                 Z0_params.keys(),
-        #                 CHIP_params.keys()
-        #             )
-        #         )
-        #         all_params_vals = list(
-        #             itertools.chain(
-        #                 worm_params.values(),
-        #                 xmonCross_params.values(),
-        #                 Z0_params.values(),
-        #                 CHIP_params.values()
-        #             )
-        #         )
-        #         # create header of the file
-        #         writer.writerow(all_params_keys + ["to_line, um"] + ["filename"])
-        #         # add first parameters row
-        #         reader = csv.reader(csv_file)
-        #         existing_entries_n = len(list(reader))
-        #         Sparams_filename = "result_1.csv"
-        #         writer.writerow(all_params_vals + [to_line / 1e3] + [Sparams_filename])
-        # finally:
-        #     # copy result from sonnet folder and rename it accordingly
-        #     shutil.copy(
-        #         result_path.decode("ascii"),
-        #         os.path.join(results_dirpath, Sparams_filename)
-        #     )
-        # ### RESULT SAVING SECTION END ###
+        ### RESULT SAVING SECTION START ###
+        import shutil
+        import os
+        import csv
+
+        # geometry parameters gathering
+        worm_params = worm.get_geometry_params_dict(prefix="worm_")
+        xmonCross_params = xmonCross.get_geometry_params_dict(prefix="xmonCross_")
+        Z0_params = Z0.get_geometry_params_dict(prefix="S21Line_")
+        CHIP_params = CHIP.get_geometry_params_dict(prefix="chip_")
+
+        project_dir = os.path.dirname(__file__)
+
+        # creating directory with simulation results
+        results_dirname = "resonator_waveguide_Q_freqs_v4_results"
+        results_dirpath = os.path.join(project_dir, results_dirname)
+
+        output_metaFile_path = os.path.join(
+            results_dirpath,
+            "resonator_waveguide_Q_freq_meta.csv"
+        )
+        try:
+            # creating directory
+            os.mkdir(results_dirpath)
+        except FileExistsError:
+            # directory already exists
+            with open(output_metaFile_path, "r+", newline='') as csv_file:
+                reader = csv.reader(csv_file)
+                existing_entries_n = len(list(reader))
+                Sparams_filename = "result_" + str(existing_entries_n) + ".csv"
+
+                writer = csv.writer(csv_file)
+
+                all_params_vals = list(
+                    itertools.chain(
+                        worm_params.values(),
+                        xmonCross_params.values(),
+                        Z0_params.values(),
+                        CHIP_params.values()
+                    )
+                )
+                # append new values row to file
+                writer.writerow(all_params_vals + [to_line / 1e3] + [Sparams_filename])
+        else:
+            '''
+                Directory did not exist and has been created sucessfully.
+                So we create fresh meta-file.
+                Meta-file contain simulation parameters and corresponding
+                S-params filename that is located in this directory
+            '''
+            with open(output_metaFile_path, "w+", newline='') as csv_file:
+                writer = csv.writer(csv_file)
+                all_params_keys = list(
+                    itertools.chain(
+                        worm_params.keys(),
+                        xmonCross_params.keys(),
+                        Z0_params.keys(),
+                        CHIP_params.keys()
+                    )
+                )
+                all_params_vals = list(
+                    itertools.chain(
+                        worm_params.values(),
+                        xmonCross_params.values(),
+                        Z0_params.values(),
+                        CHIP_params.values()
+                    )
+                )
+                # create header of the file
+                writer.writerow(all_params_keys + ["to_line, um"] + ["filename"])
+                # add first parameters row
+                reader = csv.reader(csv_file)
+                existing_entries_n = len(list(reader))
+                Sparams_filename = "result_1.csv"
+                writer.writerow(all_params_vals + [to_line / 1e3] + [Sparams_filename])
+        finally:
+            # copy result from sonnet folder and rename it accordingly
+            shutil.copy(
+                result_path.decode("ascii"),
+                os.path.join(results_dirpath, Sparams_filename)
+            )
+        ### RESULT SAVING SECTION END ###

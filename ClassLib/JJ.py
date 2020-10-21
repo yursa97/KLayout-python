@@ -5,6 +5,7 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from ClassLib.BaseClasses import *
 
+
 class Line_N_JJCross( Element_Base ):
     def __init__( self, origin, params, trans_in=None  ):
         self.params = params
@@ -22,7 +23,7 @@ class Line_N_JJCross( Element_Base ):
         
         self.poly1 = self._make_polygon( self.b, self.w, self.d1, self.f1,   self.d2 )
         
-        super( Line_N_JJ,self ).__init__( origin, trans_in )  
+        super( self ).__init__( origin, trans_in )
         
     def _make_polygon( self, length, w, d, f, overlapping ):
         polygon = DSimplePolygon

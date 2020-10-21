@@ -8,44 +8,44 @@ from ClassLib.Shapes import Circle, Kolbaska
 from ClassLib.Coplanars import CPWParameters, CPW, CPW_RL_Path
 
 class Squid(Complex_Base):
-    '''
-    Class to draw a symmetrical squid with outer positioning of the junctions.
-
-    The notation 'length' is the dimension along the line which connects the contact pads,
-    'width' is for the perpendicular direction.
-
-    Parameters:
-        pad_side: float
-            A length of the side of triangle pad.
-        (??) pad_r: float
-            The radius of round angle of the contact pad.
-        pads_distance:
-            The distance between triangle contact pads.
-        p_ext_width: float
-            The width of curved rectangle leads which connect triangle contact pads and junctions.
-        p_ext_r: float
-            The angle radius of the pad extension
-        sq_len: float
-            The length of the squid, along leads.
-        sq_width: float
-            The total area of the squid.
-            (does not count the reduction of area due to shadow angle evaporation).
-        j_width: float
-            The width of the upper small leads (straight) and also a width of the junction
-        low_lead_w: float
-            The width of the lower small bended leads before bending
-        b_ext: float
-            The extension of bended leads after bending
-        j_length: float
-            The length of the jj and the width of bended parts of the lower leads
-        n: int
-            The number of angle in regular polygon which serves as a large contact pad
-        bridge: float
-            The value of the gap between two parts of junction in the design
-        trans_in: Trans
-            Initial transformation
-    '''
     def __init__(self, origin, params, side=0, trans_in=None):
+        '''
+        Class to draw a symmetrical squid with outer positioning of the junctions.
+
+        The notation 'length' is the dimension along the line which connects the contact pads,
+        'width' is for the perpendicular direction.
+
+        Parameters:
+            pad_side: float
+                A length of the side of triangle pad.
+            pad_r: float
+                The radius of round angle of the contact pad.
+            pads_distance:
+                The distance between triangle contact pads.
+            p_ext_width: float
+                The width of curved rectangle leads which connect triangle contact pads and junctions.
+            p_ext_r: float
+                The angle radius of the pad extension
+            sq_len: float
+                The length of the squid, along leads.
+            sq_width: float
+                The total area of the squid.
+                (does not count the reduction of area due to shadow angle evaporation).
+            j_width: float
+                The width of the upper small leads (straight) and also a width of the junction
+            low_lead_w: float
+                The width of the lower small bended leads before bending
+            b_ext: float
+                The extension of bended leads after bending
+            j_length: float
+                The length of the jj and the width of bended parts of the lower leads
+            n: int
+                The number of angle in regular polygon which serves as a large contact pad
+            bridge: float
+                The value of the gap between two parts of junction in the design
+            trans_in: Trans
+                Initial transformation
+            '''
         # To draw only a half of a squid use 'side'
         # side = -1 is left, 1 is right, 0 is both (default)
         self.pad_side = params[0]
@@ -65,7 +65,6 @@ class Squid(Complex_Base):
         self.side = side
 
         super().__init__(origin, trans_in)
-
 
     def init_primitives(self):
         origin = DPoint(0,0)

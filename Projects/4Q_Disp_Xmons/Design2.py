@@ -161,13 +161,10 @@ if __name__ == "__main__":
     cpwrl_ro.place(tmp_reg)
 
     # resonators parameters
-    L_coupling_list = [270e3] * 5
+    L_coupling_list = [1e3*x for x in [255, 250, 250, 240, 230]]
     # corresponding to resonanse freq is linspaced in interval [6,9) GHz
     L0 = 1600e3
-    L1_list = [1e3 * x for x in [50.3607, 76.0327, 101.971, 93.2553, 51.1459]]
-    estimated_res_freqs_init = [4.932, 5.0, 5.08, 5.16, 5.24]  # GHz
-    freqs_span_corase = 1.0  # GHz
-    freqs_span_fine = 0.005
+    L1_list = [1e3 * x for x in [37.7039, 67.6553, 90.925, 81.5881, 39.9021]]
     r = 60e3
     N = 5
     L2_list = [r] * len(L1_list)
@@ -247,8 +244,7 @@ if __name__ == "__main__":
 
     pars = list(
         zip(
-            L1_list, estimated_res_freqs_init,
-            to_line_list, L_coupling_list,
+            L1_list, to_line_list, L_coupling_list,
             xmon_fork_penetration_list,
             tail_segment_lengths_list, tail_turn_angles_list, tail_trans_in_list
         )
@@ -256,13 +252,12 @@ if __name__ == "__main__":
     for res_idx, params in enumerate(pars):
         # parameters exctraction
         L1 = params[0]
-        estimated_freq = params[1]
-        to_line = params[2]
-        L_coupling = params[3]
-        xmon_fork_penetration = params[4]
-        tail_segment_lengths = params[5]
-        tail_turn_angles = params[6]
-        tail_trans_in = params[7]
+        to_line = params[1]
+        L_coupling = params[2]
+        xmon_fork_penetration = params[3]
+        tail_segment_lengths = params[4]
+        tail_turn_angles = params[5]
+        tail_trans_in = params[6]
         fork_y_span = xmon_fork_penetration + xmon_fork_gnd_gap
         worm_x = None
 
