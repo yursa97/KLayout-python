@@ -100,7 +100,7 @@ class CPWResonator():
 
         self._line = CPW_RL_Path(DPoint(0,0), shape,
             self._cpw_parameters, self._turn_radius, segment_lengths, turn_angles,
-                    DTrans(DPoint(-self._coupling_length+meander_length/2, 0)))
+                    DTrans(DPoint(-self._coupling_length+meander_length/2, 0)), bridged=False)
         # print("Connections[0] 1:", self._line.connections[0])
         # print("Primitive_start:", list(self._line.primitives.values())[0].connections[0])
         self._line.make_trans(self._trans_in)

@@ -1,3 +1,6 @@
+# $show-in-menu
+# $group-name: Macros
+# $menu-path: Chain_bridged
 # Enter your Python code here
 
 # $description: xmon_chains
@@ -42,7 +45,7 @@ from pya import DText
 
 class CHIP:
     dx = 10e6
-    dy = 5e6
+    dy = 10e6
 
 
 app = pya.Application.instance()
@@ -115,26 +118,38 @@ fc_cpw_params = CPWParameters(7e3, 4e3)
 cp1 = Contact_Pad(origin=DPoint(-CHIP.dx / 2, -CHIP.dy / 4), feedline_cpw_params=md_cpw_params)
 cp1.place(canvas)
 
-cp2 = Contact_Pad(DPoint(-CHIP.dx / 2, CHIP.dy / 4), fc_cpw_params)
+cp2 = Contact_Pad(DPoint(-CHIP.dx / 2, 0), fc_cpw_params)
 cp2.place(canvas)
 
-cp3 = Contact_Pad(DPoint(-2e6, CHIP.dy / 2), md_cpw_params, trans_in=DTrans.R270)
+cp3 = Contact_Pad(origin=DPoint(-CHIP.dx / 2, CHIP.dy / 4), feedline_cpw_params=md_cpw_params)
 cp3.place(canvas)
 
-cp4 = Contact_Pad(DPoint(2e6, CHIP.dy / 2), md_cpw_params, trans_in=DTrans.R270)
+cp4 = Contact_Pad(DPoint(-CHIP.dx/4, CHIP.dy / 2), md_cpw_params, trans_in=DTrans.R270)
 cp4.place(canvas)
 
-cp5 = Contact_Pad(DPoint(CHIP.dx / 2, CHIP.dy / 4), fc_cpw_params, trans_in=DTrans.R180)
+cp5 = Contact_Pad(origin=DPoint(0, CHIP.dy / 2), feedline_cpw_params=md_cpw_params, trans_in=DTrans.R270)
 cp5.place(canvas)
 
-cp6 = Contact_Pad(DPoint(CHIP.dx / 2, -CHIP.dy / 4), md_cpw_params, trans_in=DTrans.R180)
+cp6 = Contact_Pad(DPoint(CHIP.dx/4, CHIP.dy / 2), md_cpw_params, trans_in=DTrans.R270)
 cp6.place(canvas)
 
-cp7 = Contact_Pad(DPoint(2e6, -CHIP.dy / 2), feed_cpw_params, trans_in=DTrans.R90)
+cp7 = Contact_Pad(DPoint(CHIP.dx / 2, CHIP.dy / 4), fc_cpw_params, trans_in=DTrans.R180)
 cp7.place(canvas)
 
-cp8 = Contact_Pad(DPoint(-2e6, -CHIP.dy / 2), feed_cpw_params, trans_in=DTrans.R90)
+cp8 = Contact_Pad(DPoint(CHIP.dx / 2, 0), fc_cpw_params, trans_in=DTrans.R180)
 cp8.place(canvas)
+
+cp9 = Contact_Pad(DPoint(CHIP.dx / 2, -CHIP.dy / 4), md_cpw_params, trans_in=DTrans.R180)
+cp9.place(canvas)
+
+cp10 = Contact_Pad(DPoint(CHIP.dx/4, -CHIP.dy / 2), feed_cpw_params, trans_in=DTrans.R90)
+cp10.place(canvas)
+
+cp11 = Contact_Pad(DPoint(0, -CHIP.dy / 2), feed_cpw_params, trans_in=DTrans.R90)
+cp11.place(canvas)
+
+cp12 = Contact_Pad(DPoint(-CHIP.dx/4, -CHIP.dy / 2), feed_cpw_params, trans_in=DTrans.R90)
+cp12.place(canvas)
 
 # ======== Main feedline =========
 

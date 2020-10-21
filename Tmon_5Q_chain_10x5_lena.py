@@ -175,7 +175,7 @@ for i in range(-(chain_length) // 2, (chain_length) // 2, 1):
     claw = Claw(DPoint(0, 0), res_cpw_params, 100e3, w_claw=20e3, w_claw_pad=0, l_claw_pad=0)
     res = CPWResonator(res_cursor, res_cpw_params, 40e3, 7.3 + (i + 4) / 10, 11.45, coupling_length=450e3,
                        meander_periods=3, trans_in=trans_in)
-    print(i, 7.3 + (i + 3) / 10)
+    print(i, 7.3 + (i + 4) / 10)
     claw.make_trans(DTrans(res.end))
     ##resonator_length = CPWResonator._calculate_total_length(res)
     ##print(resonator_length)
