@@ -62,9 +62,8 @@ if __name__ == "__main__":
     pads_distance = 30e3
     p_ext_width = 3e3
     p_ext_r = 0.5e3
-    j_pos = DPoint(-2500e3, 1176e3)
     sq_len = 7e3
-    sq_area = 15e6
+    sq_width = 15e6
     j_width = 0.4e3
     low_lead_w = 0.5e3
     b_ext = 0.9e3
@@ -74,7 +73,7 @@ if __name__ == "__main__":
     trans_in = None
 
     pars_squid = [pad_side, pad_r, pads_distance, p_ext_width, \
-                  p_ext_r, sq_len, sq_area/sq_len, j_width, low_lead_w, \
+                  p_ext_r, sq_len, sq_width, j_width, low_lead_w, \
                   b_ext, j_length, n, bridge]
     sq = Squid(origin, pars_squid)
     sq.place(cell, layer_el)
