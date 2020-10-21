@@ -39,7 +39,7 @@ class Test_Squid(Complex_Base):
         self.primitives['bottom_rect'] = Rectangle(origin - DPoint(self.width/2, self.height + self.innergap / 2),
                                     self.width,
                                     self.height)  
-        self.squid = Squid(origin, self.squid_params, side=self.side)
+        self.squid = AsymSquid(origin, self.squid_params, side=self.side)
         self.primitives['qubit'] = self.squid
 
     def place(self, dest, layer_ph=-1, layer_el=-1):
@@ -117,12 +117,9 @@ class My_Design(simulatedDesign):
         pars = self.get_mixing_qubit_params()
         pars_squid = self.get_dc_squid_params()
         pars_coupling = self.get_mixing_qubit_coupling_params()
-    
-        # Drawing the probe line
+
         v = self.chip.chip_y/7 # vertical size of the probe line
         h = (p2-p1).x # horizontal size of the probe line
-        probe_line = CPW_RL_Path(p1, "LRLRL", self.Z, self.cpw_curve, [v, h, v], [pi/2, pi/2], trans_in=Trans.R270)
-        probe_line.place(self.cell, self.layer_ph)
         
         # Drawing the qubit near the probe line
         p = DPoint((p2.x + p1.x)/2 + 1.1 * pars['r_out'],
@@ -130,6 +127,10 @@ class My_Design(simulatedDesign):
         # mq1 = SFS_Csh_par(p, pars, pars_squid, pars_coupling)
         mq1 = SFS_Csh_emb(p, pars, pars_squid, squid_pos=1)
         mq1.place(self.cell, self.layer_ph, self.layer_el)
+        
+        # Drawing the probe line
+        probe_line = CPW_RL_Path(p1, "LRLRL", self.Z, self.cpw_curve, [v, h, v], [pi/2, pi/2], trans_in=Trans.R270)
+        probe_line.place(self.cell, self.layer_ph)
 
         # Drawing a flux bias line
         p3 = self.chip.connections[3] # port connected to the flux bias line
@@ -221,11 +222,10 @@ class My_Design(simulatedDesign):
     def draw_test_squids(self):
         pars_probe = {'width': 300e3, 'height': 200e3, 'innergap': 30e3, 'outergap': 30e3}
         pars_squid = self.get_dc_squid_params()
-        pars_squid[2] = pars_probe['innergap'] + 3 * pars_squid[0]
-        Test_Squid(DPoint(1.5e6, 1e6), pars_probe, pars_squid, side=1).place(self.cell, self.layer_ph, self.layer_el)
-        Test_Squid(DPoint(1.5e6, 4e6), pars_probe, pars_squid, side=-1).place(self.cell, self.layer_ph, self.layer_el)
-        Test_Squid(DPoint(4e6, 1e6), pars_probe, pars_squid, side=1).place(self.cell, self.layer_ph, self.layer_el)
-        Test_Squid(DPoint(8.5e6, 3.5e6), pars_probe, pars_squid, side=-1).place(self.cell, self.layer_ph, self.layer_el)
+        new_pars_squid = AsymSquidParams(*pars_squid[:2], pars_probe['innergap'] + 3 * pars_squid[0], *pars_squid[3:])
+        squids = [(DPoint(1.5e6, 1e6), 1), (DPoint(1.5e6, 4e6), -1), (DPoint(4e6, 1e6), 0), (DPoint(8.4e6, 3.5e6), 1), (DPoint(9.4e6, 3.5e6), -1)]
+        for squid in squids:
+            Test_Squid(squid[0], pars_probe, new_pars_squid, side=squid[1]).place(self.cell, self.layer_ph, self.layer_el)
 
     def get_sps_params(self):
         pars = {'r_out'	:	175e3, # Radius of an outer ring including the empty region
@@ -288,7 +288,7 @@ class My_Design(simulatedDesign):
         return pars
 
     def get_mixing_qubit_coupling_params(self):
-        pars = {"to_line": 34.4e3,  # length between outer circle and the center of the coplanar
+        pars = {"to_line": 5.24e3,  # length between outer circle and the center of the coplanar
                 "cpw_params": self.Z_res,
                 "width": 10e3,
                 "overlap": 10e3
@@ -303,15 +303,17 @@ class My_Design(simulatedDesign):
         p_ext_r = 0.5e3 # The angle radius of the pad extension
         sq_len = 7e3 # The length of the squid, along leads
         sq_area = 15e6 # The total area of the squid
-        j_width = 0.3e3 # The width of the upper small leads (straight) and also a width of the junction
+        j_width_1 = 114 # The width of the upper small leads (straight) and also a width of the junction
+        j_width_2 = 342 # The width of the upper small leads (straight) and also a width of the junction
         low_lead_w = 0.5e3 # The width of the lower small bended leads before bending
         b_ext = 0.9e3 # The extension of bended leads after bending
-        j_length =  0.2e3 # The length of the jj and the width of bended parts of the lower leads
+        j_length =  100 # The length of the LEFT jj and the width of bended parts of the lower leads
+        #j_length_2 = 342 # The length of the RIGHT jj and the width of bended parts of the lower leads
         n = 7 # The number of angle in regular polygon which serves as a large contact pad
-        bridge = 0.3e3 # The value of the gap between two parts of junction in the design
-        return [pad_side, pad_r, pads_distance, p_ext_width,
-                p_ext_r, sq_len, sq_area, j_width, low_lead_w,
-                b_ext, j_length, n,bridge]
+        bridge = 0.18e3 # The value of the gap between two parts of junction in the design
+        return AsymSquidParams(pad_side, pad_r, pads_distance, p_ext_width,
+                p_ext_r, sq_len, sq_area, j_width_1, j_width_2, low_lead_w,
+                b_ext, j_length, n, bridge)
                 
     def cut_a_piece(self):
         side = 2e6

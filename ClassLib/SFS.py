@@ -2,14 +2,17 @@ import pya
 from math import sqrt, cos, sin, atan2, pi, copysign
 from pya import Point, DPoint, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
+from collections import namedtuple
 
 from ClassLib.BaseClasses import Complex_Base
 from ClassLib.Capacitors import CWave, CWave2CPW
 from ClassLib.Coplanars import CPW
-from ClassLib.JosJ import Squid
+from ClassLib.JosJ import Squid, AsymSquid
 
 
-class SFS_Csh_emb(Complex_Base):
+SPSparams = namedtuple("SPSparams", "r_out dr n_semiwaves s alpha r_curve n_pts_cwave Z1 d_alpha1 width1 gap1 Z2 d_alpha2 width2 gap2 n_pts_arcs")
+
+class SFS_Csh_emb( Complex_Base ):
     """@brief: class represents a qubit for a single photon source
         @params:  DPoint origin - position of the center of a qubit
                         params - a dict or a list of parameters (len = 16),
@@ -115,8 +118,8 @@ class SFS_Csh_emb(Complex_Base):
         else:
             squid_trans_in = None
             p_squid = origin - DPoint(self.squid_pos * (self.r_out - 1.8 * self.dr), 0)
-
-        self.squid = Squid(p_squid, self.squid_params, trans_in=squid_trans_in)
+        
+        self.squid = AsymSquid( p_squid, self.squid_params, trans_in=squid_trans_in )
         self.primitives["qubit"] = self.squid
 
         self.connections = [Z1_end, Z2_end]
