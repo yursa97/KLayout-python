@@ -1,57 +1,62 @@
-__all__ = ["BaseClasses",
-            "Capacitors",
-            "Coplanars",
-            "Couplers",
-            "JJ",
-            "Qbits",
-            "Resonators",
-            "Shapes",
-            "ContactPad",
-            "Claw",
-            "Tmon",
-            "FluxCoil",
-           "Airbridge",
-           "BridgedCoplanars",
-            "_PROG_SETTINGS",
-           ]
+from importlib import reload
+# print("ClassLib.__init__ invoked") this row executes twice. 
+# Once for import ClassLib
+# the second time for reload(ClassLib)
+
+from . import _PROG_SETTINGS
+reload(_PROG_SETTINGS)
+from ._PROG_SETTINGS import *
+
+from . import BaseClasses
+reload(BaseClasses)
+from .BaseClasses import *
+
+from . import Shapes
+reload(Shapes)
+from .Shapes import *
+
+from . import Coplanars
+reload(Coplanars)
+from .Coplanars import *
+
+from . import Capacitors
+reload(Capacitors)
+from .Capacitors import *
+
+from . import Couplers
+reload(Couplers)
+from .Couplers import *
+
+from . import JosJ
+reload(JosJ)
+from .JosJ import *
+
+from . import Qbits
+reload(Qbits)
+from .Qbits import *
+
+from . import Resonators
+reload(Resonators)
+from .Resonators import *
+
+from . import contactPads
+reload(contactPads)
+from .contactPads import *
+
+from . import ChipTemplates
+reload(ChipTemplates)
+from .ChipTemplates import *
+
+from . import Marks
+reload(Marks)
+from .Marks import *
+
+from . import SFS
+reload(SFS)
+from .SFS import *
+
+from . import ChipDesign
+reload(ChipDesign)
+from .ChipDesign import *
 
 
-# from importlib import reload
-#
-# import ClassLib
-# import ClassLib.BaseClasses
-# import ClassLib.Capacitors
-# import ClassLib.Coplanars
-# import ClassLib.Couplers
-# import ClassLib.JJ
-# import ClassLib.Qbits
-# import ClassLib.Resonators
-# import ClassLib.Shapes
-# import ClassLib.ContactPad
-# import ClassLib.Claw
-# import ClassLib._PROG_SETTINGS
-#
-# reload(ClassLib.BaseClasses)
-# reload(ClassLib.Capacitors)
-# reload(ClassLib.Coplanars)
-# reload(ClassLib.JJ)
-# reload(ClassLib.Qbits)
-# reload(ClassLib.Resonators)
-# reload(ClassLib.Shapes)
-# reload(ClassLib.ContactPad)
-# reload(ClassLib.Claw)
-# reload(ClassLib._PROG_SETTINGS)
-#
-# from ClassLib.BaseClasses import *
-# from ClassLib.Capacitors import *
-# from ClassLib.Coplanars import *
-# from ClassLib.Couplers import *
-# from ClassLib.JJ import *
-# from ClassLib.Qbits import *
-# from ClassLib.Resonators import *
-# from ClassLib.Shapes import *
-# from ClassLib.ContactPad import *
-# from ClassLib.Claw import *
-# from ClassLib._PROG_SETTINGS import *
-#
-# print(Complex_Base)

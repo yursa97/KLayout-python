@@ -165,8 +165,7 @@ class Line_N_JJCross( ElementBase ):
 
         self.poly1 = self._make_polygon( self.b, self.w, self.d1, self.f1,   self.d2 )
 
-        super( Line_N_JJ,self ).__init__( origin, trans_in )
-
+        super( self ).__init__( origin, trans_in )
     def _make_polygon( self, length, w, d, f, overlapping ):
         polygon = DSimplePolygon
         p1 = DPoint(0,0)

@@ -8,7 +8,15 @@ from ClassLib.BaseClasses import *
 from ClassLib.Airbridge import *
 from ClassLib.BridgedCoplanars import *
 
-class CPWParameters:
+from typing import Union, List
+from collections import OrderedDict
+import copy
+
+
+from ClassLib.BaseClasses import Element_Base, Complex_Base
+
+
+class CPWParameters(Element_Base):
     def __init__(self, width, gap):
         self.width = width
         self.gap = gap
@@ -17,27 +25,37 @@ class CPWParameters:
 
 class CPW(ElementBase):
     """@brief: class represents single coplanar waveguide
-      @params:   float width - represents width of the central conductor
+        @params:  float width - represents width of the central conductor
                         float gap - spacing between central conductor and ground planes
                         float gndWidth - width of ground plane to be drawed
                         DPoint start - center aligned point, determines the start point of the coplanar segment
                         DPoint end - center aligned point, determines the end point of the coplanar segment
     """
 
-    def __init__(self, width, gap, start=DPoint(0, 0), end=DPoint(0, 0), gndWidth=-1, trans_in=None):
-        self.width = width
+    def __init__(self, width=None, gap=None, start=DPoint(0, 0), end=DPoint(0, 0), gndWidth=-1, trans_in=None,
+                 cpw_params=None):
+        if (cpw_params is None):self.width = width
         self.gap = gap
-        self.b = 2 * gap + width
+        self.b = 2 * gap + widthelse:
+            self.width = cpw_params.width
+            self.gap = cpw_params.gap
+            self.b = 2 * self.gap + self.width
         self.gndWidth = gndWidth
         self.end = end
         self.start = start
         self.dr = end - start
         super().__init__(start, trans_in)
-        self.start = self.connections[0]
-        self.end = self.connections[1]
-        self.dr = self.end - self.start
-        self.alpha_start = self.angle_connections[0]
-        self.alpha_end = self.angle_connections[1]
+
+        self._geometry_parameters = OrderedDict(
+            [
+                ("width, um", self.width / 1e3),
+                ("gap, um", self.gap / 1e3),
+                ("start.x, um", self.start.x / 1e3),
+                ("start.y, um", self.start.y / 1e3),
+                ("end.x", self.end.x / 1e3),
+                ("end.y", self.end.y / 1e3)
+            ]
+        )
 
     def init_regions(self):
         self.connections = [DPoint(0, 0), self.dr]
@@ -46,14 +64,27 @@ class CPW(ElementBase):
         alpha = atan2(self.dr.y, self.dr.x)
         self.angle_connections = [alpha, alpha]
         alpha_trans = ICplxTrans().from_dtrans(DCplxTrans(1, alpha * 180 / pi, False, self.start))
-        self.metal_region.insert(pya.Box(Point().from_dpoint(DPoint(0, -self.width / 2)),
-                                         Point().from_dpoint(DPoint(self.dr.abs(), self.width / 2))))
-        self.empty_region.insert(pya.Box(Point().from_dpoint(DPoint(0, self.width / 2)),
+        metal_poly = DSimplePolygon([DPoint(0, -self.width / 2),
+                                     DPoint(self.dr.abs(), -self.width / 2),
+                                         DPoint(self.dr.abs(), self.width / 2),
+                                     DPoint(0,self.width / 2)])
+        self.connection_edges = [3, 1]
+        self.metal_region.insert(pya.SimplePolygon().from_dpoly(metal_poly))
+        if (self.gap != 0):self.empty_region.insert(pya.Box(Point().from_dpoint(DPoint(0, self.width / 2)),
                                          Point().from_dpoint(DPoint(self.dr.abs(), self.width / 2 + self.gap))))
         self.empty_region.insert(pya.Box(Point().from_dpoint(DPoint(0, -self.width / 2 - self.gap)),
                                          Point().from_dpoint(DPoint(self.dr.abs(), -self.width / 2))))
         self.metal_region.transform(alpha_trans)
         self.empty_region.transform(alpha_trans)
+
+    def _refresh_named_connections(self):
+        self.end = self.connections[1]
+        self.start = self.connections[0]
+        self.dr = self.end - self.start
+
+    def _refresh_named_angles(self):
+        self.alpha_start = self.angle_connections[0]
+        self.alpha_end = self.angle_connections[1]
 
 
 class CPW_arc(ElementBase):
@@ -94,10 +125,9 @@ class CPW_arc(ElementBase):
             alpha_end = alpha_end - 1e-3
 
         d_alpha_inner = (alpha_end - alpha_start) / (n_inner - 1)
-        d_alpha_outer = -(alpha_end - alpha_start) / (n_outer - 1)
+        d_alpha_outer = -d_alpha_inner
 
         #        print("Center:", center)
-
         for i in range(0, n_inner):
             alpha = alpha_start + d_alpha_inner * i
             pts.append(center + DPoint(cos(alpha), sin(alpha)) * (R - width / 2))
@@ -119,13 +149,12 @@ class CPW_arc(ElementBase):
 
         metal_arc = self._get_solid_arc(self.center, self.R, self.width,
                                         self.alpha_start - pi / 2, self.alpha_end - pi / 2, n_inner, n_outer)
-
+self.connection_edges = [n_inner + n_outer, n_inner]
         empty_arc1 = self._get_solid_arc(self.center, self.R - (self.width + self.gap) / 2,
                                          self.gap, self.alpha_start - pi / 2, self.alpha_end - pi / 2, n_inner, n_outer)
 
         empty_arc2 = self._get_solid_arc(self.center, self.R + (self.width + self.gap) / 2,
                                          self.gap, self.alpha_start - pi / 2, self.alpha_end - pi / 2, n_inner, n_outer)
-
         self.metal_region.insert(SimplePolygon().from_dpoly(metal_arc))
         self.empty_region.insert(SimplePolygon().from_dpoly(empty_arc1))
         self.empty_region.insert(SimplePolygon().from_dpoly(empty_arc2))
@@ -220,14 +249,12 @@ class Path_RS(Complex_Base):
             self.arc1 = CPW_arc(self.Z0, self.cop1.end, copysign(
                 r, self.dr.y), copysign(pi / 2, self.dr.y * self.dr.x))
             self.connections = [self.cop1.start, self.arc1.end]
-            self.angle_connections = [self.cop1.alpha_end, self.arc1.alpha_start]
-
+            self.angle_connections = [self.cop1.alpha_start, self.arc1.alpha_end]
         self.primitives = {"arc1": self.arc1, "cop1": self.cop1}
 
 
 class Coil_type_1(Complex_Base):
     def __init__(self, Z0, start, L1, r, L2, trans_in=None):
-        print("COIL")
         self.Z0 = Z0
         self.L1 = L1
         self.r = r
@@ -257,7 +284,7 @@ class CPW_RL_Path(Complex_Base):
 
     def __init__(self, origin, shape, cpw_parameters, turn_radiuses,
                  segment_lengths, turn_angles, trans_in=None, bridged=False):
-        '''
+        """
         A piecewise-linear coplanar waveguide with rounded turns.
 
         Segment lengths are treated as the lengths of the segments of
@@ -266,52 +293,60 @@ class CPW_RL_Path(Complex_Base):
 
         TODO: 180 deg turns
 
-        Parameters:
-            origin: DPoint
-                The point where the line should start
-            shape: string
-                String in format "RLLRL" where an R means a turn
-                and an L means a straight part
-            cpw_parameters: CPWParameters or array-like
-                Parameters of the CPW or an array-like with parameters
-                for each peace (R or L)
-            turn_radiuses: float or array-like
-                Radius of the turns or an array-like with radiuses for
-                each turn
-            segment_lengths: array-like
-                Lengths of the straight parts of the equivalent
-                piecewise-linear line with no corner rounding
-            turn_angles: array-like
-                Angles for each turn of the line
-                !!! 180 turns are not yet supported !!!
-            trans_in: DTrans
-                Transformation of the line as a whole
-        '''
-
+        Parameters
+        ----------
+        origin : DPoint
+            The point where the line should start
+        shape : str
+            String in format "RLLRL" where an R means a turn
+            and an L means a straight part
+        cpw_parameters : Union[CPWParameters, List[CPWParameters]]
+            Parameters of the CPW or an array-like with parameters
+            for each peace (R or L)
+        turn_radiuses : Union[float, List[float]]
+            Radius of the turns or an array-like with radiuses for
+            each turn
+        segment_lengths: list[float]
+            Lengths of the straight parts of the equivalent
+            piecewise-linear line with no corner rounding
+        turn_angles: list[float]
+            Angles for each turn of the line in radians
+            !!! 180 turns are not yet supported !!!
+        trans_in: DTrans
+            Transformation of the line as a whole
+        """
         self._shape_string = shape
         self._N_elements = len(shape)
         self._shape_string_counter = Counter(shape)
-        self._bridged = bridged
+self._bridged = bridged
 
-        N_turns = self._shape_string_counter['R']
-
+        self._N_turns = self._shape_string_counter['R']
+self._N_straights = self._shape_string_counter['L']
         if hasattr(cpw_parameters, "__len__"):
             if len(cpw_parameters) != self._N_elements:
                 raise ValueError("CPW parameters dimension mismatch")
-            self._cpw_parameters = cpw_parameters
+            self._cpw_parameters = copy.deepcopy(cpw_parameters)
         else:
             self._cpw_parameters = [cpw_parameters] * self._N_elements
 
         if hasattr(turn_radiuses, "__len__"):
-            if len(turn_radiuses) != N_turns:
+            if len(turn_radiuses) != self._N_turns:
                 raise ValueError("Turn raduises dimension mismatch")
-            self._turn_radiuses = turn_radiuses
+            self._turn_radiuses = copy.deepcopy(turn_radiuses)
         else:
-            self._turn_radiuses = [turn_radiuses] * N_turns
+            self._turn_radiuses = [turn_radiuses] * self._N_turns
+if hasattr(segment_lengths, "__len__"):
+            if len(segment_lengths) != self._N_straights:
+                raise ValueError("Turn raduises dimension mismatch")
+            self._segment_lengths = copy.deepcopy(segment_lengths)
+        else:
+            self._segment_lengths = [segment_lengths] * self._N_turns
 
-        self._segment_lengths = segment_lengths
-        self._turn_angles = turn_angles
-
+        if hasattr(turn_angles, "__len__"):
+            if len(turn_angles) != self._N_turns:
+                raise ValueError("Turn angles dimension mismatch")self._turn_angles = turn_angles
+else:
+            self._turn_angles = [turn_angles] * self._N_turns
         super().__init__(origin, trans_in)
         self.start = self.connections[0]
         self.end = self.connections[1]
@@ -319,7 +354,6 @@ class CPW_RL_Path(Complex_Base):
         self.alpha_end = self.angle_connections[1]
 
     def init_primitives(self):
-
         R_index = 0
         L_index = 0
         origin = DPoint(0, 0)
@@ -329,10 +363,11 @@ class CPW_RL_Path(Complex_Base):
 
         for i, symbol in enumerate(self._shape_string):
 
-            if symbol == 'R':
-                turn_radius = self._turn_radiuses[R_index] \
-                    if self._turn_angles[R_index] > 0 \
-                    else -self._turn_radiuses[R_index]
+            if (symbol == 'R'):
+                if (self._turn_angles[R_index] > 0):
+                    turn_radius = self._turn_radiuses[R_index]
+                    else:
+                    turn_radius = -self._turn_radiuses[R_index]
                 if self._bridged:
                     cpw_arc = BridgedCPWArc(self._cpw_parameters[i], prev_primitive_end,
                                             turn_radius, self._turn_angles[R_index],
@@ -345,19 +380,20 @@ class CPW_RL_Path(Complex_Base):
 
                 self.primitives["arc_" + str(R_index)] = cpw_arc
                 R_index += 1
-
             elif symbol == 'L':
 
                 # Turns are reducing segments' lengths so as if there were no roundings at all
-                if i + 1 < self._N_elements \
-                        and self._shape_string[i + 1] == 'R' \
-                        and abs(self._turn_angles[R_index]) < pi:
+
+                # next 'R' segment if exists
+                if (i + 1 < self._N_elements
+                        and self._shape_string[i + 1] == 'R'
+                        and abs(self._turn_angles[R_index]) < pi):
                     coeff = abs(tan(self._turn_angles[R_index] / 2))
                     self._segment_lengths[L_index] -= self._turn_radiuses[R_index] * coeff
-
-                if i - 1 > 0 \
-                        and self._shape_string[i - 1] == 'R' \
-                        and abs(self._turn_angles[R_index - 1]) < pi:
+# previous 'R' segment if exists
+                if (i - 1 > 0
+                        and self._shape_string[i - 1] == 'R'
+                        and abs(self._turn_angles[R_index - 1]) < pi):
                     coeff = abs(tan(self._turn_angles[R_index - 1] / 2))
                     self._segment_lengths[L_index] -= self._turn_radiuses[R_index - 1] * coeff
 
@@ -366,22 +402,31 @@ class CPW_RL_Path(Complex_Base):
                                      prev_primitive_end, prev_primitive_end + DPoint(self._segment_lengths[L_index], 0),
                                      trans_in=DCplxTrans(1, prev_primitive_end_angle * 180 / pi, False, 0, 0))
                 else:
-                    cpw = CPW(self._cpw_parameters[i].width, self._cpw_parameters[i].gap,
+                    # if( self._segment_lengths[L_index] < 0 ):
+                #    print(self._segment_lengths[L_index])
+                #    print("CPW_RL_Path warning: segment length is less than zero")
+                #    print("L_index = {}".format(L_index))cpw = CPW(self._cpw_parameters[i].width, self._cpw_parameters[i].gap,
                               prev_primitive_end, prev_primitive_end + DPoint(self._segment_lengths[L_index], 0),
                               trans_in=DCplxTrans(1, prev_primitive_end_angle * 180 / pi, False, 0, 0))
 
                 self.primitives["cpw_" + str(L_index)] = cpw
                 L_index += 1
 
-            primitive = list(self.primitives.values())[i]
-            prev_primitive_end = primitive.end
-            prev_primitive_end_angle = primitive.alpha_end
+            prev_primitive = list(self.primitives.values())[i]
+            prev_primitive_end = prev_primitive.end
+            prev_primitive_end_angle = prev_primitive.alpha_end
 
         self.connections = [list(self.primitives.values())[0].start,
                             list(self.primitives.values())[-1].end]
         self.angle_connections = [list(self.primitives.values())[0].alpha_start,
                                   list(self.primitives.values())[-1].alpha_end]
+def _refresh_named_connections(self):
+        self.start = self.connections[0]
+        self.end = self.connections[1]
 
+    def _refresh_named_angles(self):
+        self.alpha_start = self.angle_connections[0]
+        self.alpha_end = self.angle_connections[1]
     def get_total_length(self):
         return sum(self._segment_lengths) + \
                sum([abs(R * alpha) for R, alpha in zip(self._turn_radiuses, self._turn_angles)])

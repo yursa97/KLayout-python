@@ -1,0 +1,4 @@
+class PORT_TYPES:
+    BOX_WALL = 0
+    AUTOGROUNDED = 1
+    COCALIBRATED = 2

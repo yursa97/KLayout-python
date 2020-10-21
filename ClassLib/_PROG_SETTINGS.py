@@ -29,8 +29,6 @@ class CHIP:
     # only 4 connections programmed by now
     connections = [box.p1 + DPoint( L1 + b/2,0 ), box.p1 + DPoint( dx - (L1+b/2),0 ), box.p2 - DPoint( L1 + b/2,0 ),  box.p1 + DPoint( L1 + b/2, dy )]
 
-            
-
        
         
 
