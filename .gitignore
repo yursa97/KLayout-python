@@ -70,6 +70,11 @@ venv.bak/
 .vscode/
 .vscode/*
 
+*.gds
+*.doc
+*iml
+*xml
+
 
 # matlab project settings
 SonnetLab_Matlab_server/resources
