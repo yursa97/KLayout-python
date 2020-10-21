@@ -23,7 +23,7 @@ class Mark1( Complex_Base ):
         
         if( self.cross_out_a < self.cross_in_a ):
             print( "cross inner square must be larger than outer" )
-        super( Mark1, self ).__init__( origin, trans_in )
+        super( self ).__init__( origin, trans_in )
 
     def init_primitives( self ):
         origin = DPoint( 0,0 )
