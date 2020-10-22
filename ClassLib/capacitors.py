@@ -3,8 +3,8 @@ from math import sqrt, cos, sin, tan, atan2, pi, copysign
 from pya import Point, DPoint, Vector, DVector, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from ClassLib.Coplanars import *
-from ClassLib.Shapes import *
+from ClassLib.coplanars import *
+from ClassLib.shapes import *
 
 class CWave2CPW( ElementBase ):
     '''
@@ -69,7 +69,7 @@ class CWave2CPW( ElementBase ):
         self.empty_region.insert( arc_1_empty )
         self.empty_region.insert( arc_2_empty )
 
-class CWave( Complex_Base ):
+class CWave(ComplexBase):
     '''
     Draws a condensator from a circle cutted into 2 pieces.
     '''

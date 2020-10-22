@@ -4,15 +4,15 @@ from math import cos, sin, atan2, pi
 from pya import Point, DPoint, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from ClassLib.BaseClasses import Complex_Base
-from ClassLib.Coplanars import CPW, CPW_arc
-from ClassLib.Resonators import Coil_type_1
-from ClassLib.Shapes import XmonCross
+from ClassLib.baseClasses import ComplexBase
+from ClassLib.coplanars import CPW, CPW_arc
+from ClassLib.resonators import Coil_type_1
+from ClassLib.shapes import XmonCross
 
 from sonnetSim.sonnetLab import SonnetLab, SonnetPort, SimulationBox
 
 
-class EMResonator_TL2Qbit_worm2(Complex_Base):
+class EMResonator_TL2Qbit_worm2(ComplexBase):
     def __init__(self, Z0, start, L_coupling, L1, r, L2, N, trans_in=None):
         self.Z0 = Z0  # resonator's coplanar waveguide parameters
         # first horizontal coplanar length.
@@ -246,7 +246,7 @@ if __name__ == "__main__":
         #
         # ml_terminal._send(CMD.SAY_HELLO)
         # ml_terminal.clear()
-        # simBox = SimulationBox(CHIP.dx, CHIP.dy, 300, 900)
+        # simBox = SimulationBox(CHIP_10x10_12pads.dx, CHIP_10x10_12pads.dy, 300, 900)
         # ml_terminal.set_boxProps(simBox)
         # print("sending cell and layer")
         # from sonnetSim.pORT_TYPES import PORT_TYPES

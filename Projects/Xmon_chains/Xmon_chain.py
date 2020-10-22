@@ -9,13 +9,13 @@ from importlib import reload
 import ClassLib
 from ClassLib import *
 
-reload(BaseClasses)
-reload(Capacitors)
-reload(Coplanars)
+reload(baseClasses)
+reload(capacitors)
+reload(coplanars)
 reload(JJ)
-reload(Qbits)
-reload(Resonators)
-reload(Shapes)
+reload(qbits)
+reload(resonators)
+reload(shapes)
 reload(ContactPad)
 reload(Claw)
 reload(Tmon)
@@ -24,10 +24,10 @@ reload(_PROG_SETTINGS)
 from ClassLib import *
 
 from ClassLib.ContactPad import *
-from ClassLib.Claw import *
-from ClassLib.Resonators import *
-from ClassLib.Tmon import *
-from ClassLib.FluxCoil import *
+from ClassLib.claw import *
+from ClassLib.resonators import *
+from ClassLib.tmon import *
+from ClassLib.fluxCoil import *
 
 from time import time
 

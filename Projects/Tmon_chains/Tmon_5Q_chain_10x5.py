@@ -9,13 +9,13 @@ from importlib import reload
 import ClassLib
 from ClassLib import *
 
-reload(BaseClasses)
-reload(Capacitors)
-reload(Coplanars)
+reload(baseClasses)
+reload(capacitors)
+reload(coplanars)
 reload(JJ)
-reload(Qbits)
-reload(Resonators)
-reload(Shapes)
+reload(qbits)
+reload(resonators)
+reload(shapes)
 reload(ContactPad)
 reload(Claw)
 reload(Tmon)
@@ -24,10 +24,10 @@ reload(_PROG_SETTINGS)
 from ClassLib import *
 
 from ClassLib.ContactPad import *
-from ClassLib.Claw import *
-from ClassLib.Resonators import *
-from ClassLib.Tmon import *
-from ClassLib.FluxCoil import *
+from ClassLib.claw import *
+from ClassLib.resonators import *
+from ClassLib.tmon import *
+from ClassLib.fluxCoil import *
 
 from time import time
 
@@ -48,8 +48,9 @@ if( lv == None ):
 else:
     cv = lv.active_cellview()
     
-cell_name = "Tmon_single_10x5_FBs"
+cell_name = "Tmon_5Q_chain_10x5"
 print(cell_name)
+
 
 layout = cv.layout()
 layout.dbu = 0.001
@@ -114,7 +115,7 @@ cp8.place(canvas)
 # ======== Main feedline =========
 
 turn_rad = 0.24e6
-feed_segment_lenghts = [turn_rad, 1.5e6, 0.5e6, 3e6+cp7.end.x-cp8.end.x, 0.5e6, 1.5e6, turn_rad]
+feed_segment_lenghts = [turn_rad, 2*turn_rad, 0.5e6, 4*turn_rad+cp7.end.x-cp8.end.x, 0.5e6, 2*turn_rad, turn_rad]
 
 feedline = CPW_RL_Path(cp8.end, "LRLRLRLRLRLRL", feed_cpw_params, turn_rad,
      feed_segment_lenghts, [pi/2, -pi/2, -pi/2, -pi/2, -pi/2, pi/2] ,trans_in = DTrans.R90)
@@ -124,13 +125,13 @@ feedline.place(canvas)
 # ======= Chain loop =========
 
 resonator_offsets = 5e3
-chain_length = 4
+chain_length = 5
 
 res_cpw_params = CPWParameters(7e3, 4e3)
 tmon_cpw_params = CPWParameters(20e3, 20e3)
 
 resonators_site_span = cp7.end.x - cp8.end.x
-resonators_interval = 1500e3
+resonators_interval = 650e3
 
 resonators_y_positions = cp8.end.y + turn_rad*3 + feed_cpw_params.b+res_cpw_params.b/2+resonator_offsets
 
@@ -145,9 +146,11 @@ asymmetry = 0.5
 qubit_ports = []
 
 
+i=-6
 for i in range(-(chain_length)//2, (chain_length)//2, 1):
   coupling_length = 200e3
-  res_cursor = DPoint(i*resonators_interval+resonators_interval/2, resonators_y_positions)
+  res_cursor = DPoint(i*resonators_interval+resonators_interval, 
+                      resonators_y_positions)
   print(i)
   trans_in = None if i>=0 else DTrans.M90
   claw = Claw(DPoint(0,0), res_cpw_params, 100e3, w_claw = 20e3, w_claw_pad=0, l_claw_pad = 0)
@@ -202,16 +205,14 @@ tmon1_fc.place(canvas)
 tmon1_fc_end = FluxCoil(tmon1_fc.end, fc_cpw_params, width = 20e3, trans_in = DTrans.R180)
 tmon1_fc_end.place(canvas)
 
-# tmon -1
-fc_segment_lengths =\
+tmon_m1_fc_segment_lengths =\
      [-qubit_ports[-1].x + cp5.end.x, cp5.end.y - qubit_ports[-1].y-20e3]
-fc = CPW_RL_Path(cp5.end, "LRL", fc_cpw_params, 240e3,
-     fc_segment_lengths, [-pi/2] ,trans_in = DTrans.M90)
-fc.place(canvas)
+tmon_m1_fc = CPW_RL_Path(cp5.end, "LRL", fc_cpw_params, 240e3,
+     tmon_m1_fc_segment_lengths, [-pi/2] ,trans_in = DTrans.M90)
+tmon_m1_fc.place(canvas)
 
-fc_end = FluxCoil(fc.end, fc_cpw_params, width = 20e3, trans_in = DTrans.R180)
-fc_end.place(canvas)
-
+tmon1_fc_end = FluxCoil(tmon_m1_fc.end, fc_cpw_params, width = 20e3, trans_in = DTrans.R180)
+tmon1_fc_end.place(canvas)
 
 
 
@@ -221,7 +222,9 @@ ebeam = ebeam.merge()
 invert_region = Region(pya.Box(Point(-CHIP.dx/2-50e3, -CHIP.dy/2-50e3), 
                         Point(CHIP.dx/2+50e3, CHIP.dy/2+50e3)))
 
-cell.shapes( layer_photo ).insert(invert_region - canvas)
+#cell.shapes( layer_photo ).insert(invert_region - canvas)
+cell.shapes( layer_photo ).insert(canvas)
+
 cell.shapes( layer_el ).insert(ebeam)
 
 

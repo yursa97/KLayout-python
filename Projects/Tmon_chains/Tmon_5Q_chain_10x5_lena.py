@@ -1,8 +1,3 @@
-# $show-in-menu
-# $group-name: Macros
-# $menu-path: Chain_bridged
-# Enter your Python code here
-
 # $description: xmon_chains
 # $version: 0
 # $show-in-menu
@@ -17,13 +12,13 @@ from importlib import reload
 import ClassLib
 from ClassLib import *
 
-reload(BaseClasses)
-reload(Capacitors)
-reload(Coplanars)
+reload(baseClasses)
+reload(capacitors)
+reload(coplanars)
 reload(JJ)
-reload(Qbits)
-reload(Resonators)
-reload(Shapes)
+reload(qbits)
+reload(resonators)
+reload(shapes)
 reload(ContactPad)
 reload(Claw)
 reload(Tmon)
@@ -34,18 +29,18 @@ reload(_PROG_SETTINGS)
 from ClassLib import *
 
 from ClassLib.ContactPad import *
-from ClassLib.Claw import *
-from ClassLib.Resonators import *
-from ClassLib.Tmon import *
-from ClassLib.FluxCoil import *
-from ClassLib.Airbridge import *
+from ClassLib.claw import *
+from ClassLib.resonators import *
+from ClassLib.tmon import *
+from ClassLib.fluxCoil import *
+from ClassLib.airbridge import *
 from time import time
 from pya import DText
 
 
 class CHIP:
     dx = 10e6
-    dy = 10e6
+    dy = 5e6
 
 
 app = pya.Application.instance()
@@ -118,38 +113,26 @@ fc_cpw_params = CPWParameters(7e3, 4e3)
 cp1 = Contact_Pad(origin=DPoint(-CHIP.dx / 2, -CHIP.dy / 4), feedline_cpw_params=md_cpw_params)
 cp1.place(canvas)
 
-cp2 = Contact_Pad(DPoint(-CHIP.dx / 2, 0), fc_cpw_params)
+cp2 = Contact_Pad(DPoint(-CHIP.dx / 2, CHIP.dy / 4), fc_cpw_params)
 cp2.place(canvas)
 
-cp3 = Contact_Pad(origin=DPoint(-CHIP.dx / 2, CHIP.dy / 4), feedline_cpw_params=md_cpw_params)
+cp3 = Contact_Pad(DPoint(-2e6, CHIP.dy / 2), md_cpw_params, trans_in=DTrans.R270)
 cp3.place(canvas)
 
-cp4 = Contact_Pad(DPoint(-CHIP.dx/4, CHIP.dy / 2), md_cpw_params, trans_in=DTrans.R270)
+cp4 = Contact_Pad(DPoint(2e6, CHIP.dy / 2), md_cpw_params, trans_in=DTrans.R270)
 cp4.place(canvas)
 
-cp5 = Contact_Pad(origin=DPoint(0, CHIP.dy / 2), feedline_cpw_params=md_cpw_params, trans_in=DTrans.R270)
+cp5 = Contact_Pad(DPoint(CHIP.dx / 2, CHIP.dy / 4), fc_cpw_params, trans_in=DTrans.R180)
 cp5.place(canvas)
 
-cp6 = Contact_Pad(DPoint(CHIP.dx/4, CHIP.dy / 2), md_cpw_params, trans_in=DTrans.R270)
+cp6 = Contact_Pad(DPoint(CHIP.dx / 2, -CHIP.dy / 4), md_cpw_params, trans_in=DTrans.R180)
 cp6.place(canvas)
 
-cp7 = Contact_Pad(DPoint(CHIP.dx / 2, CHIP.dy / 4), fc_cpw_params, trans_in=DTrans.R180)
+cp7 = Contact_Pad(DPoint(2e6, -CHIP.dy / 2), feed_cpw_params, trans_in=DTrans.R90)
 cp7.place(canvas)
 
-cp8 = Contact_Pad(DPoint(CHIP.dx / 2, 0), fc_cpw_params, trans_in=DTrans.R180)
+cp8 = Contact_Pad(DPoint(-2e6, -CHIP.dy / 2), feed_cpw_params, trans_in=DTrans.R90)
 cp8.place(canvas)
-
-cp9 = Contact_Pad(DPoint(CHIP.dx / 2, -CHIP.dy / 4), md_cpw_params, trans_in=DTrans.R180)
-cp9.place(canvas)
-
-cp10 = Contact_Pad(DPoint(CHIP.dx/4, -CHIP.dy / 2), feed_cpw_params, trans_in=DTrans.R90)
-cp10.place(canvas)
-
-cp11 = Contact_Pad(DPoint(0, -CHIP.dy / 2), feed_cpw_params, trans_in=DTrans.R90)
-cp11.place(canvas)
-
-cp12 = Contact_Pad(DPoint(-CHIP.dx/4, -CHIP.dy / 2), feed_cpw_params, trans_in=DTrans.R90)
-cp12.place(canvas)
 
 # ======== Main feedline =========
 
@@ -192,7 +175,7 @@ for i in range(-(chain_length) // 2, (chain_length) // 2, 1):
     claw = Claw(DPoint(0, 0), res_cpw_params, 100e3, w_claw=20e3, w_claw_pad=0, l_claw_pad=0)
     res = CPWResonator(res_cursor, res_cpw_params, 40e3, 7.3 + (i + 4) / 10, 11.45, coupling_length=450e3,
                        meander_periods=3, trans_in=trans_in)
-    print(i, 7.3 + (i + 3) / 10)
+    print(i, 7.3 + (i + 4) / 10)
     claw.make_trans(DTrans(res.end))
     ##resonator_length = CPWResonator._calculate_total_length(res)
     ##print(resonator_length)
@@ -259,10 +242,8 @@ tmon1_fc_segment_lengths = \
     [(qubit_ports[0].x - cp1.end.x) / 3, -cp1.end.y + qubit_ports[0].y + 0.35e6,
      (qubit_ports[0].x - cp1.end.x) / 2 + 0.495e6 + 2e3, (-cp1.end.y + qubit_ports[0].y) / 3 - 120e3 + 7.5e3]
 tmon1_fc = CPW_RL_Path(cp1.end, "LRLRLRL", fc_cpw_params, 240e3,
-                       tmon1_fc_segment_lengths, [pi / 2, -pi / 2, -pi / 2], trans_in=None, bridged=True)
-tmon1_fc.place(canvas, region_name="photo")
-tmon1_fc.place(bridges, region_name="bridges")
-tmon1_fc.place(bridge_patches, region_name="bridge_patches")
+                       tmon1_fc_segment_lengths, [pi / 2, -pi / 2, -pi / 2], trans_in=None)
+tmon1_fc.place(canvas)
 
 tmon1_fc_end = FluxCoil(tmon1_fc.end, fc_cpw_params, width=20e3, trans_in=DTrans.R180)
 tmon1_fc_end.place(canvas)
@@ -270,10 +251,8 @@ tmon1_fc_end.place(canvas)
 tmon2_fc_segment_lengths = \
     [0.5e6, (qubit_ports[1].x - cp2.end.x) - 0.5e6, -(-cp2.end.y + qubit_ports[1].y) / 2 + 0.26e6 + 4.25e3]
 tmon2_fc = CPW_RL_Path(cp2.end, "LRRLRL", fc_cpw_params, 150e3,
-                       tmon2_fc_segment_lengths, [-pi / 2, pi / 2, -pi / 2], trans_in=None, bridged=True)
-tmon2_fc.place(canvas, region_name="photo")
-tmon2_fc.place(bridges, region_name="bridges")
-tmon2_fc.place(bridge_patches, region_name="bridge_patches")
+                       tmon2_fc_segment_lengths, [-pi / 2, pi / 2, -pi / 2], trans_in=None)
+tmon2_fc.place(canvas)
 
 tmon1_fc_end = FluxCoil(tmon2_fc.end, fc_cpw_params, width=20e3, trans_in=DTrans.R180)
 tmon1_fc_end.place(canvas)
@@ -282,10 +261,8 @@ tmon3_fc_segment_lengths = \
     [(-cp3.end.y + qubit_ports[2].y) / 50, 3 * (-cp3.end.x + qubit_ports[2].x) / 4 + 0.5e6,
      -(-cp3.end.y + qubit_ports[2].y) / 3 + 0.775e6 + 2.2e3]
 tmon3_fc = CPW_RL_Path(cp3.end, "LRLRL", fc_cpw_params, 150e3,
-                       tmon3_fc_segment_lengths, [pi / 2, -pi / 2], trans_in=DTrans.R90, bridged=True)
-tmon3_fc.place(canvas, region_name="photo")
-tmon3_fc.place(bridges, region_name="bridges")
-tmon3_fc.place(bridge_patches, region_name="bridge_patches")
+                       tmon3_fc_segment_lengths, [pi / 2, -pi / 2], trans_in=DTrans.R90)
+tmon3_fc.place(canvas)
 
 tmon1_fc_end = FluxCoil(tmon3_fc.end, fc_cpw_params, width=20e3, trans_in=DTrans.R180)
 tmon1_fc_end.place(canvas)
@@ -294,10 +271,8 @@ tmon4_fc_segment_lengths = \
     [(-cp4.end.y + qubit_ports[3].y) / 50, -3 * (-cp4.end.x + qubit_ports[3].x) / 4 + 0.34e6 - 3e3,
      -(-cp4.end.y + qubit_ports[3].y) / 3 + 0.771e6 + 6.2e3]
 tmon4_fc = CPW_RL_Path(cp4.end, "LRLRL", fc_cpw_params, 150e3,
-                       tmon4_fc_segment_lengths, [-pi / 2, pi / 2], trans_in=DTrans.R90, bridged=True)
-tmon4_fc.place(canvas, region_name="photo")
-tmon4_fc.place(bridges, region_name="bridges")
-tmon4_fc.place(bridge_patches, region_name="bridge_patches")
+                       tmon4_fc_segment_lengths, [-pi / 2, pi / 2], trans_in=DTrans.R90)
+tmon4_fc.place(canvas)
 
 tmon1_fc_end = FluxCoil(tmon4_fc.end, fc_cpw_params, width=20e3, trans_in=DTrans.R180)
 tmon1_fc_end.place(canvas)
@@ -305,10 +280,8 @@ tmon1_fc_end.place(canvas)
 tmon_m1_fc_segment_lengths = \
     [0.5e6, -qubit_ports[-1].x + cp5.end.x - 0.5e6, cp5.end.y - qubit_ports[-1].y - 0.320e6 + 4e3]
 tmon_m1_fc = CPW_RL_Path(cp5.end, "LRRLRL", fc_cpw_params, 150e3,
-                         tmon_m1_fc_segment_lengths, [-pi / 2, pi / 2, -pi / 2], trans_in=DTrans.M90, bridged=True)
-tmon_m1_fc.place(canvas, region_name="photo")
-tmon_m1_fc.place(bridges, region_name="bridges")
-tmon_m1_fc.place(bridge_patches, region_name="bridge_patches")
+                         tmon_m1_fc_segment_lengths, [-pi / 2, pi / 2, -pi / 2], trans_in=DTrans.M90)
+tmon_m1_fc.place(canvas)
 
 tmon1_fc_end = FluxCoil(tmon_m1_fc.end, fc_cpw_params, width=20e3, trans_in=DTrans.R180)
 tmon1_fc_end.place(canvas)

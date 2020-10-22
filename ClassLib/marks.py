@@ -3,11 +3,11 @@ from math import sqrt, cos, sin, atan2, pi, copysign
 from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon, Region, Vector, DVector
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from ClassLib.BaseClasses import Complex_Base
-from ClassLib.Shapes import *
-from ClassLib.Coplanars import CPWParameters, CPW_arc
+from ClassLib.baseClasses import ComplexBase
+from ClassLib.shapes import *
+from ClassLib.coplanars import CPWParameters, CPW_arc
 
-class Mark1( Complex_Base ):
+class Mark1(ComplexBase):
     def __init__(self,origin,trans_in=None):
         self.cross_in_a = 20e3
         self.cross_out_a = 40e3
@@ -45,7 +45,7 @@ class Mark1( Complex_Base ):
             r = self.leaf_inner + (self.leaf_outer - self.leaf_inner)/(self.empty_rings_N + 1)*i
             self.primitives["empty_ring_"+str(i)] = CPW_arc( Z_empty, DVector(0,-r), r, 2*pi )
         
-class Mark2 (Complex_Base):
+class Mark2 (ComplexBase):
     def __init__(self, origin, trans_in=None):
         self.ring1_radius = 300e3
         self.ring1_thickness = 30e3

@@ -7,7 +7,7 @@ from importlib import reload
 from ClassLib import *
 
 ### START classes to be delegated to different file ###
-class CWave( Complex_Base ):
+class CWave(ComplexBase):
     def __init__(self, center, r_out, dr, n_semiwaves, s, alpha, r_curve, n_pts=50,solid=True, L0=None, trans_in=None ):
         self.r_out = r_out
         self.dr = dr

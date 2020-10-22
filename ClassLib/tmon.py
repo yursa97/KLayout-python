@@ -3,8 +3,8 @@ from math import sqrt, cos, sin, atan2, pi, copysign
 from pya import Point, DPoint, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region, Instance, CellInstArray
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from ClassLib.BaseClasses import *
-from ClassLib.JJ import *
+from ClassLib.baseClasses import *
+from ClassLib.jJ import *
 
 class Tmon(ElementBase):
 

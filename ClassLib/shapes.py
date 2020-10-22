@@ -4,11 +4,11 @@ from pya import Point,DPoint,DSimplePolygon,SimplePolygon,DPolygon,Polygon, Regi
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from ClassLib._PROG_SETTINGS import *
-from ClassLib.BaseClasses import Element_Base, Complex_Base
-from ClassLib.Coplanars import CPW
+from ClassLib.baseClasses import ElementBase, ComplexBase
+from ClassLib.coplanars import CPW
 
 
-class Rectangle( Element_Base ):
+class Rectangle(ElementBase):
     def __init__( self, origin, a,b, trans_in=None, inverse=False ):
         self.a = a
         self.b = b
@@ -26,7 +26,7 @@ class Rectangle( Element_Base ):
             self.metal_region.insert(SimplePolygon().from_dpoly(DSimplePolygon(pts_arr)))
 
 
-class Cross( Element_Base ):
+class Cross(ElementBase):
     def __init__( self, origin, inner_square_a, outer_square_a, trans_in=None ):
         self.in_a = inner_square_a
         self.out_a = outer_square_a
@@ -60,7 +60,7 @@ class Cross( Element_Base ):
         self.connections = [self.center]
 
 
-class XmonCross(Complex_Base):
+class XmonCross(ComplexBase):
     def __init__(self, origin, cross_width, side_length, gnd_gap, trans_in=None):
         self.cross_width = cross_width
         self.side_length = side_length
@@ -83,7 +83,7 @@ class XmonCross(Complex_Base):
         origin = DPoint(0, 0)
 
         # draw central square
-        from ClassLib.Shapes import Rectangle
+        from ClassLib.shapes import Rectangle
         lb_corner = DPoint(-self.cross_width / 2, -self.cross_width / 2)
         center_square = Rectangle(lb_corner, self.cross_width, self.cross_width)
         self.primitives["center_square"] = center_square
@@ -147,7 +147,7 @@ class Circle( ElementBase ):
         self.angle_connections.extend([0, 0])
 
 
-class Kolbaska(Element_Base):
+class Kolbaska(ElementBase):
     def __init__(self, origin, stop, width, r, trans_in=None):
         self._width = width
         self._vec = stop - origin
@@ -163,7 +163,7 @@ class Kolbaska(Element_Base):
         self.connections.extend([DPoint(0,0), DPoint() + self._vec])
         self.angle_connections.extend([0, 0])
 
-class Circle_arc( Element_Base ):
+class Circle_arc(ElementBase):
     def __init__( self, center, r, alpha_start=0, alpha_end = pi, trans_in=None, n_pts=50, solid=True ):
         self.center = center
         self.r = r
@@ -186,7 +186,7 @@ class Circle_arc( Element_Base ):
         self.connections.extend([self._center, self._center+DVector(0, -self.r)])
         self.angle_connections.extend([0,0])
 
-class Ring(Element_Base):
+class Ring(ElementBase):
     """@brief: class represents a ring (radius - thicknes < R < radius)
         @params:  DPoint origin - the center of the ring
                         float radius - outer radius of the ring
@@ -216,7 +216,7 @@ class Ring(Element_Base):
         else:
             self.metal_region = ring
 
-class IsoTrapezoid(Element_Base):
+class IsoTrapezoid(ElementBase):
 
     """@brief: class represents an isosceles trapezoid
         @params:  DPoint origin - position of the left bottom node
@@ -244,7 +244,7 @@ class IsoTrapezoid(Element_Base):
         else:
             self.metal_region.insert(SimplePolygon().from_dpoly(DSimplePolygon(pts_arr)))
 
-class Cross2(Element_Base):
+class Cross2(ElementBase):
     """@brief: class represents a cross
         @params:  DPoint origin - center of the cross
                         float thickness - thickness of the line

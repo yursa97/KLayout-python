@@ -3,11 +3,11 @@ from math import sqrt, cos, sin, atan2, pi, copysign
 from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 from numpy import around
-from ClassLib.BaseClasses import *
-from ClassLib.Coplanars import *
+from ClassLib.baseClasses import *
+from ClassLib.coplanars import *
 from ClassLib._PROG_SETTINGS import *
 
-class SQUIDManhattan(Complex_Base):
+class SQUIDManhattan(ComplexBase):
 
     def __init__(self, origin, w_JJ, h_JJ, asymmetry, bridge_width, structure_length,
                  squid_width_top=3e3, squid_width_bottom=2e3, pad_width=8e3, small_lead_width=.65e3,

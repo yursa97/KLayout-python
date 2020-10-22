@@ -10,18 +10,19 @@ from importlib import reload
 import ClassLib
 reload(ClassLib)
 
-from ClassLib.Coplanars import CPW, CPWParameters, CPW_RL_Path
-from ClassLib.Shapes import XmonCross
+from ClassLib.coplanars import CPW, CPWParameters, CPW_RL_Path
+from ClassLib.shapes import XmonCross
 from ClassLib.contactPads import ContactPad
 
-from ClassLib.Coplanars import CPW, CPW_arc, Coil_type_1, CPW_RL_Path
-from ClassLib.Shapes import XmonCross
-from ClassLib.BaseClasses import Complex_Base
+from ClassLib.coplanars import CPW, CPW_arc, Coil_type_1, CPW_RL_Path
+from ClassLib.shapes import XmonCross
+from ClassLib.baseClasses import ComplexBase
+from ClassLib.chipTemplates import CHIP_10x10_12pads
 
-from ClassLib.Resonators import EMResonator_TL2Qbit_worm3_2_XmonFork
+from ClassLib.resonators import EMResonator_TL2Qbit_worm3_2_XmonFork
 
 
-class EMResonatorTL2QbitWormRLTail(Complex_Base):
+class EMResonatorTL2QbitWormRLTail(ComplexBase):
     """
     same as `EMResonator_TL2Qbit_worm3` but shorted and open ends are
     interchanged their places. In addition, a few primitives had been renamed.
@@ -211,91 +212,6 @@ class EMResonatorTL2QbitWormRLTailXmonFork(EMResonatorTL2QbitWormRLTail):
         self.primitives["erased_fork_right_cpw_end"] = CPW(0, forkZ.b / 2, p1, p2)
 
 
-class CHIP:
-    """
-    10x10 mm chip
-    PCB design located here:
-    https://drive.google.com/drive/folders/1TGjD5wwC28ZiLln_W8M6gFJpl6MoqZWF?usp=sharing
-    """
-    dx = 10e6
-    dy = 10e6
-
-    pcb_width = 260e3  # 0.26 mm
-    pcb_gap = 190e3  # (0.64 - 0.26) / 2 = 0.19 mm
-    pcb_feedline_d = 2500e3  # 2.5 mm
-    pcb_Z = CPWParameters(pcb_width, pcb_gap)
-
-    cpw_width = 24.1e3
-    cpw_gap = 12.95e3
-    chip_Z = CPWParameters(cpw_width, cpw_gap)
-
-    @staticmethod
-    def get_contact_pads():
-        dx = CHIP.dx
-        dy = CHIP.dy
-        pcb_feedline_d = CHIP.pcb_feedline_d
-        pcb_Z = CHIP.pcb_Z
-        chip_Z = CHIP.chip_Z
-
-        contact_pads_left = [
-            ContactPad(
-                DPoint(0, dy - pcb_feedline_d * (i + 1)), pcb_Z, chip_Z, back_metal_width=50e3,
-                back_metal_gap=100e3
-            ) for i in range(3)
-        ]
-
-        contact_pads_bottom = [
-            ContactPad(
-                DPoint(pcb_feedline_d * (i + 1), 0), pcb_Z, chip_Z, back_metal_width=50e3,
-                back_metal_gap=100e3,
-                trans_in=Trans.R90
-            ) for i in range(3)
-        ]
-
-        contact_pads_right = [
-            ContactPad(
-                DPoint(dx, pcb_feedline_d*(i+1)), pcb_Z, chip_Z, back_metal_width=50e3,
-                back_metal_gap=100e3,
-                trans_in=Trans.R180
-            ) for i in range(3)
-        ]
-
-        contact_pads_top = [
-            ContactPad(
-                DPoint(dx - pcb_feedline_d * (i + 1), dy), pcb_Z, chip_Z, back_metal_width=50e3,
-                back_metal_gap=100e3,
-                trans_in=Trans.R270
-            ) for i in range(3)
-        ]
-
-        # contact pads are ordered starting with top-left corner in counter-clockwise direction
-        contact_pads = itertools.chain(
-            contact_pads_left, contact_pads_bottom,
-            contact_pads_right, contact_pads_top
-        )
-
-        return list(contact_pads)
-
-    origin = DPoint(0, 0)
-    box = pya.DBox(origin, origin + DPoint(dx, dy))
-
-    @staticmethod
-    def get_geometry_params_dict(prefix="", postfix=""):
-        from collections import OrderedDict
-        geometry_params = OrderedDict(
-            [
-                ("dx, um", CHIP.dx / 1e3),
-                ("dy, um", CHIP.dy / 1e3),
-                ("nX", CHIP.nX),
-                ("nY", CHIP.nY)
-            ]
-        )
-        modified_dict = OrderedDict()
-        for key, val in geometry_params.items():
-            modified_dict[prefix + key + postfix] = val
-        return modified_dict
-
-
 if __name__ == "__main__":
     # getting main references of the application
     app = pya.Application.instance()
@@ -333,10 +249,10 @@ if __name__ == "__main__":
     
     # main drive line coplanar
     x = None
-    y = 0.9 * CHIP.dy
+    y = 0.9 * CHIP_10x10_12pads.dy
     p1 = DPoint(0, y)
-    p2 = DPoint(CHIP.dx, y)
-    Z0 = CPW(CHIP.cpw_width, CHIP.cpw_gap, p1, p2)
+    p2 = DPoint(CHIP_10x10_12pads.dx, y)
+    Z0 = CPW(CHIP_10x10_12pads.cpw_width, CHIP_10x10_12pads.cpw_gap, p1, p2)
     
     # resonator
     # corresponding to resonanse freq is somewhere near 5 GHz
@@ -379,9 +295,9 @@ if __name__ == "__main__":
     tmp_reg = Region()  # faster to call `place` on single region
 
     # place chip metal layer
-    chip_box = pya.Box(DPoint(0, 0), DPoint(CHIP.dx, CHIP.dy))
+    chip_box = pya.Box(DPoint(0, 0), DPoint(CHIP_10x10_12pads.dx, CHIP_10x10_12pads.dy))
     tmp_reg.insert(chip_box)
-    contact_pads = CHIP.get_contact_pads()
+    contact_pads = CHIP_10x10_12pads.get_contact_pads()
     for contact_pad in contact_pads:
         contact_pad.place(tmp_reg)
 
@@ -391,7 +307,7 @@ if __name__ == "__main__":
     cpwrl_ro = CPW_RL_Path(
         contact_pads[-1].end, shape="LRLRL", cpw_parameters=Z0,
         turn_radiuses=[ro_line_turn_radius]*2,
-        segment_lengths=[ro_line_dy, CHIP.pcb_feedline_d, ro_line_dy],
+        segment_lengths=[ro_line_dy, CHIP_10x10_12pads.pcb_feedline_d, ro_line_dy],
         turn_angles=[pi/2, pi/2], trans_in=Trans.R270
     )
     cpwrl_ro.place(tmp_reg)
@@ -405,11 +321,11 @@ if __name__ == "__main__":
         # under condition that Xmon-Xmon distance equals
         # `xmon_x_distance`
         if res_idx == 0:
-            worm_x = 1.2*CHIP.pcb_feedline_d
+            worm_x = 1.2 * CHIP_10x10_12pads.pcb_feedline_d
         else:
-            worm_x = 1.2*CHIP.pcb_feedline_d + res_idx * xmon_x_distance - \
+            worm_x = 1.2 * CHIP_10x10_12pads.pcb_feedline_d + res_idx * xmon_x_distance - \
                      (L_coupling_list[res_idx] - L_coupling_list[0]) + \
-                     (L1_list[res_idx] - L1_list[0])/2
+                     (L1_list[res_idx] - L1_list[0]) / 2
         worm_y = contact_pads[-1].end.y - ro_line_dy - to_line
 
         worm = EMResonator_TL2Qbit_worm3_2_XmonFork(

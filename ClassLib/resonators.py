@@ -5,11 +5,11 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from importlib import reload
 
-from ClassLib.BaseClasses import *
-from ClassLib.Coplanars import *
-from .BaseClasses import Complex_Base
-from .Coplanars import CPW_RL_Path, CPW
-from .Coplanars import Coil_type_1, CPW_arc # backward compatibility TODO: delete classes
+from ClassLib.baseClasses import *
+from ClassLib.coplanars import *
+from .baseClasses import ComplexBase
+from .coplanars import CPW_RL_Path, CPW
+from .coplanars import Coil_type_1, CPW_arc # backward compatibility TODO: delete classes
 
 
 class CPWResonator():
@@ -136,7 +136,7 @@ class CPWResonator():
         return length*1e9 # in nm
 
 
-class CPWResonator2(Complex_Base):
+class CPWResonator2(ComplexBase):
     # neck doesn't stand out and instead spreads along the resonator
     _c = 299792458.0
 
@@ -222,7 +222,7 @@ class CPWResonator2(Complex_Base):
         length = self._c / self.freq / sqrt(self.eps/2 + 0.5) / 1e9 * self.wavelength_fraction
         return length * 1e9 # in nm
 
-class EMResonator_TL2Qbit_worm( Complex_Base ):
+class EMResonator_TL2Qbit_worm(ComplexBase):
     def __init__( self, Z0, start, L_coupling, L1, r, L2, N, trans_in=None ):
         self.Z0 = Z0
         self.L_coupling = L_coupling
@@ -262,7 +262,7 @@ class EMResonator_TL2Qbit_worm( Complex_Base ):
         self.angle_connections = [0,self.cop_tail.alpha_end]
 
 
-class EMResonator_TL2Qbit_worm2( Complex_Base ):
+class EMResonator_TL2Qbit_worm2(ComplexBase):
     def __init__( self, Z0, start, L_coupling, L1, r, L2, N, trans_in=None ):
         self.Z0 = Z0
         self.L_coupling = L_coupling
@@ -375,7 +375,7 @@ class EMResonator_TL2Qbit_worm2_XmonFork(EMResonator_TL2Qbit_worm2):
         self.primitives["erased_fork_right_cpw_end"] = CPW(0, forkZ.b / 2, self.fork_y_cpw2.end, p1)
 
 
-class EMResonator_TL2Qbit_worm3(Complex_Base):
+class EMResonator_TL2Qbit_worm3(ComplexBase):
     def __init__(self, Z0, start, L_coupling, L0, L1, r, L2, N, trans_in=None):
         self.Z0 = Z0
         self.L_coupling = L_coupling
@@ -557,7 +557,7 @@ class EMResonator_TL2Qbit_worm4_XmonFork(EMResonator_TL2Qbit_worm4):
         self.primitives["erased_fork_right_cpw_end"] = CPW(0, forkZ.b / 2, self.fork_y_cpw2.end, p1)
 
 
-class EMResonator_TL2Qbit_worm3_2(Complex_Base):
+class EMResonator_TL2Qbit_worm3_2(ComplexBase):
     """
     same as `EMResonator_TL2Qbit_worm3` but shorted and open ends are
     interchanged their places. In addition, a few primitives had been renamed.
@@ -729,7 +729,7 @@ class EMResonator_TL2Qbit_worm3_2_XmonFork(EMResonator_TL2Qbit_worm3_2):
         self.primitives["erased_fork_right_cpw_end"] = CPW(0, forkZ.b / 2, p1, p2)
 
 
-class EMResonatorTL3QbitWormRLTail(Complex_Base):
+class EMResonatorTL3QbitWormRLTail(ComplexBase):
     """
     same as `EMResonator_TL3Qbit_worm3` but shorted and open ends are
     interchanged their places. In addition, a few primitives had been renamed.

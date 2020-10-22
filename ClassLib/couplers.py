@@ -3,10 +3,10 @@ from math import sqrt, cos, sin, atan2, pi, copysign
 from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from ClassLib.BaseClasses import *
-from ClassLib.Coplanars import *
+from ClassLib.baseClasses import *
+from ClassLib.coplanars import *
 
-class BranchLine_finger( Complex_Base ):
+class BranchLine_finger(ComplexBase):
     def __init__( self, Z0, start, params, gndWidth = -1, trans_in=None ):
         if( len(params) != 6 ):
             raise LookupError
@@ -49,7 +49,7 @@ class BranchLine_finger( Complex_Base ):
                                 "coplanar3":self.coplanar3, "arc3":self.arc3,"coplanar4":self.coplanar4,"arc4":self.arc4,
                                 "coplanar5":self.coplanar5}
 
-class BranchLine_finger2( Complex_Base ):
+class BranchLine_finger2(ComplexBase):
     def __init__( self, Z0, start, params, gndWidth = -1, trans_in = None ):
         if( len(params) != 11 ):
             raise LookupError
@@ -109,7 +109,7 @@ class BranchLine_finger2( Complex_Base ):
                                 "arc1":self.arc1,"arc2":self.arc2,"arc3":self.arc3,"arc4":self.arc4,
                                 "arc5":self.arc5,"arc6":self.arc6,"arc7":self.arc7,"arc8":self.arc8}
 
-class Coupler_BranchLine( Complex_Base ):
+class Coupler_BranchLine(ComplexBase):
     def __init__( self, origin, branchline_hor, branchline_vert, tJunction, trans_in=None ):
         self.bl_hor = branchline_hor
         self.bl_vert = branchline_vert

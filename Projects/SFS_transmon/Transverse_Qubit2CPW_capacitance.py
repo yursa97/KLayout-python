@@ -16,7 +16,7 @@ reload(sonnetSim)
 from sonnetSim import SonnetLab, PORT_TYPES
 
 
-class Sandbox(Chip_Design):
+class Sandbox(ChipDesign):
     def __init__(self, cell_name):
         self.origin = DPoint(0, 0)
         self.Z = CPWParameters(20e3, 10e3)  # normal CPW

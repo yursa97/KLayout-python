@@ -4,13 +4,13 @@ from math import pi
 from importlib import reload
 import ClassLib
 reload(ClassLib)
-from ClassLib import Chip_Design, CPWParameters, CPW, CPWResonator2, SFS_Csh_emb, Rectangle
+from ClassLib import ChipDesign, CPWParameters, CPW, CPWResonator2, SFS_Csh_emb, Rectangle
 
 import sonnetSim
 reload(sonnetSim)
 from sonnetSim import SonnetLab, PORT_TYPES
 
-class ResonatorSimulator(Chip_Design):
+class ResonatorSimulator(ChipDesign):
 
     origin = DPoint(0, 0)
     Z = CPWParameters(20e3, 10e3) # normal CPW

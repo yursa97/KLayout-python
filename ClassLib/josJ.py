@@ -3,16 +3,16 @@ from math import pi
 from pya import DPoint,DSimplePolygon,SimplePolygon
 from pya import Trans,DTrans,DVector,DPath
 
-from ClassLib.BaseClasses import Element_Base, Complex_Base
-from ClassLib.Shapes import Circle, Kolbaska
-from ClassLib.Coplanars import CPWParameters, CPW, CPW_RL_Path
+from ClassLib.baseClasses import ElementBase, ComplexBase
+from ClassLib.shapes import Circle, Kolbaska
+from ClassLib.coplanars import CPWParameters, CPW, CPW_RL_Path
 
 from collections import namedtuple
 
 SquidParams = namedtuple("SquidParams", "pad_side pad_r pads_distance p_ext_width p_ext_r sq_len sq_area j_width low_lead_w b_ext j_length n bridge")
 AsymSquidParams = namedtuple("AsymSquidParams", "pad_side pad_r pads_distance p_ext_width p_ext_r sq_len sq_area j_width_1 j_width_2 low_lead_w b_ext j_length n bridge")
 
-class AsymSquid(Complex_Base):
+class AsymSquid(ComplexBase):
     '''
     Class to draw a symmetrical squid with outer positioning of the junctions.
 
@@ -149,7 +149,7 @@ class Squid(AsymSquid):
         asymparams = AsymSquidParams(*params[:-3], *params[-2:])
         super().__init__(self, origin, asymparams, side, trans_in)
 
-class Line_N_JJCross(Element_Base):
+class Line_N_JJCross(ElementBase):
     def __init__( self, origin, params, trans_in=None  ):
         self.params = params
         self.a = params[0]

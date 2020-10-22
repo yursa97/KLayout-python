@@ -6,10 +6,10 @@ import pya
 from pya import Point, DPoint, DVector, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from ClassLib.BaseClasses import Complex_Base
-from ClassLib.Coplanars import CPW, CPW_arc
-from ClassLib.Resonators import Coil_type_1
-from ClassLib.Shapes import XmonCross
+from ClassLib.baseClasses import ComplexBase
+from ClassLib.coplanars import CPW, CPW_arc
+from ClassLib.resonators import Coil_type_1
+from ClassLib.shapes import XmonCross
 
 from sonnetSim.sonnetLab import SonnetLab, SonnetPort, SimulationBox
 
@@ -176,7 +176,7 @@ if __name__ == "__main__":
         #
         # ml_terminal._send(CMD.SAY_HELLO)
         # ml_terminal.clear()
-        # simBox = SimulationBox(CHIP.dx, CHIP.dy, CHIP.nX, CHIP.nY)
+        # simBox = SimulationBox(CHIP_10x10_12pads.dx, CHIP_10x10_12pads.dy, CHIP_10x10_12pads.nX, CHIP_10x10_12pads.nY)
         # ml_terminal.set_boxProps(simBox)
         # print("sending cell and layer")
         # from sonnetSim.pORT_TYPES import PORT_TYPES
@@ -200,7 +200,7 @@ if __name__ == "__main__":
         # worm_params = worm.get_geometry_params_dict(prefix="worm_")
         # xmonCross_params = xmonCross.get_geometry_params_dict(prefix="xmonCross_")
         # Z0_params = Z0.get_geometry_params_dict(prefix="S21Line_")
-        # CHIP_params = CHIP.get_geometry_params_dict(prefix="chip_")
+        # CHIP_params = CHIP_10x10_12pads.get_geometry_params_dict(prefix="chip_")
         #
         # project_dir = os.path.dirname(__file__)
         #

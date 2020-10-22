@@ -15,7 +15,7 @@ class CHIP:
 
 ### START classes to be delegated to different file ###
 
-class SFS_Csh_emb( Complex_Base ):
+class SFS_Csh_emb(ComplexBase):
     def __init__( self, origin, params, trans_in=None ):
         self.params = params
         self.r_out = params[0]
@@ -69,7 +69,7 @@ class SFS_Csh_emb( Complex_Base ):
         self.connections = [Z1_end, Z2_end]
         self.angle_connections = [pi/2, 3/2*pi]
 
-class StickQubit_Cap(Element_Base):
+class StickQubit_Cap(ElementBase):
 
     def __init__(self, origin, s_w, s_l, gap_w, gap_l, trans_in=None):
         self._s_w = s_w

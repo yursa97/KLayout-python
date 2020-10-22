@@ -9,7 +9,7 @@ from ClassLib import *
 reload(ClassLib)
 from ClassLib import *
 
-from ClassLib.Coplanars import *
+from ClassLib.coplanars import *
 
 
 class CHIP:

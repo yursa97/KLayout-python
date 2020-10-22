@@ -5,10 +5,10 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 import math
 
-from ClassLib.BaseClasses import Complex_Base
-from ClassLib.Coplanars import CPWParameters, CPW, CPW2CPW
+from ClassLib.baseClasses import ComplexBase, ElementBase
+from ClassLib.coplanars import CPWParameters, CPW, CPW2CPW
 
-class ContactPad(Complex_Base):
+class ContactPad(ComplexBase):
     def __init__(self, origin, pcb_cpw_params=CPWParameters(width=200e3, gap=120e3),
                  chip_cpw_params=CPWParameters(width=24.1e3, gap=12.95e3),
                  pad_length=300e3, back_metal_width=0, back_metal_gap=None,

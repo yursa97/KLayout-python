@@ -9,7 +9,7 @@ from ClassLib import *
 ### START classes to be delegated to different file ###
 from collections import Counter
 
-class CPW_RL_Path( Complex_Base ):
+class CPW_RL_Path(ComplexBase):
     def __init__( self, start, RL_str, Z_list, R_list, L_list, delta_alpha_list, trans_in = None ):
         self.RL_str = RL_str
         self.N_elements = len(RL_str)

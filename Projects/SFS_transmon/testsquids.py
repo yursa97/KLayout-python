@@ -4,7 +4,7 @@ from math import pi
 from importlib import reload
 import ClassLib
 reload(ClassLib)
-from ClassLib import Chip_Design, Rectangle, AsymSquid
+from ClassLib import ChipDesign, Rectangle, AsymSquid
 
 class Test_Squid(Complex_Base):
     """ @brief:     class represents a rectangular capacitor with a dc-SQUID between its plates
@@ -41,7 +41,7 @@ class Test_Squid(Complex_Base):
             self.primitives[prim_name].place(dest, layer_ph)
         self.squid.place(dest, layer_el)  
 
-class SquidModel(Chip_Design):
+class SquidModel(ChipDesign):
 
     origin = DPoint(0, 0)
     chip_x = 1e6

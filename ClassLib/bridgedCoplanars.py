@@ -4,8 +4,8 @@ from numpy import sign
 from pya import Point, DPoint, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from ClassLib.BaseClasses import *
-from ClassLib.Airbridge import *
+from ClassLib.baseClasses import *
+from ClassLib.airbridge import *
 
 
 class BridgedCPW(ElementBase):

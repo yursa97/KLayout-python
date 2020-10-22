@@ -4,15 +4,15 @@ from math import cos, sin, atan2, pi
 from pya import Point, DPoint, DVector, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from ClassLib.BaseClasses import Complex_Base
-from ClassLib.Coplanars import CPW, CPW_arc
-from ClassLib.Resonators import Coil_type_1
-from ClassLib.Shapes import XmonCross
+from ClassLib.baseClasses import ComplexBase
+from ClassLib.coplanars import CPW, CPW_arc
+from ClassLib.resonators import Coil_type_1
+from ClassLib.shapes import XmonCross
 
 from sonnetSim.sonnetLab import SonnetLab, SonnetPort, SimulationBox
 
 
-class EMResonator_TL2Qbit_worm2(Complex_Base):
+class EMResonator_TL2Qbit_worm2(ComplexBase):
     def __init__(self, Z0, start, L_coupling, L1, r, L2, N, trans_in=None):
         self.Z0 = Z0  # resonator's coplanar waveguide parameters
         # first horizontal coplanar length.

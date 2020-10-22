@@ -9,13 +9,13 @@ from importlib import reload
 import ClassLib
 from ClassLib import *
 
-reload(BaseClasses)
-reload(Capacitors)
-reload(Coplanars)
+reload(baseClasses)
+reload(capacitors)
+reload(coplanars)
 reload(JJ)
-reload(Qbits)
-reload(Resonators)
-reload(Shapes)
+reload(qbits)
+reload(resonators)
+reload(shapes)
 reload(ContactPad)
 reload(Claw)
 reload(Tmon)
@@ -24,10 +24,10 @@ reload(_PROG_SETTINGS)
 from ClassLib import *
 
 from ClassLib.ContactPad import *
-from ClassLib.Claw import *
-from ClassLib.Resonators import *
-from ClassLib.Tmon import *
-from ClassLib.FluxCoil import *
+from ClassLib.claw import *
+from ClassLib.resonators import *
+from ClassLib.tmon import *
+from ClassLib.fluxCoil import *
 
 from time import time
 
@@ -47,21 +47,23 @@ if( lv == None ):
     lv = mw.current_view()
 else:
     cv = lv.active_cellview()
-
-cell_name = "Tmon_chain_10x5_resonators"
+    
+cell_name = "Tmon_chain_10x5_FBs"
 print(cell_name)
+
+
 
 layout = cv.layout()
 layout.dbu = 0.001
 if not layout.has_cell(cell_name):
-    layout.create_cell(cell_name)
+  layout.create_cell(cell_name)
 
 cv.cell_name = cell_name
 cell = cv.cell
 
-info = pya.LayerInfo(1, 0)
-info2 = pya.LayerInfo(2, 0)
-layer_photo = layout.layer(info)
+info = pya.LayerInfo(1,0)
+info2 = pya.LayerInfo(2,0)
+layer_photo = layout.layer( info )
 layer_el = layout.layer( info2 )
 
 # clear this cell and layer
@@ -85,7 +87,7 @@ fc_cpw_params = CPWParameters(7e3, 4e3)
 
 ### DRAW SECTION START ###
 
-cp1 = Contact_Pad(origin=DPoint(-CHIP.dx/2, -CHIP.dy/4), feedline_cpw_params=md_cpw_params)
+cp1 = Contact_Pad(origin = DPoint(-CHIP.dx/2, -CHIP.dy/4), feedline_cpw_params = md_cpw_params)
 cp1.place(canvas)
 
 cp2 = Contact_Pad(DPoint(-CHIP.dx/2, CHIP.dy/4), fc_cpw_params)
@@ -158,7 +160,80 @@ for i in range(-(chain_length)//2, (chain_length)//2, 1):
   claw.place(canvas)
   res.place(canvas)
 
+  tmon = Tmon(claw.connections[1], tmon_cpw_params, tmon_arm_len, \
+                tmon_JJ_arm_len, tmon_JJ_site_span, tmon_coupling_pads_len, \
+                  h_jj, w_jj, asymmetry, None)
 
+  tmon.place(canvas, region_name = "photo")
+  tmon.place(ebeam, region_name = "ebeam")
+
+
+  qubit_ports.append(tmon.end)
+
+# ====== Microwave drives ========
+
+
+tmon1_md_segment_lengths =\
+     [300e3, qubit_ports[0].y - cp1.end.y-tmon_JJ_arm_len - tmon_JJ_site_span-tmon_cpw_params.width/2,
+        qubit_ports[0].x - cp1.end.x-300e3 - tmon_arm_len*2]
+tmon1_md = CPW_RL_Path(cp1.end, "LRLRL", md_cpw_params, 240e3,
+     tmon1_md_segment_lengths, [pi/2, -pi/2] ,trans_in = None)
+tmon1_md.place(canvas)
+
+tmon1_md_end = CPW(0, md_cpw_params.b/2, tmon1_md.end, tmon1_md.end+DPoint(4e3, 0))
+tmon1_md_end.place(canvas)
+
+tmon_m1_md_segment_lengths =\
+     [300e3, qubit_ports[-1].y - cp6.end.y-tmon_JJ_arm_len - tmon_JJ_site_span-tmon_cpw_params.width/2,
+        -qubit_ports[-1].x + cp6.end.x-300e3 - tmon_arm_len*2]
+tmon_m1_md = CPW_RL_Path(cp6.end, "LRLRL", md_cpw_params, 240e3,
+     tmon_m1_md_segment_lengths, [pi/2, -pi/2] ,trans_in = DTrans.M90)
+tmon_m1_md.place(canvas)
+
+tmon_m1_md_end = CPW(0, md_cpw_params.b/2, tmon_m1_md.end, tmon_m1_md.end+DPoint(-4e3, 0))
+tmon_m1_md_end.place(canvas)
+
+# ======= Flux coils =======
+
+
+tmon1_fc_segment_lengths =\
+     [qubit_ports[0].x - cp2.end.x, cp2.end.y - qubit_ports[0].y-20e3]
+tmon1_fc = CPW_RL_Path(cp2.end, "LRL", fc_cpw_params, 240e3,
+     tmon1_fc_segment_lengths, [-pi/2] ,trans_in = None)
+tmon1_fc.place(canvas)
+
+tmon1_fc_end = FluxCoil(tmon1_fc.end, fc_cpw_params, width = 20e3, trans_in = DTrans.R180)
+tmon1_fc_end.place(canvas)
+
+# tmon -1
+fc_segment_lengths =\
+     [-qubit_ports[-1].x + cp5.end.x, cp5.end.y - qubit_ports[-1].y-20e3]
+fc = CPW_RL_Path(cp5.end, "LRL", fc_cpw_params, 240e3,
+     fc_segment_lengths, [-pi/2] ,trans_in = DTrans.M90)
+fc.place(canvas)
+
+fc_end = FluxCoil(fc.end, fc_cpw_params, width = 20e3, trans_in = DTrans.R180)
+fc_end.place(canvas)
+
+# tmon 3
+fc_segment_lengths =\
+     [0.5e6, abs(qubit_ports[3].x - cp3.end.x), -0.5e6+cp3.end.y - qubit_ports[3].y-20e3]
+fc = CPW_RL_Path(cp3.end, "LRLRL", fc_cpw_params, 240e3,
+     fc_segment_lengths, [pi/2, -pi/2] , trans_in = DTrans.R270)
+fc.place(canvas)
+
+fc_end = FluxCoil(fc.end, fc_cpw_params, width = 20e3, trans_in = DTrans.R180)
+fc_end.place(canvas)
+
+# tmon -4
+fc_segment_lengths =\
+     [0.5e6, -qubit_ports[-4].x + cp4.end.x, -0.5e6+cp4.end.y - qubit_ports[-4].y-20e3]
+fc = CPW_RL_Path(cp4.end, "LRLRL", fc_cpw_params, 240e3,
+     fc_segment_lengths, [-pi/2, pi/2] ,trans_in = DTrans.R270)
+fc.place(canvas)
+
+fc_end = FluxCoil(fc.end, fc_cpw_params, width = 20e3, trans_in = DTrans.R180)
+fc_end.place(canvas)
 
 
 

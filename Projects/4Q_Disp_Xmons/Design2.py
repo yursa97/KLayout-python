@@ -8,287 +8,220 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from importlib import reload
 import ClassLib
+reload(ClassLib)
 
-reload(ClassLib)    
+from ClassLib.coplanars import CPWParameters, CPW_RL_Path
+from ClassLib.shapes import XmonCross
+from ClassLib.resonators import EMResonatorTL3QbitWormRLTailXmonFork
+from ClassLib.chipTemplates import CHIP_10x10_12pads
+from ClassLib.chipDesign import ChipDesign
 
-from ClassLib.BaseClasses import Complex_Base
-from ClassLib.Coplanars import CPW, CPWParameters, CPW_RL_Path, CPW_arc, Coil_type_1
-from ClassLib.Shapes import XmonCross
+# imports for docstrings generation
+from typing import List, Dict
 from ClassLib.contactPads import ContactPad
-from ClassLib.Resonators import EMResonatorTL3QbitWormRLTailXmonFork
 
 
-class CHIP:
-    """
-    10x10 mm chip
-    PCB design located here:
-    https://drive.google.com/drive/folders/1TGjD5wwC28ZiLln_W8M6gFJpl6MoqZWF?usp=sharing
-    """
-    dx = 10e6
-    dy = 10e6
+class Design5Q(ChipDesign):
+    def __init__(self, cell_name):
 
-    pcb_width = 260e3  # 0.26 mm
-    pcb_gap = 190e3  # (0.64 - 0.26) / 2 = 0.19 mm
-    pcb_feedline_d = 2500e3  # 2.5 mm
-    pcb_Z = CPWParameters(pcb_width, pcb_gap)
+        super().__init__(cell_name)
+        info_el2 = pya.LayerInfo(3, 0)  # for DC contact deposition
+        self.region_el2 = Region()
+        self.layer_el2 = self.layout.layer(info_el2)
 
-    cpw_width = 24.1e3
-    cpw_gap = 12.95e3
-    chip_Z = CPWParameters(cpw_width, cpw_gap)
+        info_bridges1 = pya.LayerInfo(4, 0)  # bridge photo layer 1
+        self.region_bridges1 = Region()
+        self.layer_bridges1 = self.layout.layer(info_bridges1)
 
-    @staticmethod
-    def get_contact_pads():
-        dx = CHIP.dx
-        dy = CHIP.dy
-        pcb_feedline_d = CHIP.pcb_feedline_d
-        pcb_Z = CHIP.pcb_Z
-        chip_Z = CHIP.chip_Z
+        info_bridges2 = pya.LayerInfo(5, 0)  # bridge photo layer 2
+        self.region_bridges2 = Region()
+        self.layer_bridges2 = self.layout.layer(info_bridges2)
 
-        contact_pads_left = [
-            ContactPad(
-                DPoint(0, dy - pcb_feedline_d * (i + 1)), pcb_Z, chip_Z, back_metal_width=50e3,
-                back_metal_gap=100e3
-            ) for i in range(3)
-        ]
+        self.lv.add_missing_layers()  # has to call it once more to add new layers
 
-        contact_pads_bottom = [
-            ContactPad(
-                DPoint(pcb_feedline_d * (i + 1), 0), pcb_Z, chip_Z, back_metal_width=50e3,
-                back_metal_gap=100e3,
-                trans_in=Trans.R90
-            ) for i in range(3)
-        ]
+        ### ADDITIONAL VARIABLES SECTION START ###
+        self.contact_pads: list[ContactPad] = None
 
-        contact_pads_right = [
-            ContactPad(
-                DPoint(dx, pcb_feedline_d*(i+1)), pcb_Z, chip_Z, back_metal_width=50e3,
-                back_metal_gap=100e3,
-                trans_in=Trans.R180
-            ) for i in range(3)
-        ]
+        # readout line parameters
+        self.ro_line_turn_radius: float = None
+        self.ro_line_dy: float = None
+        self.cpw_ro_line: CPW_RL_Path = None
 
-        contact_pads_top = [
-            ContactPad(
-                DPoint(dx - pcb_feedline_d * (i + 1), dy), pcb_Z, chip_Z, back_metal_width=50e3,
-                back_metal_gap=100e3,
-                trans_in=Trans.R270
-            ) for i in range(3)
-        ]
+        # resonators objects list
+        self.resonators: List[EMResonatorTL3QbitWormRLTailXmonFork] = []
+        # resonator parameters
+        self.L_coupling_list = [1e3 * x for x in [255, 250, 250, 240, 230]]
+        # corresponding to resonanse freq is linspaced in interval [6,9) GHz
+        self.L0 = 1600e3
+        self.L1_list = [1e3 * x for x in [37.7039, 67.6553, 90.925, 81.5881, 39.9021]]
+        self.r = 60e3
+        self.N = 5
+        self.L2_list = [self.r] * len(self.L1_list)
+        self.L4_list = [self.r] * len(self.L1_list)
+        self.width_res = 20e3
+        self.gap_res = 10e3
+        self.Z_res = CPWParameters(self.width_res, self.gap_res)
+        self.to_line_list = [53e3] * len(self.L1_list)
+        self.fork_metal_width = 20e3
+        self.fork_gnd_gap = 20e3
+        self.xmon_fork_gnd_gap = 20e3
+        # resonator-fork parameters
+        # -20e3 for Xmons in upper sweet-spot
+        # -10e3 for Xmons in lower sweet-spot
+        self.xmon_fork_penetration_list = [-20e3, -10e3, -20e3, -10e3, -20e3]
 
-        # contact pads are ordered starting with top-left corner in counter-clockwise direction
-        contact_pads = itertools.chain(
-            contact_pads_left, contact_pads_bottom,
-            contact_pads_right, contact_pads_top
+        # xmon parameters
+        self.cross_width: float = 60e3
+        self.cross_len: float = 125e3
+        self.cross_gnd_gap: float = 20e3
+        self.xmon_x_distance: float = 393e3  # from simulation of g_12
+        self.xmons: list[XmonCross] = []
+        ### ADDITIONAL VARIABLES SECTION END ###
+
+    def draw(self, design_params=None):
+        self.draw_chip()
+        self.draw_readout_waveguide()
+
+        '''
+            Only creating object. This is due to the drawing of xmons and resonators require
+        draw xmons, then draw resonators and then draw additional xmons. This is
+        ugly and that how this was before migrating to `ChipDesign` based code structure
+            This is also the reason why `self.__init__` is flooded with design parameters that
+        are used across multiple drawing functions.
+        
+        TODO: This drawings sequence can be decoupled in the future.
+        '''
+        self.create_resonator_objects()
+        self.draw_xmons_and_resonators()
+
+        self.cell.shapes(self.layer_ph).insert(self.region_ph)
+        pass
+
+    def draw_chip(self):
+        chip_box = CHIP_10x10_12pads.box
+        self.region_ph.insert(chip_box)
+
+        self.contact_pads = CHIP_10x10_12pads.get_contact_pads()
+        for contact_pad in self.contact_pads:
+            contact_pad.place(self.region_ph)
+
+    def draw_readout_waveguide(self):
+        # place readout waveguide
+        self.ro_line_turn_radius = 200e3
+        self.ro_line_dy = 600e3
+        Z0 = CPWParameters(CHIP_10x10_12pads.cpw_width, CHIP_10x10_12pads.cpw_gap)
+        self.cpw_ro_line = CPW_RL_Path(
+            self.contact_pads[-1].end, shape="LRLRL", cpw_parameters=Z0,
+            turn_radiuses=[self.ro_line_turn_radius] * 2,
+            segment_lengths=[self.ro_line_dy, CHIP_10x10_12pads.pcb_feedline_d, self.ro_line_dy],
+            turn_angles=[pi / 2, pi / 2], trans_in=Trans.R270
         )
+        self.cpw_ro_line.place(self.region_ph)
 
-        return list(contact_pads)
+    def create_resonator_objects(self):
+        # fork at the end of resonator parameters
+        fork_x_span = self.cross_width + 2 * (self.xmon_fork_gnd_gap + self.fork_metal_width)
 
-    origin = DPoint(0, 0)
-    box = pya.DBox(origin, origin + DPoint(dx, dy))
+        ### RESONATORS TAILS CALCULATIONS SECTION START ###
+        # key to the calculations can be found in hand-written format here:
+        # https://drive.google.com/file/d/1wFmv5YmHAMTqYyeGfiqz79a9kL1MtZHu/view?usp=sharing
 
-    @staticmethod
-    def get_geometry_params_dict(prefix="", postfix=""):
-        from collections import OrderedDict
-        geometry_params = OrderedDict(
-            [
-                ("dx, um", CHIP.dx / 1e3),
-                ("dy, um", CHIP.dy / 1e3),
-                ("nX", CHIP.nX),
-                ("nY", CHIP.nY)
-            ]
+        # distance between nearest resonators central conductors centers
+        resonators_d = 400e3
+        # x span between left long vertical line and
+        # right-most center of central conductors
+        resonators_widths = [2 * self.r + L_coupling for L_coupling in self.L_coupling_list]
+        x1 = sum(resonators_widths[:2]) + 2 * resonators_d + resonators_widths[3] / 2 - 2 * self.xmon_x_distance
+        x2 = x1 + self.xmon_x_distance - (resonators_widths[0] + resonators_d)
+        x3 = sum(resonators_widths[:3]) + 3 * resonators_d - (x1 + 3 * self.xmon_x_distance)
+        x4 = sum(resonators_widths[:4]) + 4 * resonators_d - (x1 + 4 * self.xmon_x_distance)
+
+        res_tail_shape = "LRLRL"
+        tail_turn_radiuses = self.r
+
+        self.L2_list[0] += 6 * self.Z_res.b
+        self.L2_list[1] += 0
+        self.L2_list[3] += 3 * self.Z_res.b
+        self.L2_list[4] += 6 * self.Z_res.b
+
+        self.L4_list[1] += 6 * self.Z_res.b
+        self.L4_list[2] += 6 * self.Z_res.b
+        self.L4_list[3] += 3 * self.Z_res.b
+        tail_segment_lengths_list = [
+            [self.L2_list[0], x1, self.L4_list[0]],
+            [self.L2_list[1], x2, self.L4_list[1]],
+            [self.L2_list[2], (self.L_coupling_list[2] + 2 * self.r) / 2, self.L4_list[2]],
+            [self.L2_list[3], x3, self.L4_list[3]],
+            [self.L2_list[4], x4, self.L4_list[4]]
+        ]
+        tail_turn_angles_list = [
+            [pi / 2, -pi / 2],
+            [pi / 2, -pi / 2],
+            [pi / 2, -pi / 2],
+            [-pi / 2, pi / 2],
+            [-pi / 2, pi / 2],
+        ]
+        tail_trans_in_list = [
+            Trans.R270,
+            Trans.R270,
+            Trans.R270,
+            Trans.R270,
+            Trans.R270
+        ]
+        ### RESONATORS TAILS CALCULATIONS SECTION END ###
+
+        pars = list(
+            zip(
+                self.L1_list, self.to_line_list, self.L_coupling_list,
+                self.xmon_fork_penetration_list,
+                tail_segment_lengths_list, tail_turn_angles_list, tail_trans_in_list
+            )
         )
-        modified_dict = OrderedDict()
-        for key, val in geometry_params.items():
-            modified_dict[prefix + key + postfix] = val
-        return modified_dict
+        for res_idx, params in enumerate(pars):
+            # parameters exctraction
+            L1 = params[0]
+            to_line = params[1]
+            L_coupling = params[2]
+            xmon_fork_penetration = params[3]
+            tail_segment_lengths = params[4]
+            tail_turn_angles = params[5]
+            tail_trans_in = params[6]
+
+            # deduction for resonator placements
+            # under condition that Xmon-Xmon distance equals
+            # `xmon_x_distance`
+            worm_x = 1.2 * CHIP_10x10_12pads.pcb_feedline_d + \
+                     sum(resonators_widths[:res_idx]) + res_idx * resonators_d
+            worm_y = self.contact_pads[-1].end.y - self.ro_line_dy - to_line
+            # `fork_y_span` based on coupling modulated with
+            # xmon_fork_penetration from `self.xmon_fork_penetration`
+            fork_y_span = xmon_fork_penetration + self.xmon_fork_gnd_gap
+
+            self.resonators.append(
+                EMResonatorTL3QbitWormRLTailXmonFork(
+                    self.Z_res, DPoint(worm_x, worm_y), L_coupling, self.L0, L1, self.r, self.N,
+                    tail_shape=res_tail_shape, tail_turn_radiuses=tail_turn_radiuses,
+                    tail_segment_lengths=tail_segment_lengths,
+                    tail_turn_angles=tail_turn_angles, tail_trans_in=tail_trans_in,
+                    fork_x_span=fork_x_span, fork_y_span=fork_y_span,
+                    fork_metal_width=self.fork_metal_width, fork_gnd_gap=self.fork_gnd_gap
+                )
+            )
+
+    def draw_xmons_and_resonators(self):
+        for resonator, xmon_fork_penetration in zip(self.resonators, self.xmon_fork_penetration_list):
+            xmon_center = (resonator.fork_y_cpw1.end + resonator.fork_y_cpw2.end) / 2
+            xmon_center += DPoint(0, -(self.cross_len + self.cross_width / 2) + xmon_fork_penetration)
+            self.xmons.append(
+                XmonCross(xmon_center, self.cross_width, self.cross_len, self.cross_gnd_gap)
+            )
+            self.xmons[-1].place(self.region_ph)
+            resonator.place(self.region_ph)
+            xmonCross_corrected = XmonCross(xmon_center, self.cross_width, self.cross_len, self.xmon_fork_gnd_gap)
+            xmonCross_corrected.place(self.region_ph)
 
 
 if __name__ == "__main__":
-    # getting main references of the application
-    # getting main references of the application
-    app = pya.Application.instance()
-    mw = app.main_window()
-    lv = mw.current_view()
-    cv = None
-
-    # this insures that lv and cv are valid objects
-    if lv is None:
-        cv = mw.create_layout(1)
-        lv = mw.current_view()
-    else:
-        cv = lv.active_cellview()
-
-    # find or create the desired by programmer cell and layer
-    layout = cv.layout()
-    layout.dbu = 0.001
-    if (layout.has_cell("testScript")):
-        pass
-    else:
-        cell = layout.create_cell("testScript")
-
-    layer_info_photo = pya.LayerInfo(10, 0)
-    layer_info_el = pya.LayerInfo(1, 0)
-    layer_photo = layout.layer(layer_info_photo)
-    layer_el = layout.layer(layer_info_el)
-
-    # setting layout view
-    lv.select_cell(cell.cell_index(), 0)
-    lv.add_missing_layers()
-
-    ## DRAWING SECTION START ##
-    origin = DPoint(0, 0)
-    # clear this cell and layer
-    cell.clear()
-    tmp_reg = Region()  # faster to call `place` on single region
-
-    # place chip metal layer
-    chip_box = pya.Box(DPoint(0, 0), DPoint(CHIP.dx, CHIP.dy))
-    tmp_reg.insert(chip_box)
-    contact_pads = CHIP.get_contact_pads()
-    for contact_pad in contact_pads:
-        contact_pad.place(tmp_reg)
-
-    # place readout waveguide
-    ro_line_turn_radius = 200e3
-    ro_line_dy = 600e3
-    Z0 = CPWParameters(CHIP.cpw_width, CHIP.cpw_gap)
-    cpwrl_ro = CPW_RL_Path(
-        contact_pads[-1].end, shape="LRLRL", cpw_parameters=Z0,
-        turn_radiuses=[ro_line_turn_radius] * 2,
-        segment_lengths=[ro_line_dy, CHIP.pcb_feedline_d, ro_line_dy],
-        turn_angles=[pi / 2, pi / 2], trans_in=Trans.R270
-    )
-    cpwrl_ro.place(tmp_reg)
-
-    # resonators parameters
-    L_coupling_list = [1e3*x for x in [255, 250, 250, 240, 230]]
-    # corresponding to resonanse freq is linspaced in interval [6,9) GHz
-    L0 = 1600e3
-    L1_list = [1e3 * x for x in [37.7039, 67.6553, 90.925, 81.5881, 39.9021]]
-    r = 60e3
-    N = 5
-    L2_list = [r] * len(L1_list)
-    L3_list = [0e3] * len(L1_list)
-    L4_list = [r] * len(L1_list)
-    width_res = 20e3
-    gap_res = 10e3
-    Z_res = CPW(width_res, gap_res, origin, origin)
-
-    # xmon cross parameters
-    cross_width = 60e3
-    cross_len = 125e3
-    cross_gnd_gap = 20e3
-    xmon_x_distance = 393e3  # from simulation of g_12
-
-    # fork at the end of resonator parameters
-    fork_metal_width = 20e3
-    fork_gnd_gap = 20e3
-    xmon_fork_gnd_gap = 20e3
-    fork_x_span = cross_width + 2 * (xmon_fork_gnd_gap + fork_metal_width)
-    fork_y_span = None
-    # Xmon-fork parameters
-    # -20e3 for Xmons in upper sweet-spot
-    # -10e3 for Xmons in lower sweet-spot
-    xmon_fork_penetration_list = [-20e3, -10e3, -20e3, -10e3, -20e3]
-
-    photo_reg = Region()  # optimal to place everything in one region
-    to_line_list = [53e3] * len(L1_list)
-
-    ### RESONATORS TAILS CALCULATIONS SECTION START ###
-    # key to the calculations can be found in hand-written format here:
-    # https://drive.google.com/file/d/1wFmv5YmHAMTqYyeGfiqz79a9kL1MtZHu/view?usp=sharing
-
-    # distance between nearest resonators central conductors centers
-    resonators_d = 400e3
-    # x span between left long vertical line and
-    # right-most center of central conductors
-    resonators_widths = [2 * r + L_coupling for L_coupling in L_coupling_list]
-    x1 = sum(resonators_widths[:2]) + 2 * resonators_d + resonators_widths[3] / 2 - 2 * xmon_x_distance
-    x2 = x1 + xmon_x_distance - (resonators_widths[0] + resonators_d)
-    x3 = sum(resonators_widths[:3]) + 3 * resonators_d - (x1 + 3 * xmon_x_distance)
-    x4 = sum(resonators_widths[:4]) + 4 * resonators_d - (x1 + 4 * xmon_x_distance)
-
-    res_tail_shape = "LRLRL"
-    tail_turn_radiuses = r
-
-    L2_list[0] += 6 * Z_res.b
-    L2_list[1] += 0
-    L2_list[3] += 3 * Z_res.b
-    L2_list[4] += 6 * Z_res.b
-
-    L4_list[1] += 6 * Z_res.b
-    L4_list[2] += 6 * Z_res.b
-    L4_list[3] += 3 * Z_res.b
-    tail_segment_lengths_list = [
-        [L2_list[0], x1, L4_list[0]],
-        [L2_list[1], x2, L4_list[1]],
-        [L2_list[2], (L_coupling_list[2] + 2 * r) / 2, L4_list[2]],
-        [L2_list[3], x3, L4_list[3]],
-        [L2_list[4], x4, L4_list[4]]
-    ]
-    tail_turn_angles_list = [
-        [pi / 2, -pi / 2],
-        [pi / 2, -pi / 2],
-        [pi / 2, -pi / 2],
-        [-pi / 2, pi / 2],
-        [-pi / 2, pi / 2],
-    ]
-    tail_trans_in_list = [
-        Trans.R270,
-        Trans.R270,
-        Trans.R270,
-        Trans.R270,
-        Trans.R270
-    ]
-    ### RESONATORS TAILS CALCULATIONS SECTION END ###
-
-    pars = list(
-        zip(
-            L1_list, to_line_list, L_coupling_list,
-            xmon_fork_penetration_list,
-            tail_segment_lengths_list, tail_turn_angles_list, tail_trans_in_list
-        )
-    )
-    for res_idx, params in enumerate(pars):
-        # parameters exctraction
-        L1 = params[0]
-        to_line = params[1]
-        L_coupling = params[2]
-        xmon_fork_penetration = params[3]
-        tail_segment_lengths = params[4]
-        tail_turn_angles = params[5]
-        tail_trans_in = params[6]
-        fork_y_span = xmon_fork_penetration + xmon_fork_gnd_gap
-        worm_x = None
-
-        # deduction for resonator placements
-        # under condition that Xmon-Xmon distance equals
-        # `xmon_x_distance`
-        worm_x = 1.2 * CHIP.pcb_feedline_d + \
-                 sum(resonators_widths[:res_idx]) + res_idx*resonators_d
-        worm_y = contact_pads[-1].end.y - ro_line_dy - to_line
-
-        worm = EMResonatorTL3QbitWormRLTailXmonFork(
-            Z_res, DPoint(worm_x, worm_y), L_coupling, L0, L1, r, N,
-            tail_shape=res_tail_shape, tail_turn_radiuses=r,
-            tail_segment_lengths=tail_segment_lengths,
-            tail_turn_angles=tail_turn_angles, tail_trans_in=tail_trans_in,
-            fork_x_span=fork_x_span, fork_y_span=fork_y_span,
-            fork_metal_width=fork_metal_width, fork_gnd_gap=fork_gnd_gap
-        )
-
-        xmon_center = (worm.fork_y_cpw1.end + worm.fork_y_cpw2.end) / 2
-        xmon_center += DPoint(0, -(cross_len + cross_width / 2) + xmon_fork_penetration)
-        xmonCross = XmonCross(xmon_center, cross_width, cross_len, cross_gnd_gap)
-
-        # translating all objects so that chip.p1 at coordinate origin
-        xmonCross.place(cell, layer_photo)
-        worm.place(tmp_reg)
-
-        xmonCross_corrected = XmonCross(xmon_center, cross_width, cross_len, xmon_fork_gnd_gap)
-        xmonCross_corrected.place(tmp_reg)
-
-    # convert region to cell and display it
-    cell.shapes(layer_photo).insert(tmp_reg)
-    lv.zoom_fit()
-    ## DRAWING SECTION END ##
+    design = Design5Q("testCell")
+    design.draw()
+    design.lv.zoom_fit()

@@ -3,19 +3,19 @@ import pya
 from math import cos, sin, atan2, pi
 from pya import Point, DPoint, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
-from ClassLib.Coplanars import CPW, CPW_arc
-from ClassLib.Resonators import Coil_type_1
-from ClassLib.BaseClasses import Complex_Base, Element_Base
+from ClassLib.coplanars import CPW, CPW_arc
+from ClassLib.resonators import Coil_type_1
+from ClassLib.baseClasses import ComplexBase, ElementBase
 
 from importlib import reload
 import sonnetSim.sonnetLab
 
 reload(sonnetSim.sonnetLab)
 from sonnetSim.sonnetLab import SonnetLab, SonnetPort, SimulationBox
-from ClassLib.Shapes import XmonCross
+from ClassLib.shapes import XmonCross
 
 
-class XmonCross(Complex_Base):
+class XmonCross(ComplexBase):
     def __init__(self, origin,
                  sideX_length, sideX_width, sideX_gnd_gap, sideX_face_gnd_gap=None,
                  sideY_length=None, sideY_width=None, sideY_gnd_gap=None, sideY_face_gnd_gap=None,
@@ -68,7 +68,7 @@ class XmonCross(Complex_Base):
         origin = DPoint(0, 0)
 
         # draw central square
-        from ClassLib.Shapes import Rectangle
+        from ClassLib.shapes import Rectangle
         lb_corner = DPoint(-self.sideX_width / 2, -self.sideY_width / 2)
         center_square = Rectangle(lb_corner, self.sideX_width, self.sideY_width)
         self.primitives["center_square"] = center_square

@@ -6,15 +6,15 @@ import pya
 from pya import Point, DPoint, DVector, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from ClassLib.BaseClasses import Complex_Base
-from ClassLib.Coplanars import CPW, CPW_arc
-from ClassLib.Resonators import Coil_type_1
-from ClassLib.Shapes import XmonCross
+from ClassLib.baseClasses import ComplexBase
+from ClassLib.coplanars import CPW, CPW_arc
+from ClassLib.resonators import Coil_type_1
+from ClassLib.shapes import XmonCross
 
 from sonnetSim.sonnetLab import SonnetLab, SonnetPort, SimulationBox
 
 
-class EMResonator_TL2Qbit_worm2(Complex_Base):
+class EMResonator_TL2Qbit_worm2(ComplexBase):
     def __init__(self, Z0, start, L_coupling, L1, r, L2, N, trans_in=None):
         self.Z0 = Z0
         self.L_coupling = L_coupling
@@ -130,7 +130,7 @@ class EMResonator_TL2Qbit_worm2_XmonFork(EMResonator_TL2Qbit_worm2):
         self.primitives["erased_fork_right_cpw_end"] = CPW(0, forkZ.b / 2, self.fork_y_cpw2.end, p1)
 
 
-class EMResonator_TL2Qbit_worm3(Complex_Base):
+class EMResonator_TL2Qbit_worm3(ComplexBase):
     def __init__(self, Z0, start, L_coupling, L0, L1, r, L2, N, trans_in=None):
         self.Z0 = Z0
         self.L_coupling = L_coupling
@@ -426,7 +426,7 @@ if __name__ == "__main__":
         #
         # ml_terminal._send(CMD.SAY_HELLO)
         # ml_terminal.clear()
-        # simBox = SimulationBox(CHIP.dx, CHIP.dy, CHIP.nX, CHIP.nY)
+        # simBox = SimulationBox(CHIP_10x10_12pads.dx, CHIP_10x10_12pads.dy, CHIP_10x10_12pads.nX, CHIP_10x10_12pads.nY)
         # ml_terminal.set_boxProps(simBox)
         # print("sending cell and layer")
         # from sonnetSim.pORT_TYPES import PORT_TYPES
@@ -450,7 +450,7 @@ if __name__ == "__main__":
         # worm_params = worm.get_geometry_params_dict(prefix="worm_")
         # xmonCross_params = xmonCross.get_geometry_params_dict(prefix="xmonCross_")
         # Z0_params = Z0.get_geometry_params_dict(prefix="S21Line_")
-        # CHIP_params = CHIP.get_geometry_params_dict(prefix="chip_")
+        # CHIP_params = CHIP_10x10_12pads.get_geometry_params_dict(prefix="chip_")
         #
         # project_dir = os.path.dirname(__file__)
         #

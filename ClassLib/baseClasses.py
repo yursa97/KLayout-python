@@ -8,7 +8,7 @@ from ClassLib._PROG_SETTINGS import *
 from collections import OrderedDict
 
 
-class Element_Base():
+class ElementBase():
     '''
     @brief: base class for simple single-layer or multi-layer elements and objects that are consisting of
             several polygons.
@@ -215,7 +215,7 @@ class Element_Base():
                 dest.merge()
 
 
-class Complex_Base(Element_Base):
+class ComplexBase(ElementBase):
     def __init__(self, origin, trans_in=None):
         super().__init__(origin, trans_in)
         # ensures sequential order of drawing primitives

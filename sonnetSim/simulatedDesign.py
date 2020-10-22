@@ -4,10 +4,10 @@ from itertools import product
 import numpy as np
 from datetime import datetime
 
-from ClassLib.ChipDesign import Chip_Design
+from ClassLib.chipDesign import ChipDesign
 from .sonnetLab import SonnetLab, SimulationBox
 
-class SimulatedDesign(Chip_Design):
+class SimulatedDesign(ChipDesign):
     def __init__(self, cell_name):
         super().__init__(cell_name)
 

@@ -11,8 +11,8 @@ from typing import Union
 import ClassLib
 
 reload(ClassLib)
-from ClassLib.BaseClasses import Element_Base
-from ClassLib.Coplanars import CPWParameters, CPW, CPW_arc
+from ClassLib.baseClasses import ElementBase
+from ClassLib.coplanars import CPWParameters, CPW, CPW_arc
 from ClassLib.contactPads import ContactPad
 
 
@@ -101,7 +101,7 @@ class CHIP:
         return modified_dict
 
 
-class Bridge1(Element_Base):
+class Bridge1(ElementBase):
     """
         Class implements bridges that are used to suppress
         non-TEM modes in coplanar or other types of waveguides.

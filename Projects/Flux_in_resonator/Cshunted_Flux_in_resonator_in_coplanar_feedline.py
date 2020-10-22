@@ -9,7 +9,7 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 import ClassLib
 from ClassLib import *
 
-from ClassLib.Coplanars import *
+from ClassLib.coplanars import *
             
 class CHIP:
     dx = 10.1e6

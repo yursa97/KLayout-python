@@ -7,56 +7,56 @@ from . import _PROG_SETTINGS
 reload(_PROG_SETTINGS)
 from ._PROG_SETTINGS import *
 
-from . import BaseClasses
-reload(BaseClasses)
-from .BaseClasses import *
+from . import baseClasses
+reload(baseClasses)
+from .baseClasses import *
 
-from . import Shapes
-reload(Shapes)
-from .Shapes import *
+from . import shapes
+reload(shapes)
+from .shapes import *
 
-from . import Coplanars
-reload(Coplanars)
-from .Coplanars import *
+from . import coplanars
+reload(coplanars)
+from .coplanars import *
 
-from . import Capacitors
-reload(Capacitors)
-from .Capacitors import *
+from . import capacitors
+reload(capacitors)
+from .capacitors import *
 
-from . import Couplers
-reload(Couplers)
-from .Couplers import *
+from . import couplers
+reload(couplers)
+from .couplers import *
 
-from . import JosJ
-reload(JosJ)
-from .JosJ import *
+from . import josJ
+reload(josJ)
+from .josJ import *
 
-from . import Qbits
-reload(Qbits)
-from .Qbits import *
+from . import qbits
+reload(qbits)
+from .qbits import *
 
-from . import Resonators
-reload(Resonators)
-from .Resonators import *
+from . import resonators
+reload(resonators)
+from .resonators import *
 
 from . import contactPads
 reload(contactPads)
 from .contactPads import *
 
-from . import ChipTemplates
-reload(ChipTemplates)
-from .ChipTemplates import *
+from . import chipTemplates
+reload(chipTemplates)
+from .chipTemplates import *
 
-from . import Marks
-reload(Marks)
-from .Marks import *
+from . import marks
+reload(marks)
+from .marks import *
 
-from . import SFS
-reload(SFS)
-from .SFS import *
+from . import sPS
+reload(sPS)
+from .sPS import *
 
-from . import ChipDesign
-reload(ChipDesign)
-from .ChipDesign import *
+from . import chipDesign
+reload(chipDesign)
+from .chipDesign import *
 
 

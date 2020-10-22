@@ -10,10 +10,10 @@ from ClassLib import *
 import sonnetSim
 
 reload(sonnetSim)
-from sonnetSim import SimulatedDesign, PORT_TYPES, SonnetPort, SimulationBox
+from sonnetSim import PORT_TYPES, SonnetPort, SimulationBox
+from sonnetSim.simulatedDesign import SimulatedDesign
 
-
-class Test_Squid(Complex_Base):
+class Test_Squid(ComplexBase):
     """ @brief:     class represents a rectangular capacitor with a dc-SQUID between its plates
         @params:    DPoint origin - position of the center of a structure
                     params{} - a dictionary with geometric parameters of a capacitor
@@ -53,7 +53,7 @@ class Test_Squid(Complex_Base):
         self.squid.place(dest, layer_el)
 
 
-class My_Design(simulatedDesign):
+class My_Design(SimulatedDesign):
     origin = DPoint(0, 0)
     Z = CPWParameters(20e3, 10e3)  # normal CPW
     Z_res = Z

@@ -10,12 +10,12 @@ from importlib import reload
 import ClassLib
 reload(ClassLib)
 
-from ClassLib.Coplanars import CPW, CPW_arc, Coil_type_1, CPW_RL_Path
-from ClassLib.Shapes import XmonCross
-from ClassLib.BaseClasses import Complex_Base
+from ClassLib.coplanars import CPW, CPW_arc, Coil_type_1, CPW_RL_Path
+from ClassLib.shapes import XmonCross
+from ClassLib.baseClasses import ComplexBase
 
 from sonnetSim.sonnetLab import SonnetLab, SonnetPort, SimulationBox
-from ClassLib.Resonators import EMResonatorTL3QbitWormRLTailXmonFork
+from ClassLib.resonators import EMResonatorTL3QbitWormRLTailXmonFork
 
 
 class CHIP:

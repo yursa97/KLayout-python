@@ -14,9 +14,9 @@ from ClassLib import *
 reload(ClassLib)
 from ClassLib import *
 
-from ClassLib.Coplanars import *
-from ClassLib.Resonators import *
-from ClassLib.Qbits import *
+from ClassLib.coplanars import *
+from ClassLib.resonators import *
+from ClassLib.qbits import *
             
 class CHIP:
     dx = 10.1e6

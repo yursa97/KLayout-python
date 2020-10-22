@@ -15,7 +15,7 @@ from sonnetSim import SimulatedDesign, SonnetPort, SimulationBox, PORT_TYPES
 
 import numpy as np
 
-class Test_Squid(Complex_Base):
+class Test_Squid(ComplexBase):
     """ @brief:     class represents a rectangular capacitor with a dc-SQUID between its plates
         @params:    DPoint origin - position of the center of a structure
                     params{} - a dictionary with geometric parameters of a capacitor

@@ -5,9 +5,9 @@ import pya
 from math import cos, sin, atan2, pi
 from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
-from ClassLib.BaseClasses import *
-from ClassLib.Qbits import *
-from ClassLib.Coplanars import *
+from ClassLib.baseClasses import *
+from ClassLib.qbits import *
+from ClassLib.coplanars import *
 
 def fill_holes( poly, dx=10e3, dy=8e3, width=5e3, height=5e3, d=0 ):
     bbox = poly.bbox()
@@ -31,7 +31,7 @@ def fill_holes( poly, dx=10e3, dy=8e3, width=5e3, height=5e3, d=0 ):
         y += dy       
     return poly
 
-class EMResonator_TL2Qbit_worm( Complex_Base ):
+class EMResonator_TL2Qbit_worm(ComplexBase):
     def __init__( self, Z0, start, L_coupling, L1, r, L2, N, gnd_width, trans_in=None ):
         self.Z0 = Z0
         self.gnd_width = gnd_width
@@ -142,7 +142,7 @@ class EMResonator_TL2Qbit_worm( Complex_Base ):
         for element in self.primitives_gnd.values():    
             element.make_trans( dCplxTrans_temp ) # move to the origin
 
-class Coil_type_1( Complex_Base ):
+class Coil_type_1(ComplexBase):
     def __init__( self, Z0, start, L1, r, L2, gnd_width, trans_in=None ):
         self.gnd_width = gnd_width
         self.Z0 = Z0

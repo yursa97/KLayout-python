@@ -29,7 +29,7 @@ def fill_holes( poly, dx=10e3, dy=8e3, width=5e3, height=5e3, d=0 ):
         y += dy       
     return poly
 
-class EMResonator_TL2Qbit_worm2( Complex_Base ):
+class EMResonator_TL2Qbit_worm2(ComplexBase):
     def __init__( self, Z0, start, L_coupling, L1, r, L2, N, trans_in=None ):
         self.Z0 = Z0
         self.L_coupling = L_coupling
@@ -69,7 +69,7 @@ class EMResonator_TL2Qbit_worm2( Complex_Base ):
         self.angle_connections = [0,self.cop_tail.alpha_end]
 
 
-class EMResonator_TL2Qbit_worm2( Complex_Base ):
+class EMResonator_TL2Qbit_worm2(ComplexBase):
     def __init__( self, Z0, start, L_coupling, L1, r, L2, N, trans_in=None ):
         self.Z0 = Z0
         self.L_coupling = L_coupling
@@ -108,7 +108,7 @@ class EMResonator_TL2Qbit_worm2( Complex_Base ):
         self.connections = [DPoint(0,0), self.cop_tail.end]
         self.angle_connections = [0,self.cop_tail.alpha_end]
 
-class Coil_type_1( Complex_Base ):
+class Coil_type_1(ComplexBase):
     def __init__( self, Z0, start, L1, r, L2, trans_in=None ):
         self.Z0 = Z0
         self.L1 = L1

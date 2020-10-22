@@ -62,7 +62,7 @@ if( __name__ == "__main__" ):
     gamma2 = 2.35619
 
     origin = DPoint(1e6,0)
-    #cell.shapes( layer_i ).insert( pya.Box( Point(0,0), Point( CHIP.dx, CHIP.dy ) ) )
+    #cell.shapes( layer_i ).insert( pya.Box( Point(0,0), Point( CHIP_10x10_12pads.dx, CHIP_10x10_12pads.dy ) ) )
     Z0 = CPW( width1, gap1, origin, origin )
     Z1 = CPW( width2, gap2, origin, origin )
     '''Z1 = CPW( width1, gap1, origin, origin + DPoint( 1e6,0 ), trans_in=DCplxTrans( 1,90,False,1e6,0 ) )
