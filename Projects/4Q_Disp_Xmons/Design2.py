@@ -7,18 +7,18 @@ from pya import Point, DPoint, DVector, DSimplePolygon, SimplePolygon, DPolygon,
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from importlib import reload
-import ClassLib
-reload(ClassLib)
+import сlassLib
+reload(сlassLib)
 
-from ClassLib.coplanars import CPWParameters, CPW_RL_Path
-from ClassLib.shapes import XmonCross
-from ClassLib.resonators import EMResonatorTL3QbitWormRLTailXmonFork
-from ClassLib.chipTemplates import CHIP_10x10_12pads
-from ClassLib.chipDesign import ChipDesign
+from сlassLib.coplanars import CPWParameters, CPW_RL_Path
+from сlassLib.shapes import XmonCross
+from сlassLib.resonators import EMResonatorTL3QbitWormRLTailXmonFork
+from сlassLib.chipTemplates import CHIP_10x10_12pads
+from сlassLib.chipDesign import ChipDesign
 
 # imports for docstrings generation
 from typing import List, Dict
-from ClassLib.contactPads import ContactPad
+from сlassLib.contactPads import ContactPad
 
 
 class Design5Q(ChipDesign):

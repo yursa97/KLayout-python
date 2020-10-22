@@ -4,12 +4,12 @@
 import pya
 from importlib import reload
 
-import ClassLib
-from ClassLib import *
-reload(ClassLib)
-from ClassLib import *
+import сlassLib
+from сlassLib import *
+reload(сlassLib)
+from сlassLib import *
 
-from ClassLib.coplanars import *
+from сlassLib.coplanars import *
 
 
 class CHIP:

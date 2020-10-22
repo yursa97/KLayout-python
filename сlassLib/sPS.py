@@ -4,10 +4,10 @@ from pya import Point, DPoint, DSimplePolygon, SimplePolygon, DPolygon, Polygon,
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 from collections import namedtuple
 
-from ClassLib.baseClasses import ComplexBase
-from ClassLib.capacitors import CWave, CWave2CPW
-from ClassLib.coplanars import CPW
-from ClassLib.josJ import Squid, AsymSquid
+from сlassLib.baseClasses import ComplexBase
+from сlassLib.capacitors import CWave, CWave2CPW
+from сlassLib.coplanars import CPW
+from сlassLib.josJ import Squid, AsymSquid
 
 
 SPSparams = namedtuple("SPSparams", "r_out dr n_semiwaves s alpha r_curve n_pts_cwave Z1 d_alpha1 width1 gap1 Z2 d_alpha2 width2 gap2 n_pts_arcs")

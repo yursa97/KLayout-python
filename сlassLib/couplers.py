@@ -3,8 +3,8 @@ from math import sqrt, cos, sin, atan2, pi, copysign
 from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from ClassLib.baseClasses import *
-from ClassLib.coplanars import *
+from сlassLib.baseClasses import *
+from сlassLib.coplanars import *
 
 class BranchLine_finger(ComplexBase):
     def __init__( self, Z0, start, params, gndWidth = -1, trans_in=None ):

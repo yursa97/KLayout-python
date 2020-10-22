@@ -3,9 +3,9 @@ from math import pi
 from pya import DPoint,DSimplePolygon,SimplePolygon
 from pya import Trans,DTrans,DVector,DPath
 
-from ClassLib.baseClasses import ElementBase, ComplexBase
-from ClassLib.shapes import Circle, Kolbaska
-from ClassLib.coplanars import CPWParameters, CPW, CPW_RL_Path
+from сlassLib.baseClasses import ElementBase, ComplexBase
+from сlassLib.shapes import Circle, Kolbaska
+from сlassLib.coplanars import CPWParameters, CPW, CPW_RL_Path
 
 from collections import namedtuple
 

@@ -8,8 +8,8 @@ from typing import Union, List
 from collections import OrderedDict
 import copy
 
-from ClassLib.baseClasses import ElementBase, ComplexBase
-from ClassLib.bridgedCoplanars import BridgedCPW, BridgedCPWArc
+from сlassLib.baseClasses import ElementBase, ComplexBase
+from сlassLib.bridgedCoplanars import BridgedCPW, BridgedCPWArc
 
 
 class CPWParameters(ElementBase):

@@ -8,12 +8,12 @@ import itertools
 from collections import OrderedDict
 from typing import Union
 
-import ClassLib
+import сlassLib
 
-reload(ClassLib)
-from ClassLib.baseClasses import ElementBase
-from ClassLib.coplanars import CPWParameters, CPW, CPW_arc
-from ClassLib.contactPads import ContactPad
+reload(сlassLib)
+from сlassLib.baseClasses import ElementBase
+from сlassLib.coplanars import CPWParameters, CPW, CPW_arc
+from сlassLib.contactPads import ContactPad
 
 
 class CHIP:

@@ -3,8 +3,8 @@ from math import sqrt, cos, sin, tan, atan2, pi, copysign
 from pya import Point, DPoint, Vector, DVector, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from ClassLib.coplanars import *
-from ClassLib.shapes import *
+from сlassLib.coplanars import *
+from сlassLib.shapes import *
 
 class CWave2CPW( ElementBase ):
     '''

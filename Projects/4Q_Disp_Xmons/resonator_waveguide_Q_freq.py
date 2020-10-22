@@ -6,11 +6,11 @@ import pya
 from pya import Point, DPoint, DVector, DSimplePolygon, SimplePolygon, DPolygon, Polygon,  Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from ClassLib.baseClasses import ComplexBase
-from ClassLib.coplanars import CPW, CPW_arc
-from ClassLib.resonators import Coil_type_1
-from ClassLib.shapes import XmonCross
-from ClassLib.resonators import EMResonator_TL2Qbit_worm3_XmonFork
+from сlassLib.baseClasses import ComplexBase
+from сlassLib.coplanars import CPW, CPW_arc
+from сlassLib.resonators import Coil_type_1
+from сlassLib.shapes import XmonCross
+from сlassLib.resonators import EMResonator_TL2Qbit_worm3_XmonFork
 
 from sonnetSim.sonnetLab import SonnetLab, SonnetPort, SimulationBox
 

@@ -2,10 +2,10 @@ from pya import DBox, Point, DPoint, Vector, DVector, DSimplePolygon, SimplePoly
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from importlib import reload
-import ClassLib
+import сlassLib
 
-reload(ClassLib)
-from ClassLib import *
+reload(сlassLib)
+from сlassLib import *
 
 import sonnetSim
 

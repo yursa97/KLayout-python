@@ -3,7 +3,7 @@ from math import sqrt, cos, sin, atan2, pi, copysign
 from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from ClassLib.baseClasses import *
+from сlassLib.baseClasses import *
 
 class FluxCoil(ElementBase):
 

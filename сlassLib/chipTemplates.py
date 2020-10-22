@@ -5,10 +5,10 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 import itertools
 
-from ClassLib.baseClasses import ComplexBase
-from ClassLib.shapes import Rectangle
-from ClassLib.coplanars import CPWParameters
-from ClassLib.contactPads import ContactPad
+from сlassLib.baseClasses import ComplexBase
+from сlassLib.shapes import Rectangle
+from сlassLib.coplanars import CPWParameters
+from сlassLib.contactPads import ContactPad
 
 
 class Chip5x10_with_contactPads(ComplexBase):

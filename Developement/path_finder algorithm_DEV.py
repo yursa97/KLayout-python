@@ -5,7 +5,7 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 import numpy as np
 
-from ClassLib import *   
+from сlassLib import *
          
 ### START classes to be delegated to different file ###
 

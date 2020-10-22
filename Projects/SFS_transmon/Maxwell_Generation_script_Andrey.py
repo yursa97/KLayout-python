@@ -2,9 +2,9 @@ from pya import DPoint, Trans
 from math import pi
 
 from importlib import reload
-import ClassLib
-reload(ClassLib)
-from ClassLib import ChipDesign, CPWParameters, CPW, CPWResonator2, SFS_Csh_emb, Rectangle
+import сlassLib
+reload(сlassLib)
+from сlassLib import ChipDesign, CPWParameters, CPW, CPWResonator2, SFS_Csh_emb, Rectangle
 
 class ResonatorQubitSimulator(ChipDesign):
 

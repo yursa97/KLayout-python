@@ -3,16 +3,16 @@ import pya
 from math import cos, sin, atan2, pi
 from pya import Point, DPoint, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
-from ClassLib.coplanars import CPW, CPW_arc
-from ClassLib.resonators import Coil_type_1
-from ClassLib.baseClasses import ComplexBase, ElementBase
+from сlassLib.coplanars import CPW, CPW_arc
+from сlassLib.resonators import Coil_type_1
+from сlassLib.baseClasses import ComplexBase, ElementBase
 
 from importlib import reload
 import sonnetSim.sonnetLab
 
 reload(sonnetSim.sonnetLab)
 from sonnetSim.sonnetLab import SonnetLab, SonnetPort, SimulationBox
-from ClassLib.shapes import XmonCross
+from сlassLib.shapes import XmonCross
 
 
 

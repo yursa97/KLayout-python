@@ -9,14 +9,14 @@ from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  R
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 
-import ClassLib
-from ClassLib import *
-reload(ClassLib)
-from ClassLib import *
+import сlassLib
+from сlassLib import *
+reload(сlassLib)
+from сlassLib import *
 
-from ClassLib.coplanars import *
-from ClassLib.resonators import *
-from ClassLib.qbits import *
+from сlassLib.coplanars import *
+from сlassLib.resonators import *
+from сlassLib.qbits import *
             
 class CHIP:
     dx = 10.1e6

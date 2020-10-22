@@ -3,9 +3,9 @@ from math import sqrt, cos, sin, atan2, pi, copysign
 from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 from numpy import around
-from ClassLib.baseClasses import *
-from ClassLib.coplanars import *
-from ClassLib._PROG_SETTINGS import *
+from сlassLib.baseClasses import *
+from сlassLib.coplanars import *
+from сlassLib._PROG_SETTINGS import *
 
 class SQUIDManhattan(ComplexBase):
 

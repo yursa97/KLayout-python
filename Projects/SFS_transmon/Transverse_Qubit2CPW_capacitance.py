@@ -5,10 +5,10 @@ from importlib import reload
 
 import pickle as pkl
 
-import ClassLib
+import сlassLib
 
-reload(ClassLib)
-from ClassLib import *
+reload(сlassLib)
+from сlassLib import *
 
 import sonnetSim
 

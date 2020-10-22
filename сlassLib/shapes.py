@@ -3,9 +3,9 @@ from math import sqrt, cos, sin, atan2, pi, copysign
 from pya import Point,DPoint,DSimplePolygon,SimplePolygon,DPolygon,Polygon, Region,DPath,DVector,DBox
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from ClassLib._PROG_SETTINGS import *
-from ClassLib.baseClasses import ElementBase, ComplexBase
-from ClassLib.coplanars import CPW
+from сlassLib._PROG_SETTINGS import *
+from сlassLib.baseClasses import ElementBase, ComplexBase
+from сlassLib.coplanars import CPW
 
 
 class Rectangle(ElementBase):
@@ -83,7 +83,7 @@ class XmonCross(ComplexBase):
         origin = DPoint(0, 0)
 
         # draw central square
-        from ClassLib.shapes import Rectangle
+        from сlassLib.shapes import Rectangle
         lb_corner = DPoint(-self.cross_width / 2, -self.cross_width / 2)
         center_square = Rectangle(lb_corner, self.cross_width, self.cross_width)
         self.primitives["center_square"] = center_square
