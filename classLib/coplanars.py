@@ -8,8 +8,8 @@ from typing import Union, List
 from collections import OrderedDict
 import copy
 
-from сlassLib.baseClasses import ElementBase, ComplexBase
-from сlassLib.bridgedCoplanars import BridgedCPW, BridgedCPWArc
+from classLib.baseClasses import ElementBase, ComplexBase
+from classLib.bridgedCoplanars import BridgedCPW, BridgedCPWArc
 
 
 class CPWParameters(ElementBase):
@@ -142,8 +142,9 @@ class CPW_arc(ElementBase):
         self.end = self.dr
         self.center = DPoint(0, self.R)
 
-        n_inner = 10
-        n_outer = 10
+        from ._PROG_SETTINGS import PROGRAM
+        n_inner = PROGRAM.ARC_PTS_N
+        n_outer = PROGRAM.ARC_PTS_N
 
         metal_arc = self._get_solid_arc(self.center, self.R, self.width,
                                         self.alpha_start - pi / 2, self.alpha_end - pi / 2, n_inner, n_outer)

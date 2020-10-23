@@ -5,10 +5,10 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 import itertools
 
-from сlassLib.baseClasses import ComplexBase
-from сlassLib.shapes import Rectangle
-from сlassLib.coplanars import CPWParameters
-from сlassLib.contactPads import ContactPad
+from classLib.baseClasses import ComplexBase
+from classLib.shapes import Rectangle
+from classLib.coplanars import CPWParameters
+from classLib.contactPads import ContactPad
 
 
 class Chip5x10_with_contactPads(ComplexBase):
@@ -42,11 +42,11 @@ class Chip5x10_with_contactPads(ComplexBase):
 
         # contact pads
         self.contact_pad_left = ContactPad(origin + DPoint(0, self.chip_y / 2),
-                                           {"w": self.Z_params[0].width, "g": self.Z_params[0].gap})
+                                           chip_cpw_params=self.Z_params[0])
         self.primitives["cp_left"] = self.contact_pad_left
 
         self.contact_pad_right = ContactPad(origin + DPoint(self.chip_x, self.chip_y / 2),
-                                            {"w": self.Z_params[1].width, "g": self.Z_params[1].gap},
+                                            chip_cpw_params=self.Z_params[1],
                                             trans_in=Trans.R180)
         self.primitives["cp_right"] = self.contact_pad_right
 
@@ -57,7 +57,7 @@ class Chip5x10_with_contactPads(ComplexBase):
                                   self.contact_pad_right.angle_connections[1]]
 
         self.contact_pads_top = [ContactPad(origin + DPoint(self.chip_x / (N_pads + 1) * (i + 1), self.chip_y),
-                                            {"w": self.Z_params[2 + i].width, "g": self.Z_params[2 + i].gap},
+                                            chip_cpw_params=self.Z_params[i+2],
                                             trans_in=Trans.R270) for i in range(0, N_pads)]
         for i in range(0, N_pads):
             self.primitives["cp_top_" + str(i)] = self.contact_pads_top[i]
@@ -65,7 +65,7 @@ class Chip5x10_with_contactPads(ComplexBase):
             self.angle_connections.append(self.contact_pads_top[i].angle_connections[1])
 
         self.contact_pads_bottom = [ContactPad(origin + DPoint(self.chip_x / (N_pads + 1) * (i + 1), 0),
-                                               {"w": self.Z_params[5 + i].width, "g": self.Z_params[5 + i].gap},
+                                               chip_cpw_params=self.Z_params[5+i],
                                                trans_in=Trans.R90) for i in range(0, N_pads)]
         for i in range(0, N_pads):
             self.primitives["cp_bot_" + str(i)] = self.contact_pads_bottom[i]

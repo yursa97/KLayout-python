@@ -4,10 +4,10 @@ from pya import Point, DPoint, Vector, DVector, DSimplePolygon, SimplePolygon, D
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from importlib import reload
-import сlassLib
-from сlassLib import *
-reload(сlassLib)
-from сlassLib import *
+import classLib
+from classLib import *
+reload(classLib)
+from classLib import *
 
 class CHIP:
     dx = 10e6

@@ -4,7 +4,7 @@ from itertools import product
 import numpy as np
 from datetime import datetime
 
-from сlassLib.chipDesign import ChipDesign
+from classLib.chipDesign import ChipDesign
 from .sonnetLab import SonnetLab, SimulationBox
 
 class SimulatedDesign(ChipDesign):

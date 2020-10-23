@@ -3,7 +3,7 @@ from math import sqrt, cos, sin, atan2, pi, copysign
 from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from сlassLib.baseClasses import *
+from classLib.baseClasses import *
 
 class QBit_Flux_1( ElementBase ):
     def __init__( self, origin, params, trans_in=None ):

@@ -1,7 +1,7 @@
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 from pya import Text
 
-from сlassLib import *
+from classLib import *
 
 import numpy as np
 

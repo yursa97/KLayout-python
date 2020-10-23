@@ -4,7 +4,7 @@ from pya import Point, DPoint, Vector, DVector, DSimplePolygon, SimplePolygon, D
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from importlib import reload
-from сlassLib import *
+from classLib import *
 
 ### START classes to be delegated to different file ###
 from collections import Counter

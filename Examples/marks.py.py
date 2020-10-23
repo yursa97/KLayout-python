@@ -3,9 +3,9 @@ from math import sqrt, cos, sin, atan2, pi, copysign
 from pya import Point, DPoint, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from сlassLib import *
+from classLib import *
 reload( ClassLib )
-from сlassLib import *
+from classLib import *
 
 ### START classes to be delegated to different file ###
 

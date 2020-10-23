@@ -1,8 +1,8 @@
 # Enter your Python code here
 import pya
 from importlib import reload
-import сlassLib
-from сlassLib import *
+import classLib
+from classLib import *
 
 reload(baseClasses)
 reload(capacitors)
@@ -16,13 +16,13 @@ reload(Claw)
 reload(Tmon)
 reload(FluxCoil)
 reload(_PROG_SETTINGS)
-from сlassLib import *
+from classLib import *
 
-from сlassLib.ContactPad import *
-from сlassLib.claw import *
-from сlassLib.resonators import *
-from сlassLib.tmon import *
-from сlassLib.fluxCoil import *
+from classLib.ContactPad import *
+from classLib.claw import *
+from classLib.resonators import *
+from classLib.tmon import *
+from classLib.fluxCoil import *
 
 from time import time
 

@@ -3,9 +3,9 @@ from math import sqrt, cos, sin, atan2, pi, copysign
 from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon, Region, Vector, DVector
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from сlassLib.baseClasses import ComplexBase
-from сlassLib.shapes import *
-from сlassLib.coplanars import CPWParameters, CPW_arc
+from classLib.baseClasses import ComplexBase
+from classLib.shapes import *
+from classLib.coplanars import CPWParameters, CPW_arc
 
 class Mark1(ComplexBase):
     def __init__(self,origin,trans_in=None):

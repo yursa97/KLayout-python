@@ -3,7 +3,7 @@ from math import sqrt, cos, sin, atan2, pi, copysign
 from pya import Point, DPoint, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from сlassLib._PROG_SETTINGS import *
+from classLib._PROG_SETTINGS import *
 
 from collections import OrderedDict
 
@@ -142,10 +142,10 @@ class ElementBase():
         to coincide with `self.connections[1]`, then this function
         is used to update this correspondance after connections
         are changed due to call of `self.make_trans`.
-            See сlassLib.Coplanars.CPW class for example.
+            See classLib.Coplanars.CPW class for example.
         """
         # can be implemented in child class
-        # see сlassLib.Coplanars.CPW for example
+        # see classLib.Coplanars.CPW for example
         pass
 
     def _update_alpha(self, dCplxTrans):
@@ -167,7 +167,7 @@ class ElementBase():
         to coincide with `self.angle_connections[1]`, then this function
         is used to update this correspondance after connections
         are changed due to call of `self.make_trans`.
-            See сlassLib.Coplanars.CPW class for example.
+            See classLib.Coplanars.CPW class for example.
         """
         pass
 

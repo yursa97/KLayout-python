@@ -7,15 +7,15 @@ from pya import Point, DPoint, DVector, DSimplePolygon, SimplePolygon, DPolygon,
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from importlib import reload
-import сlassLib
-reload(сlassLib)
+import classLib
+reload(classLib)
 
-from сlassLib.coplanars import CPW, CPW_arc, Coil_type_1, CPW_RL_Path
-from сlassLib.shapes import XmonCross
-from сlassLib.baseClasses import ComplexBase
+from classLib.coplanars import CPW, CPW_arc, Coil_type_1, CPW_RL_Path
+from classLib.shapes import XmonCross
+from classLib.baseClasses import ComplexBase
 
 from sonnetSim.sonnetLab import SonnetLab, SonnetPort, SimulationBox
-from сlassLib.resonators import EMResonatorTL3QbitWormRLTailXmonFork
+from classLib.resonators import EMResonatorTL3QbitWormRLTailXmonFork
 
 
 class CHIP:

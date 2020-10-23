@@ -14,8 +14,8 @@ import sys
 sys.path.append(r"C:\Users\user\Desktop\lab\Klayout-python")
 import pya
 from importlib import reload
-import сlassLib
-from сlassLib import *
+import classLib
+from classLib import *
 
 reload(baseClasses)
 reload(capacitors)
@@ -31,14 +31,14 @@ reload(FluxCoil)
 reload(Airbridge)
 reload(BridgedCoplanars)
 reload(_PROG_SETTINGS)
-from сlassLib import *
+from classLib import *
 
-from сlassLib.ContactPad import *
-from сlassLib.claw import *
-from сlassLib.resonators import *
-from сlassLib.tmon import *
-from сlassLib.fluxCoil import *
-from сlassLib.airbridge import *
+from classLib.ContactPad import *
+from classLib.claw import *
+from classLib.resonators import *
+from classLib.tmon import *
+from classLib.fluxCoil import *
+from classLib.airbridge import *
 from time import time
 from pya import DText
 

@@ -2,9 +2,9 @@ from pya import DPoint, Trans
 from math import pi
 
 from importlib import reload
-import сlassLib
-reload(сlassLib)
-from сlassLib import ChipDesign, Rectangle, AsymSquid
+import classLib
+reload(classLib)
+from classLib import ChipDesign, Rectangle, AsymSquid
 
 class Test_Squid(Complex_Base):
     """ @brief:     class represents a rectangular capacitor with a dc-SQUID between its plates

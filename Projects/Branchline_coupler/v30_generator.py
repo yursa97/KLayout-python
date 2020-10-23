@@ -11,9 +11,9 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 import csv
 
-from сlassLib import ComplexBase
-from сlassLib.coplanars import CPW, CPW_arc, CPW2CPW
-from сlassLib.couplers import TJunction_112, BranchLine_finger2, Coupler_BranchLine
+from classLib import ComplexBase
+from classLib.coplanars import CPW, CPW_arc, CPW2CPW
+from classLib.couplers import TJunction_112, BranchLine_finger2, Coupler_BranchLine
 
 
 ### START classes to be delegated to different file ###

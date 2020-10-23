@@ -6,10 +6,10 @@ from math import cos, sin, atan2, pi
 from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-import сlassLib
-from сlassLib import *
+import classLib
+from classLib import *
 
-from сlassLib.coplanars import *
+from classLib.coplanars import *
             
 class CHIP:
     dx = 10.1e6

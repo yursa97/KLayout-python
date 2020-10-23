@@ -3,7 +3,7 @@ from math import sqrt, cos, sin, atan2, pi, copysign
 from pya import Point, DPoint, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region, Path
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
-from сlassLib import *
+from classLib import *
 
 import sys
 

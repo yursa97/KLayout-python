@@ -7,18 +7,19 @@ from pya import Point, DPoint, DVector, DSimplePolygon, SimplePolygon, DPolygon,
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from importlib import reload
-import сlassLib
-reload(сlassLib)
+import classLib
+reload(classLib)
 
-from сlassLib.coplanars import CPWParameters, CPW_RL_Path
-from сlassLib.shapes import XmonCross
-from сlassLib.resonators import EMResonatorTL3QbitWormRLTailXmonFork
-from сlassLib.chipTemplates import CHIP_10x10_12pads
-from сlassLib.chipDesign import ChipDesign
+from classLib.coplanars import CPWParameters, CPW_RL_Path
+from classLib.shapes import XmonCross
+from classLib.resonators import EMResonatorTL3QbitWormRLTailXmonFork
+from classLib.josJ import AsymSquidParams, AsymSquid
+from classLib.chipTemplates import CHIP_10x10_12pads
+from classLib.chipDesign import ChipDesign
 
 # imports for docstrings generation
 from typing import List, Dict
-from сlassLib.contactPads import ContactPad
+from classLib.contactPads import ContactPad
 
 
 class Design5Q(ChipDesign):
@@ -79,8 +80,8 @@ class Design5Q(ChipDesign):
         ### ADDITIONAL VARIABLES SECTION END ###
 
     def draw(self, design_params=None):
-        self.draw_chip()
-        self.draw_readout_waveguide()
+        # self.draw_chip()
+        # self.draw_readout_waveguide()
 
         '''
             Only creating object. This is due to the drawing of xmons and resonators require
@@ -91,11 +92,12 @@ class Design5Q(ChipDesign):
         
         TODO: This drawings sequence can be decoupled in the future.
         '''
-        self.create_resonator_objects()
-        self.draw_xmons_and_resonators()
+        # self.create_resonator_objects()
+        # self.draw_xmons_and_resonators()
+        self.draw_josephson_loops()
 
         self.cell.shapes(self.layer_ph).insert(self.region_ph)
-        pass
+        self.cell.shapes(self.layer_el).insert(self.region_el)
 
     def draw_chip(self):
         chip_box = CHIP_10x10_12pads.box
@@ -219,6 +221,18 @@ class Design5Q(ChipDesign):
             resonator.place(self.region_ph)
             xmonCross_corrected = XmonCross(xmon_center, self.cross_width, self.cross_len, self.xmon_fork_gnd_gap)
             xmonCross_corrected.place(self.region_ph)
+
+    def draw_josephson_loops(self):
+        new_pars_squid = AsymSquidParams(
+            pad_side=1e3, pad_r=100, pads_distance=5e3,
+            p_ext_width=500, p_ext_r=100, sq_len=2e3,
+            sq_area=5e3, j_width_1=100, j_width_2=100,
+            low_lead_w=400, b_ext=160, j_length=400, n=20,
+            bridge=160
+        )
+        origin = DPoint(0, 0)
+        squid = AsymSquid(origin, new_pars_squid, 50e3)
+        squid.place(self.region_el)
 
 
 if __name__ == "__main__":

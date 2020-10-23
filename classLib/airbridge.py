@@ -2,7 +2,7 @@ import pya
 from pya import Point, DPoint, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region, Box
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans, CellInstArray
 
-from сlassLib.baseClasses import *
+from classLib.baseClasses import *
 
 
 class Airbridge(ElementBase):

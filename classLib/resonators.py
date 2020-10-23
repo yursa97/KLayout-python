@@ -5,8 +5,8 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from importlib import reload
 
-from сlassLib.baseClasses import *
-from сlassLib.coplanars import *
+from classLib.baseClasses import *
+from classLib.coplanars import *
 from .baseClasses import ComplexBase
 from .coplanars import CPW_RL_Path, CPW
 from .coplanars import Coil_type_1, CPW_arc # backward compatibility TODO: delete classes

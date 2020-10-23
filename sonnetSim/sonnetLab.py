@@ -2,7 +2,7 @@ import csv
 
 import pya
 from pya import Point, DPoint, Vector, DVector, DSimplePolygon, SimplePolygon, DPolygon, Polygon, Region
-from сlassLib import *
+from classLib import *
 from sonnetSim.matlabClient import MatlabClient
 from sonnetSim.pORT_TYPES import PORT_TYPES
 

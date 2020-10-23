@@ -4,12 +4,12 @@ from pya import Point, DPoint, Vector, DVector, DSimplePolygon, SimplePolygon, D
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans, DPath
 
 from importlib import reload
-# reload(сlassLib)
-import сlassLib
-from сlassLib import *
+# reload(classLib)
+import classLib
+from classLib import *
 
-reload(сlassLib)
-from сlassLib import *
+reload(classLib)
+from classLib import *
 
 
 class CHIP:

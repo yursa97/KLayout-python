@@ -1,7 +1,7 @@
 from importlib import reload
-# print("сlassLib.__init__ invoked") this row executes twice.
-# Once for import сlassLib
-# the second time for reload(сlassLib)
+# print("classLib.__init__ invoked") this row executes twice.
+# Once for import classLib
+# the second time for reload(classLib)
 
 from . import _PROG_SETTINGS
 reload(_PROG_SETTINGS)

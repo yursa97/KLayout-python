@@ -2,10 +2,10 @@ from pya import DBox, Point, DPoint, Vector, DVector, DSimplePolygon, SimplePoly
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from importlib import reload
-import сlassLib
+import classLib
 
-reload(сlassLib)
-from сlassLib import *
+reload(classLib)
+from classLib import *
 
 import sonnetSim
 
@@ -62,8 +62,7 @@ class My_Design(SimulatedDesign):
     chip = None
 
     # Call other methods drawing parts of the design from here
-    def draw(self, design_params):
-        self.deisgn_pars = design_params
+    def draw(self, design_params=None):
 
         self.draw_chip()
         self.draw_mark(500e3, self.chip.chip_y - 500e3)
@@ -339,4 +338,4 @@ class My_Design(SimulatedDesign):
 ### MAIN FUNCTION ###
 if __name__ == "__main__":
     my_design = My_Design('testScript')
-    my_design.show()
+    my_design.draw()

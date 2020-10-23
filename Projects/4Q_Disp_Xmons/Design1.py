@@ -7,19 +7,19 @@ from pya import Point, DPoint, DVector, DSimplePolygon, SimplePolygon, DPolygon,
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from importlib import reload
-import сlassLib
-reload(сlassLib)
+import classLib
+reload(classLib)
 
-from сlassLib.coplanars import CPW, CPWParameters, CPW_RL_Path
-from сlassLib.shapes import XmonCross
-from сlassLib.contactPads import ContactPad
+from classLib.coplanars import CPW, CPWParameters, CPW_RL_Path
+from classLib.shapes import XmonCross
+from classLib.contactPads import ContactPad
 
-from сlassLib.coplanars import CPW, CPW_arc, Coil_type_1, CPW_RL_Path
-from сlassLib.shapes import XmonCross
-from сlassLib.baseClasses import ComplexBase
-from сlassLib.chipTemplates import CHIP_10x10_12pads
+from classLib.coplanars import CPW, CPW_arc, Coil_type_1, CPW_RL_Path
+from classLib.shapes import XmonCross
+from classLib.baseClasses import ComplexBase
+from classLib.chipTemplates import CHIP_10x10_12pads
 
-from сlassLib.resonators import EMResonator_TL2Qbit_worm3_2_XmonFork
+from classLib.resonators import EMResonator_TL2Qbit_worm3_2_XmonFork
 
 
 class EMResonatorTL2QbitWormRLTail(ComplexBase):

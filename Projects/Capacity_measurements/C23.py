@@ -5,9 +5,9 @@ from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
 
 from importlib import reload
 
-import сlassLib
-reload(сlassLib)
-from сlassLib import *
+import classLib
+reload(classLib)
+from classLib import *
 
 import sonnetSim
 reload(sonnetSim)

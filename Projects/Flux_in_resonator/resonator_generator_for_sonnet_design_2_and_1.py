@@ -5,7 +5,7 @@ import pya
 from math import cos, sin, atan2, pi
 from pya import Point,DPoint,DSimplePolygon,SimplePolygon, DPolygon, Polygon,  Region
 from pya import Trans, DTrans, CplxTrans, DCplxTrans, ICplxTrans
-from сlassLib import *
+from classLib import *
 
 def fill_holes( poly, dx=10e3, dy=8e3, width=5e3, height=5e3, d=0 ):
     bbox = poly.bbox()
