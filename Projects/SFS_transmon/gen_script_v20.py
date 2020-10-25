@@ -309,8 +309,7 @@ class My_Design(SimulatedDesign):
         return pars
 
     def get_dc_squid_params(self):
-        pad_side = 5e3  # A length of the side of triangle pad
-        pad_r = 1e3  # The radius of round angle of the contact pad
+        pad_r = 5e3  # A length of the side of triangle pad
         pads_distance = 30e3  # The distance between triangle contact pads
         p_ext_width = 3e3  # The width of curved rectangle leads which connect triangle contact pads and junctions
         p_ext_r = 0.5e3  # The angle radius of the pad extension
@@ -318,14 +317,14 @@ class My_Design(SimulatedDesign):
         sq_area = 15e6  # The total area of the squid
         j_width_1 = 114  # The width of the upper small leads (straight) and also a width of the junction
         j_width_2 = 342  # The width of the upper small leads (straight) and also a width of the junction
-        low_lead_w = 0.5e3  # The width of the lower small bended leads before bending
+        intermediate_width = 0.5e3  # The width of the lower small bended leads before bending
         b_ext = 0.9e3  # The extension of bended leads after bending
         j_length = 100  # The length of the LEFT jj and the width of bended parts of the lower leads
         # j_length_2 = 342 # The length of the RIGHT jj and the width of bended parts of the lower leads
         n = 7  # The number of angle in regular polygon which serves as a large contact pad
         bridge = 0.18e3  # The value of the gap between two parts of junction in the design
-        return AsymSquidParams(pad_side, pad_r, pads_distance, p_ext_width,
-                               p_ext_r, sq_len, sq_area, j_width_1, j_width_2, low_lead_w,
+        return AsymSquidParams(pad_r, pads_distance, p_ext_width,
+                               p_ext_r, sq_len, sq_area, j_width_1, j_width_2, intermediate_width,
                                b_ext, j_length, n, bridge)
 
     def cut_a_piece(self):

@@ -65,7 +65,7 @@ if __name__ == "__main__":
     sq_len = 7e3
     sq_width = 15e6
     j_width = 0.4e3
-    low_lead_w = 0.5e3
+    intermediate_width = 0.5e3
     b_ext = 0.9e3
     j_length = 0.3e3
     n = 7
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     trans_in = None
 
     pars_squid = [pad_side, pad_r, pads_distance, p_ext_width, \
-                  p_ext_r, sq_len, sq_width, j_width, low_lead_w, \
+                  p_ext_r, sq_len, sq_width, j_width, intermediate_width, \
                   b_ext, j_length, n, bridge]
     sq = Squid(origin, pars_squid)
     sq.place(cell, layer_el)

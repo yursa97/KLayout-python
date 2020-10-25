@@ -65,13 +65,7 @@ import numpy as np
 if __name__ == "__main__":
     my_design = Sandbox('testScript')
     freqs = np.linspace(1e9, 5e9, 300)
-    sim_box = SimulationBox(0.5e6, 0.2e6, 200, 200)
-    my_design.set_fixed_parameters(freqs, simBox=sim_box)
-
-    swept_params = {"square_dx": np.arange(-my_design.sim_X/3,my_design.sim_X/3,my_design.sim_X/20)}
-    my_design.set_swept_parameters(swept_params)
-    my_design.simulate_sweep()
-    my_design.save_result()
+    import recordclass
 
 
 

@@ -224,14 +224,15 @@ class Design5Q(ChipDesign):
 
     def draw_josephson_loops(self):
         new_pars_squid = AsymSquidParams(
-            pad_side=1e3, pad_r=100, pads_distance=5e3,
-            p_ext_width=500, p_ext_r=100, sq_len=2e3,
-            sq_area=5e3, j_width_1=100, j_width_2=100,
-            low_lead_w=400, b_ext=160, j_length=400, n=20,
-            bridge=160
+            pad_r=5e3, pads_distance=30e3,
+            p_ext_width=5e3, p_ext_r=200,
+            sq_len=7e3, sq_area=35e6,
+            j_width_1=94, j_width_2=347,
+            intermediate_width=500, b_ext=1e3, j_length=94, n=20,
+            bridge=180, j_length_2=250
         )
         origin = DPoint(0, 0)
-        squid = AsymSquid(origin, new_pars_squid, 50e3)
+        squid = AsymSquid(origin, new_pars_squid, 0)
         squid.place(self.region_el)
 
 

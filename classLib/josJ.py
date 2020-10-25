@@ -13,9 +13,12 @@ from typing import Union
 
 # nice solution for parameters, man. Had really appreciated this one and put to use already (SH).
 SquidParams = namedtuple("SquidParams",
-                         "pad_side pad_r pads_distance p_ext_width p_ext_r sq_len sq_area j_width low_lead_w b_ext j_length n bridge")
+                         "pad_side pad_r pads_distance p_ext_width p_ext_r sq_len sq_area j_width intermediate_width b_ext j_length n bridge")
 AsymSquidParams = namedtuple("AsymSquidParams",
-                             "pad_side pad_r pads_distance p_ext_width p_ext_r sq_len sq_area j_width_1 j_width_2 low_lead_w b_ext j_length n bridge")
+                             "pad_r pads_distance p_ext_width p_ext_r sq_len sq_area"
+                             " j_width_1 j_width_2 intermediate_width b_ext j_length n bridge"
+                             " j_length_2",
+                             defaults=[None])  # btw, you're free to rename `intermediate_width`
 
 
 class AsymSquid(ComplexBase):
@@ -31,7 +34,7 @@ class AsymSquid(ComplexBase):
         origin : DPoint
             the geometrical center between centers of contact pads
         params : Union[tuple, AsymSquidParams]
-        side : float
+        side : int
             only creates single JJ.
             `side == -1` - only left junction created
             `side == 1` - only right junction created
@@ -41,27 +44,32 @@ class AsymSquid(ComplexBase):
 
         Notes
         ------
-        pad_side: float
-            A length of the side of triangle pad.
-        (??) pad_r: float
-            The radius of round angle of the contact pad.
+        pad_r: float
+            A radious of the circle pad.
         pads_distance:
-            The distance between triangle contact pads.
+            The distance between centers of contact pads.
         p_ext_width: float
-            The width of curved rectangle leads which connect triangle contact pads and junctions.
+            The width of DPath leads which connect
+            contact pads and junctions.
         p_ext_r: float
-            The radius of the circular pad extension
+            Curved extension of DPath leads along the leads direction
         sq_len: float
             The length of the squid, along leads.
         sq_area: float
             The total area of the squid.
-            (does not count the reduction of area due to shadow angle evaporation).
+            (does not count the reduction of area due to
+             shadow angle evaporation).
         j_width_1: float
-            The width of the upper small lead on left side (straight) and also a width of the junction
+            The width of the upper small lead on left
+            side (straight) and also a width of
+            the junction
         j_width_2: float
-            The width of the upper small lead on right side (straight) and also a width of the junction
-        low_lead_w: float
-            The width of the lower small bended leads before bending
+            The width of the upper small lead on right
+            side (straight) and also a width of
+            the junction
+        intermediate_width: float
+            The width of the lower small bended leads
+            before bending.
         b_ext: float
             The extension of bended leads after bending
         j_length: float
@@ -70,12 +78,25 @@ class AsymSquid(ComplexBase):
             The number of angle in regular polygon which serves as a large contact pad
         bridge: float
             The value of the gap between two parts of junction in the design
-        trans_in: Trans
-            Initial transformation
+        j_length_2 : float
+            optional
+            if present, `j_length` is interpreted as
+            y-dimensions of left small bottom horizontal lead,
+            and `j_length_2` is interpreted as
+            y-dimensions of the right small bottom bended lead
         '''
         # To draw only a half of a squid use 'side'
         # side = -1 is left, 1 is right, 0 is both (default)
         self.params: AsymSquidParams = params  # See description of AsymSquidParams tuple and the comment above
+        if (self.params.intermediate_width < self.params.j_width_1) or \
+                (self.params.intermediate_width < self.params.j_width_2):
+            raise ValueError("AsymSquid constructor:\n"
+                             "intermediate lead width assumed be bigger than width of each jj")
+        if self.params.j_length_2 is None:
+            # workaround because namedtuple is immutable
+            # there is `recordtype` that is mutable, but
+            # in is not included in default KLayout build.
+            self.params = AsymSquidParams(*(self.params[:-1] + (self.params.j_length,)))
         self.side = side
         super().__init__(origin, trans_in)
 
@@ -85,15 +106,15 @@ class AsymSquid(ComplexBase):
         self._up_pad_center = origin + DVector(0, pars.pads_distance / 2)
         self._down_pad_center = origin + DVector(0, -pars.pads_distance / 2)
         self.primitives["pad_down"] = Circle(
-            self._down_pad_center, pars.pad_side,
+            self._down_pad_center, pars.pad_r,
             n_pts=pars.n, offset_angle=pi / 2
         )
         self.primitives["p_ext_down"] = Kolbaska(
-            self._down_pad_center, origin + DPoint(0, -pars.sq_len/2),
+            self._down_pad_center, origin + DPoint(0, -pars.sq_len / 2),
             pars.p_ext_width, pars.p_ext_r
         )
         self.primitives["pad_up"] = Circle(
-            self._up_pad_center, pars.pad_side,
+            self._up_pad_center, pars.pad_r,
             n_pts=pars.n, offset_angle=-pi / 2
         )
         self.primitives["p_ext_up"] = Kolbaska(
@@ -111,36 +132,53 @@ class AsymSquid(ComplexBase):
         # side = -1 is left, 1 is right
         pars = self.params
         j_width = pars.j_width_1 if side < 0 else pars.j_width_2
-        up_st_gap = pars.sq_area / (2 * pars.sq_len)
-        low_st_gap = up_st_gap + pars.low_lead_w * 2.5
-        up_st_start_p = self.primitives["p_ext_up"].connections[1]
-        low_st_start_p = self.primitives["p_ext_down"].connections[1]
-
-        up_st_start = up_st_start_p + DVector(side * up_st_gap / 2, 0)
-        up_st_stop = origin + DVector(side * up_st_gap / 2, pars.bridge / 2 + j_width / 4)
-        low_st_start = low_st_start_p + DVector(side * low_st_gap / 2, 0)
-        low_st_stop = origin + DVector(side * (low_st_gap / 2 - pars.b_ext), -pars.bridge / 2)
-        Z_low = CPWParameters(pars.j_length, 0)
-        Z_low2 = CPWParameters(pars.low_lead_w, 0)
-        len_ly = (low_st_stop - low_st_start).y - Z_low2.width / 2
-        len_lb = side * (low_st_start - low_st_stop).x - Z_low2.width / 2
-
+        j_length = pars.j_length if side < 0 else pars.j_length_2
         suff = "_left" if side < 0 else "_right"
+        up_st_gap = pars.sq_area / (2 * pars.sq_len)
+
+        # exact correction in first row
+        # additional extension to isolate jj's from intermediate bottom polygons
+        # without correction horizontal faces of jj's will be adjacent
+        # to thick intemediate polygons
+        low_st_gap = up_st_gap + ((pars.j_length + pars.j_length_2) / 2 + pars.intermediate_width) + \
+                     2 * pars.intermediate_width
+
+        ### upper and lower vertical intermediate and jj leads ###
+        ## top leads ##
+        upper_leads_extension = j_width / 4
+        # upper intemediate lead
+        up_st_start = self.primitives["p_ext_up"].connections[1] + \
+                      DVector(side * up_st_gap / 2, 0)
+        up_st_stop = origin + \
+                     DVector(side * up_st_gap / 2, pars.bridge / 2 + upper_leads_extension)
+        # top jj lead
         self.primitives["upp_st" + suff] = Kolbaska(
-            up_st_start, up_st_stop, j_width, j_width / 4
+            up_st_start, up_st_stop, j_width, upper_leads_extension
         )
+        # top intermediate lead
+        upper_thin_part_len = 4 * pars.bridge + pars.intermediate_width / 2
         self.primitives["upp_st_thick" + suff] = Kolbaska(
-            up_st_start, up_st_stop + DPoint(0, 2 * pars.bridge + pars.low_lead_w / 2 - j_width / 4),
-            pars.low_lead_w, pars.low_lead_w / 2
+            up_st_start, up_st_stop + DPoint(0, upper_thin_part_len),
+            pars.intermediate_width, pars.intermediate_width / 2
         )
-        self.primitives["low_st" + suff] = CPW_RL_Path(low_st_start, 'LR', Z_low2, Z_low2.width / 2,
-                                                       [len_ly], [side * pi / 2], trans_in=DTrans.R90)
-        # self.primitives["low_st_jj" + suff] = CPW(Z_low.width, Z_low.gap, low_st_stop + DPoint(side * (pars.b_ext - Z_low2.width/2),\
-        #                                         -pars.j_length/2), low_st_stop + DPoint(0, -pars.j_length/2))
-        low_st_jj_start = low_st_stop + DPoint(side * (pars.b_ext - Z_low2.width / 2), -pars.j_length / 2)
-        low_st_jj_stop = low_st_stop + DPoint(0, -pars.j_length / 2)
-        self.primitives["low_st_jj" + suff] = Kolbaska(low_st_jj_start, low_st_jj_stop, pars.j_length,
-                                                       pars.j_length / 2)
+
+        ## bottom leads ##
+        low_st_start = self.primitives["p_ext_down"].connections[1] + \
+                       DVector(side * low_st_gap / 2, 0)
+        low_st_stop = origin + \
+                      DVector(side * (low_st_gap / 2 + 2 * pars.intermediate_width),
+                              -pars.bridge / 2 - pars.intermediate_width / 2)
+        len_ly = (low_st_stop - low_st_start).y
+        # bottom intermediate lead
+        self.primitives["low_st" + suff] = CPW_RL_Path(
+            low_st_start, 'LR', CPWParameters(pars.intermediate_width, 0),
+            pars.intermediate_width / 2, [len_ly], [side * pi / 2], trans_in=DTrans.R90)
+        # bottom jj lead (horizontal)
+        low_st_end = self.primitives["low_st" + suff].connections[1]
+        low_st_jj_start = low_st_end + DPoint(0, -j_length / 2 + pars.intermediate_width / 2)
+        low_st_jj_stop = low_st_jj_start + DPoint(-side * pars.b_ext, 0)
+        self.primitives["low_st_jj" + suff] = Kolbaska(low_st_jj_start, low_st_jj_stop, j_length,
+                                                       j_length / 2)
 
 
 class Squid(AsymSquid):
@@ -168,7 +206,7 @@ class Squid(AsymSquid):
             (does not count the reduction of area due to shadow angle evaporation).
         j_width: float
             The width of the upper small leads (straight) and also a width of the junction
-        low_lead_w: float
+        intermediate_width: float
             The width of the lower small bended leads before bending
         b_ext: float
             The extension of bended leads after bending
