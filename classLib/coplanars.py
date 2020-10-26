@@ -256,6 +256,10 @@ class CPW_RL_Path(ComplexBase):
             !!! 180 turns are not yet supported !!!
         trans_in: DTrans
             Transformation of the line as a whole
+
+        Returns
+        -------
+
         """
         self._shape_string = shape
         self._N_elements = len(shape)
