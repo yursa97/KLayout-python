@@ -240,8 +240,8 @@ if __name__ == "__main__":
 
         xmonCross_corrected = XmonCross(
             xmon_center,
-            sideX_length=cross_len_x, sideX_width=cross_width_x, sideX_gnd_gap=10,
-            sideY_length=cross_len_y, sideY_width=cross_width_y, sideY_gnd_gap=10
+            sideX_length=cross_len_x, sideX_width=cross_width_x, sideX_gnd_gap=cross_gnd_gap_x,
+            sideY_length=cross_len_y, sideY_width=cross_width_y, sideY_gnd_gap=min(xmon_fork_gnd_gap, cross_gnd_gap_y)
         )
         xmonCross_corrected.make_trans(translation_trans)
         xmonCross_corrected.place(cell, layer_photo)

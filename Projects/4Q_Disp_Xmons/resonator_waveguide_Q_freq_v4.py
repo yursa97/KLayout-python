@@ -104,16 +104,19 @@ if __name__ == "__main__":
     Z_res = CPW(width_res, gap_res, origin, origin)
 
     # xmon cross parameters
-    cross_width = 60e3
-    cross_len = 125e3
-    cross_gnd_gap = 20e3
-    xmon_x_distance = 393e3  # from simulation of g_12
+    cross_len_x = 180e3
+    cross_width_x = 60e3
+    cross_width_y = 60e3
+    cross_len_y = 60e3
+    cross_gnd_gap_x = 20e3
+    cross_gnd_gap_y = 20e3
+    xmon_x_distance = 485e3  # from simulation of g_12
 
     # fork at the end of resonator parameters
     fork_metal_width = 20e3
     fork_gnd_gap = 20e3
     xmon_fork_gnd_gap = 20e3
-    fork_x_span = cross_width + 2 * (xmon_fork_gnd_gap + fork_metal_width)
+    fork_x_span = cross_width_x + 2 * (xmon_fork_gnd_gap + fork_metal_width)
     fork_y_span = None
     # Xmon-fork parameters
     # -20e3 for Xmons in upper sweet-spot
@@ -127,7 +130,7 @@ if __name__ == "__main__":
     # https://drive.google.com/file/d/1wFmv5YmHAMTqYyeGfiqz79a9kL1MtZHu/view?usp=sharing
 
     # distance between nearest resonators central conductors centers
-    resonators_d = 400e3
+    resonators_d = 420e3
     # x span between left long vertical line and
     # right-most center of central conductors
     resonators_widths = [2 * r + L_coupling for L_coupling in L_coupling_list]
@@ -215,25 +218,29 @@ if __name__ == "__main__":
                 fork_metal_width=fork_metal_width, fork_gnd_gap=fork_gnd_gap
             )
             xmon_center_test = (worm_test.fork_y_cpw1.end + worm_test.fork_y_cpw2.end) / 2
-            xmon_center_test += DPoint(0, -(cross_len + cross_width / 2) + xmon_fork_penetration)
-            xmonCross_test = XmonCross(xmon_center_test, cross_width, cross_len, cross_gnd_gap)
+            xmon_center_test += DPoint(0, -(cross_len_y + cross_width_x / 2) + xmon_fork_penetration)
+            xmonCross_test = XmonCross(
+                xmon_center_test,
+                sideX_length=cross_len_x, sideX_width=cross_width_x, sideX_gnd_gap=cross_gnd_gap_x,
+                sideY_length=cross_len_y, sideY_width=cross_width_y, sideY_gnd_gap=cross_gnd_gap_y
+            )
             import math
             print(math.copysign(1, tail_turn_angles[0]) > 0)
             if math.copysign(1, tail_turn_angles[0]) > 0:
                 CHIP.dx = (
                         10*Z_res.b +
                         max(tail_segment_lengths[1], L_coupling + 2 * r) +
-                        (cross_len + cross_width / 2 + cross_gnd_gap)
+                        (cross_len_x + cross_width_y / 2 + cross_gnd_gap_x)
                 )
             else:
                 CHIP.dx = (
                     10*Z_res.b +
                     tail_segment_lengths[1] + L_coupling + 2*r +
-                    (cross_len + cross_width/2 + cross_gnd_gap)
+                    (cross_len_y + cross_width_x / 2 + cross_gnd_gap_y)
                 )
 
             CHIP.dy = 1.2 * (worm_test.coil0.start.y - xmonCross_test.center.y
-                             + (cross_width/2 + cross_len + cross_gnd_gap))
+                             + (cross_width_x/2 + cross_len_y + cross_gnd_gap_y))
             CHIP.nX = int(CHIP.dx/2.5e3)
 
             # main drive line coplanar
@@ -266,8 +273,12 @@ if __name__ == "__main__":
             )
 
             xmon_center = (worm.fork_y_cpw1.end + worm.fork_y_cpw2.end) / 2
-            xmon_center += DPoint(0, -(cross_len + cross_width / 2) + xmon_fork_penetration)
-            xmonCross = XmonCross(xmon_center, cross_width, cross_len, cross_gnd_gap)
+            xmon_center += DPoint(0, -(cross_len_y + cross_width_x / 2) + xmon_fork_penetration)
+            xmonCross = XmonCross(
+                xmon_center,
+                sideX_length=cross_len_x, sideX_width=cross_width_x, sideX_gnd_gap=cross_gnd_gap_x,
+                sideY_length=cross_len_y, sideY_width=cross_width_y, sideY_gnd_gap=cross_gnd_gap_y
+            )
 
             # optimal to place everything in one region for polygon logic
             # operations and then transfer it to the cell
@@ -283,7 +294,11 @@ if __name__ == "__main__":
             xmonCross.place(photo_reg)
             worm.place(photo_reg)
 
-            xmonCross_corrected = XmonCross(xmon_center, cross_width, cross_len, xmon_fork_gnd_gap)
+            xmonCross_corrected = XmonCross(
+                xmon_center,
+                sideX_length=cross_len_x, sideX_width=cross_width_x, sideX_gnd_gap=cross_gnd_gap_x,
+                sideY_length=cross_len_y, sideY_width=cross_width_y, sideY_gnd_gap=min(cross_gnd_gap_y, xmon_fork_gnd_gap)
+            )
             xmonCross_corrected.place(photo_reg)
 
             Z0.place(photo_reg)

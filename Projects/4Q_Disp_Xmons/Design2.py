@@ -266,7 +266,7 @@ class Design5Q(ChipDesign):
         # https://drive.google.com/file/d/1wFmv5YmHAMTqYyeGfiqz79a9kL1MtZHu/view?usp=sharing
 
         # distance between nearest resonators central conductors centers
-        resonators_d = 400e3
+        resonators_d = 420e3
         # x span between left long vertical line and
         # right-most center of central conductors
         resonators_widths = [2 * self.r + L_coupling for L_coupling in self.L_coupling_list]
