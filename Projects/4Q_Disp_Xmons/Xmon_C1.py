@@ -15,9 +15,6 @@ from sonnetSim.sonnetLab import SonnetLab, SonnetPort, SimulationBox
 from classLib.shapes import XmonCross
 
 
-
-
-
 class CHIP:
     dx = 0.2e6
     dy = 0.2e6
@@ -67,27 +64,37 @@ if __name__ == "__main__":
     ## DRAWING SECTION START ##
     origin = DPoint(0, 0)
 
-    cross_widths = [1e3 * x for x in range(60, 61, 20)]
-    cross_lens = [1e3 * x for x in range(125, 126, 10)]
-    cross_gnd_gaps = [1e3 * x for x in range(20, 21, 1)]
+    # xmon parameters
+    cross_widths = [60e3]
+    cross_lens = [60e3]
+    cross_gnd_gaps = [20e3]
+
+    cross_lens_x = [180e3]
+    cross_widths_x = [60e3]
+    cross_gnd_gaps_x = [20e3]
+    cross_lens_y = [60e3]
+    cross_widths_y = [60e3]
+    cross_gnd_gaps_y = [20e3]
 
     # clear this cell and layer
     cell.clear()
 
     from itertools import product
 
-    pars = product(cross_widths, cross_lens, cross_gnd_gaps)
-    for cross_width, cross_len, cross_gnd_gap in pars:
-        xmon_dX = 2 * cross_len + cross_width + 2 * cross_gnd_gap
+    pars = product(cross_lens_x, cross_widths_x, cross_gnd_gaps_x, cross_lens_y, cross_widths_y, cross_gnd_gaps_y)
+    for cross_len_x, cross_width_x, cross_gnd_gap_x, cross_len_y, cross_width_y, cross_gnd_gap_y in pars:
+        xmon_dX = 2 * cross_len_x + cross_width_y + 2 * cross_gnd_gap_x
+        xmon_dY = 2 * cross_len_y + cross_width_x + 2 * cross_gnd_gap_y
         CHIP.dx = 5 * xmon_dX
-        CHIP.dy = 5 * xmon_dX
+        CHIP.dy = 5 * xmon_dY
         CHIP.center = DPoint(CHIP.dx / 2, CHIP.dy / 2)
 
         chip_box = pya.Box(Point(0, 0), Point(CHIP.dx, CHIP.dy))
         cell.shapes(layer_photo).insert(chip_box)
 
         xmon_cross1 = XmonCross(
-            CHIP.center, cross_width, cross_len, cross_gnd_gap
+            CHIP.center, sideX_length=cross_len_x, sideX_width=cross_width_x, sideX_gnd_gap=cross_gnd_gap_x,
+            sideY_length=cross_len_y, sideY_width=cross_width_y, sideY_gnd_gap=cross_gnd_gap_y
         )
         xmon_cross1.place(cell, layer_photo)
 
@@ -143,18 +150,18 @@ if __name__ == "__main__":
 
         print(C1)
 
-        output_filepath = os.path.join(project_dir, "Xmon_C1.csv")
-        if os.path.exists(output_filepath):
-            # append data to file
-            with open(output_filepath, "a") as csv_file:
-                writer = csv.writer(csv_file)
-                writer.writerow([cross_width / 1e3, cross_len / 1e3, cross_gnd_gap / 1e3, C1])
-        else:
-            # create file, add header, append data
-            with open(output_filepath, "w") as csv_file:
-                writer = csv.writer(csv_file)
-                # create header of the file
-                writer.writerow(["cross_width, um", "cross_len, um", "cross_gnd_gap, um", "C12, fF"])
-                writer.writerow([cross_width / 1e3, cross_len / 1e3, cross_gnd_gap / 1e3, C1])
+        # output_filepath = os.path.join(project_dir, "Xmon_C1.csv")
+        # if os.path.exists(output_filepath):
+        #     # append data to file
+        #     with open(output_filepath, "a") as csv_file:
+        #         writer = csv.writer(csv_file)
+        #         writer.writerow([cross_width / 1e3, cross_len / 1e3, cross_gnd_gap / 1e3, C1])
+        # else:
+        #     # create file, add header, append data
+        #     with open(output_filepath, "w") as csv_file:
+        #         writer = csv.writer(csv_file)
+        #         # create header of the file
+        #         writer.writerow(["cross_width, um", "cross_len, um", "cross_gnd_gap, um", "C12, fF"])
+        #         writer.writerow([cross_width / 1e3, cross_len / 1e3, cross_gnd_gap / 1e3, C1])
 
 

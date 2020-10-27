@@ -354,7 +354,7 @@ if __name__ == "__main__":
     N = 7
     width_res = 10e3
     gap_res = 10e3
-    to_line = 45e3
+    to_line = 45e3`
     Z_res = CPW(width_res, gap_res, origin, origin)
 
     # xmon cross parameters

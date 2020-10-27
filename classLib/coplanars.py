@@ -105,8 +105,6 @@ class CPW_arc(ElementBase):
         self.end = self.connections[1]
         self.center = self.connections[2]
 
-        # print("End coords:", self.dr, self.end)
-
         self.alpha_start = self.angle_connections[0]
         self.alpha_end = self.angle_connections[1]
 
@@ -158,6 +156,15 @@ class CPW_arc(ElementBase):
         self.empty_region.insert(SimplePolygon().from_dpoly(empty_arc1))
         self.empty_region.insert(SimplePolygon().from_dpoly(empty_arc2))
 
+    def _refresh_named_connections(self):
+        self.start = self.connections[0]
+        self.end = self.connections[1]
+        self.center = self.connections[2]
+
+    def _refresh_named_angles(self):
+        self.alpha_start = self.angle_connections[0]
+        self.alpha_end = self.angle_connections[1]
+
 
 class CPW2CPW(ElementBase):
     def __init__(self, Z0, Z1, start, end, trans_in=None):
@@ -193,6 +200,15 @@ class CPW2CPW(ElementBase):
         self.metal_region.insert(SimplePolygon.from_dpoly(m_poly))
         self.empty_region.insert(SimplePolygon.from_dpoly(e_poly1))
         self.empty_region.insert(SimplePolygon.from_dpoly(e_poly2))
+
+    def _refresh_named_connections(self):
+        self.start = self.connections[0]
+        self.end = self.connections[1]
+
+    def _refresh_named_angles(self):
+        self.alpha_start = self.angle_connections[0]
+        self.alpha_end = self.angle_connections[1]
+
 
 
 class Coil_type_1(ComplexBase):
@@ -369,6 +385,7 @@ class CPW_RL_Path(ComplexBase):
                             list(self.primitives.values())[-1].end]
         self.angle_connections = [list(self.primitives.values())[0].alpha_start,
                                   list(self.primitives.values())[-1].alpha_end]
+
     def _refresh_named_connections(self):
         self.start = self.connections[0]
         self.end = self.connections[1]
@@ -376,6 +393,7 @@ class CPW_RL_Path(ComplexBase):
     def _refresh_named_angles(self):
         self.alpha_start = self.angle_connections[0]
         self.alpha_end = self.angle_connections[1]
+
     def get_total_length(self):
         return sum(self._segment_lengths) + \
                sum([abs(R * alpha) for R, alpha in zip(self._turn_radiuses, self._turn_angles)])

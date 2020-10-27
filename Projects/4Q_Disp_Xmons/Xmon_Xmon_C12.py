@@ -12,63 +12,7 @@ import sonnetSim.sonnetLab
 
 reload(sonnetSim.sonnetLab)
 from sonnetSim.sonnetLab import SonnetLab, SonnetPort, SimulationBox
-
-
-class Xmon_cross(ComplexBase):
-    def __init__(self, origin, cross_width, side_length, gnd_gap, trans_in=None):
-        self.cross_width = cross_width
-        self.side_length = side_length
-        self.gnd_gap = gnd_gap
-        self.center = origin
-        super().__init__(origin, trans_in)
-        self.center = self.connections[0]
-
-    def init_primitives(self):
-        origin = DPoint(0, 0)
-
-        # draw central square
-        from classLib.shapes import Rectangle
-        lb_corner = DPoint(-self.cross_width / 2, -self.cross_width / 2)
-        center_square = Rectangle(lb_corner, self.cross_width, self.cross_width)
-        self.primitives["center_square"] = center_square
-
-        """ left part of Xmon cross """
-        p1 = origin + DPoint(-self.cross_width / 2, 0)
-        p2 = p1 + DPoint(-self.side_length, 0)
-        self.cpw_l = CPW(self.cross_width, self.gnd_gap, p1, p2)
-        self.primitives["cpw_l"] = self.cpw_l
-        p3 = p2 + DPoint(-self.gnd_gap, 0)
-        self.cpw_lempt = CPW(0, self.cpw_l.b / 2, p2, p3)
-        self.primitives["cpw_lempt"] = self.cpw_lempt
-
-        """ right part of Xmon cross """
-        p1 = origin + DPoint(self.cross_width / 2, 0)
-        p2 = p1 + DPoint(self.side_length, 0)
-        self.cpw_r = CPW(self.cross_width, self.gnd_gap, p1, p2)
-        self.primitives["cpw_r"] = self.cpw_r
-        p3 = p2 + DPoint(self.gnd_gap, 0)
-        self.cpw_rempt = CPW(0, self.cpw_r.b / 2, p2, p3)
-        self.primitives["cpw_rempt"] = self.cpw_rempt
-
-        """ top part of Xmon cross """
-        p1 = origin + DPoint(0, self.cross_width / 2)
-        p2 = p1 + DPoint(0, self.side_length)
-        self.cpw_t = CPW(self.cross_width, self.gnd_gap, p1, p2)
-        self.primitives["cpw_t"] = self.cpw_t
-        p3 = p2 + DPoint(0, self.gnd_gap)
-        self.cpw_tempt = CPW(0, self.cpw_t.b / 2, p2, p3)
-        self.primitives["cpw_tempt"] = self.cpw_tempt
-
-        """ bottom part of Xmon cross """
-        p1 = origin + DPoint(0, -self.cross_width / 2)
-        p2 = p1 + DPoint(0, -self.side_length)
-        self.cpw_b = CPW(self.cross_width, self.gnd_gap, p1, p2)
-        self.primitives["cpw_b"] = self.cpw_b
-        p3 = p2 + DPoint(0, -self.gnd_gap)
-        self.cpw_bempt = CPW(0, self.cpw_l.b / 2, p2, p3)
-        self.primitives["cpw_bempt"] = self.cpw_bempt
-
-        self.connections = [origin]
+from classLib import XmonCross
 
 
 class CHIP:
@@ -120,34 +64,50 @@ if __name__ == "__main__":
     ## DRAWING SECTION START ##
     origin = DPoint(0, 0)
 
+    # xmon parameters
     cross_widths = [60e3]
-    cross_lens = [125e3]
+    cross_lens = [60e3]
     cross_gnd_gaps = [20e3]
-    xmon_dX = 2 * cross_lens[0] + cross_widths[0] + 2 * cross_gnd_gaps[0]
-    xmon_distances = [1e3 * x for x in range(393, 394, 10)]
+
+    cross_lens_x = [180e3]
+    cross_widths_x = [60e3]
+    cross_gnd_gaps_x = [20e3]
+    cross_lens_y = [60e3]
+    cross_widths_y = [60e3]
+    cross_gnd_gaps_y = [20e3]
+
+    xmon_x_distances = [485e3]
+    # clear this cell and layer
+    cell.clear()
+
     from itertools import product
 
-    pars = product(cross_widths, cross_lens, cross_gnd_gaps, xmon_distances)
-    for cross_width, cross_len, cross_gnd_gap, xmon_distance in pars:
+    pars = product(cross_lens_x, cross_widths_x, cross_gnd_gaps_x, cross_lens_y, cross_widths_y, cross_gnd_gaps_y,
+                   xmon_x_distances)
+    for cross_len_x, cross_width_x, cross_gnd_gap_x, cross_len_y, cross_width_y, cross_gnd_gap_y, \
+        xmon_x_distance in pars:
         # clear this cell and layer
         cell.clear()
-        xmon_dX = 2 * cross_len + cross_width + 2 * cross_gnd_gap
-        CHIP.dx = 5 * xmon_dX + xmon_distance
-        CHIP.dy = 5 * xmon_dX + xmon_distance
+        xmon_dX = 2 * cross_len_x + cross_width_y + 2 * cross_gnd_gap_x
+        xmon_dY = 2 * cross_len_y + cross_width_x + 2 * cross_gnd_gap_y
+        CHIP.dx = 5 * xmon_dX
+        CHIP.dy = 5 * xmon_dY
         CHIP.center = DPoint(CHIP.dx / 2, CHIP.dy / 2)
 
         chip_box = pya.Box(Point(0, 0), Point(CHIP.dx, CHIP.dy))
         cell.shapes(layer_photo).insert(chip_box)
 
-        xmon_cross1 = Xmon_cross(
-            CHIP.center + DPoint(-xmon_distance / 2, 0),
-            cross_width, cross_len, cross_gnd_gap
+        xmon_cross1 = XmonCross(
+            CHIP.center + DPoint(-xmon_x_distance / 2, 0),
+            sideX_length=cross_len_x, sideX_width=cross_width_x, sideX_gnd_gap=cross_gnd_gap_x,
+            sideY_length=cross_len_y, sideY_width=cross_width_y, sideY_gnd_gap=cross_gnd_gap_y
         )
         xmon_cross1.place(cell, layer_photo)
 
-        xmon_cross2 = Xmon_cross(
-            CHIP.center + DPoint(xmon_distance / 2, 0),
-            cross_width, cross_len, cross_gnd_gap
+        xmon_cross2 = XmonCross(
+            CHIP.center + DPoint(xmon_x_distance / 2, 0),
+            sideX_length=cross_len_x, sideX_width=cross_width_x, sideX_gnd_gap=cross_gnd_gap_x,
+            sideY_length=cross_len_y, sideY_width=cross_width_y, sideY_gnd_gap=cross_gnd_gap_y
         )
         xmon_cross2.place(cell, layer_photo)
 
@@ -156,14 +116,12 @@ if __name__ == "__main__":
 
         ### MATLAB COMMANDER SECTION START ###
         ml_terminal = SonnetLab()
-        print("starting connection...")
         from sonnetSim.cMD import CMD
 
         ml_terminal._send(CMD.SAY_HELLO)
         ml_terminal.clear()
-        simBox = SimulationBox(CHIP.dx, CHIP.dy, 600, 600)
+        simBox = SimulationBox(CHIP.dx, CHIP.dy, 1200, 600)
         ml_terminal.set_boxProps(simBox)
-        print("sending cell and layer")
         from sonnetSim.pORT_TYPES import PORT_TYPES
 
         ports = [
@@ -204,26 +162,29 @@ if __name__ == "__main__":
             delta = (1+s[0][0])*(1+s[1][1]) - s[0][1]*s[1][0]
             y21 = -2 * s[1][0] / delta * 1/R
             C12 = 1e15 / (2 * math.pi * freq0 * 1e9 * (1 / y21).imag)
+            
+            y11 = ((1 - s[0][0])*(1 + s[1][1]) + s[0][1]*s[1][0]) / delta * 1/R
+            C1 = -1e15 / (2 * math.pi * freq0 * 1e9 * (1 / y11).imag)
 
-        print(C12)
+        print(C12, "   ", C1)
 
-        output_filepath = os.path.join(project_dir, "Xmon_Xmon_C12.csv")
-        if os.path.exists(output_filepath):
-            # append data to file
-            with open(output_filepath, "a") as csv_file:
-                writer = csv.writer(csv_file)
-                writer.writerow(
-                    [cross_width / 1e3, cross_len / 1e3, cross_gnd_gap / 1e3,
-                     xmon_distance/1e3,  C12]
-                )
-        else:
-            # create file, add header, append data
-            with open(output_filepath, "w") as csv_file:
-                writer = csv.writer(csv_file)
-                # create header of the file
-                writer.writerow(
-                    ["cross_width, um", "cross_len, um", "cross_gnd_gap, um", "xmon_distance, um", "C12, fF"])
-                writer.writerow(
-                    [cross_width / 1e3, cross_len / 1e3, cross_gnd_gap / 1e3,
-                     xmon_distance / 1e3, C12]
-                )
+        # output_filepath = os.path.join(project_dir, "Xmon_Xmon_C12.csv")
+        # if os.path.exists(output_filepath):
+        #     # append data to file
+        #     with open(output_filepath, "a") as csv_file:
+        #         writer = csv.writer(csv_file)
+        #         writer.writerow(
+        #             [cross_width / 1e3, cross_len / 1e3, cross_gnd_gap / 1e3,
+        #              xmon_distance/1e3,  C12]
+        #         )
+        # else:
+        #     # create file, add header, append data
+        #     with open(output_filepath, "w") as csv_file:
+        #         writer = csv.writer(csv_file)
+        #         # create header of the file
+        #         writer.writerow(
+        #             ["cross_width, um", "cross_len, um", "cross_gnd_gap, um", "xmon_distance, um", "C12, fF"])
+        #         writer.writerow(
+        #             [cross_width / 1e3, cross_len / 1e3, cross_gnd_gap / 1e3,
+        #              xmon_distance / 1e3, C12]
+        #         )

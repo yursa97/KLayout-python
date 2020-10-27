@@ -126,9 +126,16 @@ if __name__ == "__main__":
     Z_res = CPW(width_res, gap_res)
 
     # xmon cross parameters
-    cross_width = 60e3
-    cross_len = 125e3
-    cross_gnd_gap = 20e3
+    cross_widths = 60e3
+    cross_lens = 60e3
+    cross_gnd_gaps = 20e3
+
+    cross_lens_x = 180e3
+    cross_widths_x = 60e3
+    cross_gnd_gaps_x = 20e3
+    cross_lens_y = 60e3
+    cross_widths_y = 60e3
+    cross_gnd_gaps_y = 20e3
 
     xmon_resEnd_distances = [1e3*x for x in range(1, 2)]
 
