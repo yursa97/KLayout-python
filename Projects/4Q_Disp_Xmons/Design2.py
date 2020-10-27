@@ -171,10 +171,10 @@ class Design5Q(ChipDesign):
         self.cross_width: float = 60e3
         self.cross_len: float = 60e3
         self.cross_gnd_gap: float = 20e3
-        self.xmon_x_distance: float = 453e3  # from simulation of g_12
+        self.xmon_x_distance: float = 485e3  # from simulation of g_12
         self.xmons: list[XmonCross] = []
 
-        self.cross_len_x = 165e3
+        self.cross_len_x = 180e3
         self.cross_width_x = 60e3
         self.cross_width_y = 60e3
         self.cross_len_y = 60e3
