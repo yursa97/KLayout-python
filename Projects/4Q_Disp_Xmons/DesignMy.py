@@ -12,7 +12,7 @@ import classLib
 reload(classLib)
 
 from classLib.baseClasses import ElementBase, ComplexBase
-from classLib.coplanars import CPWParameters, CPW_RL_Path, CPW2CPW
+from classLib.coplanars import CPWParameters, CPW_RL_Path, CPW2CPW, Coil_type_1
 from classLib.shapes import XmonCross
 from classLib.resonators import EMResonatorTL3QbitWormRLTailXmonFork
 from classLib.josJ import AsymSquidParams, AsymSquid
@@ -595,8 +595,8 @@ class Design5Q(ChipDesign):
       fork_metal_width = 20e3
       fork_gnd_gap = 20e3
       xmon_fork_gnd_gap = 20e3
-      fork_x_span = cross_width + 2 * (xmon_fork_gnd_gap + fork_metal_width)
-      self.worm = EMResonator_TL2Qbit_worm4_XmonFork(Z_res, DPoint(5e6+400e3 - 30e3 + 50e3,5e6+400e3 - 23e3), 0, 0,200e3, r, 100e3, 5,fork_x_span, fork_metal_width, fork_gnd_gap, Trans.R270)
+      fork_x_span = self.cross_width + 2 * (xmon_fork_gnd_gap + fork_metal_width)
+      self.worm = EMResonator_TL2Qbit_worm4_XmonFork(self.Z_res, DPoint(5e6+400e3 - 30e3 + 50e3,5e6+400e3 - 23e3), 0, 0,200e3, self.r, 100e3, 5,fork_x_span, fork_metal_width, fork_gnd_gap, Trans.R270)
         
       self.worm.place(self.region_ph)      
     def draw_md_and_flux_lines(self):          
