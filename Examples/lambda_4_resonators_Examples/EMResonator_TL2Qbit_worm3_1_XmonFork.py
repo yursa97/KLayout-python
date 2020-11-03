@@ -10,8 +10,6 @@ from classLib.coplanars import CPW, CPW_arc, Coil_type_1
 from classLib.shapes import XmonCross
 from classLib.baseClasses import ComplexBase
 
-from sonnetSim.sonnetLab import SonnetLab, SonnetPort, SimulationBox
-
 
 class EMResonator_TL2Qbit_worm3_1(ComplexBase):
     """

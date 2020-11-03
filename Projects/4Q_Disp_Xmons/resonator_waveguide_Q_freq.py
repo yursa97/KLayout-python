@@ -12,7 +12,7 @@ from classLib.resonators import Coil_type_1
 from classLib.shapes import XmonCross
 from classLib.resonators import EMResonator_TL2Qbit_worm3_XmonFork
 
-from sonnetSim.sonnetLab import SonnetLab, SonnetPort, SimulationBox
+#from sonnetSim.sonnetLab import SonnetLab, SonnetPort, SimulationBox
 
 class CHIP:
     dx = 0.6e6
@@ -170,106 +170,3 @@ if __name__ == "__main__":
         ## DRAWING SECTION END ##
         lv.zoom_fit()
 
-        ### MATLAB COMMANDER SECTION START ###
-        ml_terminal = SonnetLab()
-        print("starting connection...")
-        from sonnetSim.cMD import CMD
-        ml_terminal._send(CMD.SAY_HELLO)
-        ml_terminal.clear()
-        simBox = SimulationBox(CHIP.dx, CHIP.dy, CHIP.nX, CHIP.nY)
-        ml_terminal.set_boxProps(simBox)
-        print("sending cell and layer")
-        from sonnetSim.pORT_TYPES import PORT_TYPES
-        ports = [SonnetPort(point, PORT_TYPES.BOX_WALL) for point in [Z0.start, Z0.end] ]
-        ml_terminal.set_ports(ports)
-
-        ml_terminal.send_polygons(cell, layer_photo)
-        ml_terminal.set_ABS_sweep(estimated_freq-freqs_span/2, estimated_freq + freqs_span/2)
-        print("simulating...")
-        result_path = ml_terminal.start_simulation(wait=True)
-        ml_terminal.release()
-        ### MATLAB COMMANDER SECTION END ###
-
-
-        ### RESULT SAVING SECTION START ###
-        import shutil
-        import os
-        import csv
-
-        # geometry parameters gathering
-        worm_params = worm.get_geometry_params_dict(prefix="worm_")
-        xmonCross_params = xmonCross.get_geometry_params_dict(prefix="xmonCross_")
-        Z0_params = Z0.get_geometry_params_dict(prefix="S21Line_")
-        CHIP_params = CHIP.get_geometry_params_dict(prefix="chip_")
-
-        project_dir = os.path.dirname(__file__)
-
-        # creating directory with simulation results
-        results_dirname = "resonator_waveguide_Q_freqs_results"
-        results_dirpath = os.path.join(project_dir, results_dirname)
-
-        output_metaFile_path = os.path.join(
-            results_dirpath,
-            "resonator_waveguide_Q_freq_meta.csv"
-        )
-        try:
-            # creating directory
-            os.mkdir(results_dirpath)
-        except FileExistsError:
-            # directory already exists
-            with open(output_metaFile_path, "r+", newline='') as csv_file:
-                reader = csv.reader(csv_file)
-                existing_entries_n = len(list(reader))
-                Sparams_filename = "result_" + str(existing_entries_n) + ".csv"
-
-                writer = csv.writer(csv_file)
-
-                all_params_vals = list(
-                    itertools.chain(
-                        worm_params.values(),
-                        xmonCross_params.values(),
-                        Z0_params.values(),
-                        CHIP_params.values()
-                    )
-                )
-                # append new values row to file
-                writer.writerow(all_params_vals + [Sparams_filename])
-        else:
-            ''' 
-                Directory has not existed and has been created sucessfully.
-                So we create fresh meta-file.
-                Meta-file contain simulation parameters and corresponding
-                S-params filename that is located in this directory 
-            '''
-            with open(output_metaFile_path, "w+", newline='') as csv_file:
-                writer = csv.writer(csv_file)
-                all_params_keys = list(
-                    itertools.chain(
-                        worm_params.keys(),
-                        xmonCross_params.keys(),
-                        Z0_params.keys(),
-                        CHIP_params.keys()
-                    )
-                )
-                all_params_vals = list(
-                    itertools.chain(
-                        worm_params.values(),
-                        xmonCross_params.values(),
-                        Z0_params.values(),
-                        CHIP_params.values()
-                    )
-                )
-                # create header of the file
-                writer.writerow(all_params_keys + ["filename"])
-                # add first parameters row
-                reader = csv.reader(csv_file)
-                existing_entries_n = len(list(reader))
-                Sparams_filename = "result_1.csv"
-                writer.writerow(all_params_vals + [Sparams_filename])
-        finally:
-            # copy result from sonnet folder and rename it accordingly
-            shutil.copy(
-                result_path.decode("ascii"),
-                os.path.join(results_dirpath, Sparams_filename)
-            )
-        ### RESULT SAVING SECTION END ###
